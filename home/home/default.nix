@@ -26,6 +26,7 @@ in {
   ];
 
   home.packages = with pkgs; [
+    nh
     glow
     nwg-look
     swayimg
@@ -51,7 +52,6 @@ in {
     nixd
     vesktop
     localsend
-    clippy
     bibata-cursors
     nerd-fonts.jetbrains-mono
     alsa-utils

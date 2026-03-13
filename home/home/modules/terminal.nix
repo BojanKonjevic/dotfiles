@@ -66,11 +66,10 @@
       wall = "~/scripts/setwall.sh";
       pyproj = "~/scripts/new-python-project.sh";
 
-      ncg = "sudo nix-env --delete-generations +20 -p /nix/var/nix/profiles/system && sudo nix-collect-garbage";
-      hcg = "nix-env --delete-generations +20 -p ~/.local/state/nix/profiles/home-manager && nix-collect-garbage";
-      nr = "sudo nixos-rebuild switch --flake /etc/nixos#nixos";
-      hm = "home-manager switch --flake ~/home-manager#bojan";
-      nu = "cd /etc/nixos && sudo nix flake update && sudo nixos-rebuild switch --flake .#nixos && cd ~/home-manager && nix flake update && home-manager switch --flake .#bojan";
+      nr = "nh os switch";
+      hm = "nh home switch";
+      nu = "nh os switch -u && nh home switch -u";
+      cg = "nh clean all --keep 10";
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
       hgens = "nix-env --list-generations --profile ~/.local/state/nix/profiles/home-manager";
     };
@@ -89,6 +88,8 @@
       setopt PUSHD_IGNORE_DUPS
       setopt PUSHD_SILENT
 
+      export NH_OS_FLAKE="/etc/nixos"
+      export NH_HOME_FLAKE="$HOME/home-manager"
       export STARSHIP_VI_MODE=0
     '';
 

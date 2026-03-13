@@ -28,7 +28,6 @@
 
       exec-once = [
         "waybar & hyprpaper"
-        #"hypridle"
         "hyprlock || hyprctl dispatch exit"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
@@ -127,7 +126,6 @@
         "$mainMod, I, exec, swaync-client -t"
         "$mainMod, BACKSLASH, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
         "$mainMod, N, exec, $privateWindow"
-        "$mainMod, O, exec, $privateWindow \"chatgpt.com\""
         "$mainMod, C, exec, cliphist list | wofi --dmenu | cliphist decode | wl-copy"
 
         "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"
@@ -180,16 +178,14 @@
     extraConfig = ''
       bind = $mainMod, R, submap, resize
       submap = resize
-        # Repeatable resize binds (binde = bind + repeat)
         binde = , H, resizeactive, -20 0
         binde = , L, resizeactive, 20 0
         binde = , K, resizeactive, 0 -20
         binde = , J, resizeactive, 0 20
 
-        # Exit submap
         bind = , RETURN, submap, reset
         bind = , ESCAPE, submap, reset
-      submap = reset   # Important: reset to global map
+      submap = reset
     '';
   };
 }

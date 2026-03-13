@@ -28,7 +28,7 @@
           direction = "horizontal";
           shade_terminals = false;
           persist_size = true;
-          close_on_exit = false; # keeps output visible after script finishes
+          close_on_exit = false;
         };
       };
 
@@ -405,11 +405,6 @@
           easing = 'cubic',
         })
         local neoscroll = require('neoscroll')
-        local scroll_opts = {
-          duration = 60,
-          easing = 'quadratic',
-          cursor_scrolls_alone = true,
-        }
         vim.keymap.set('n', '<ScrollWheelUp>', function()
           require('neoscroll').scroll(-5, { duration = 80, easing = 'quadratic' })
         end)
@@ -474,8 +469,6 @@
             end
           end,
         })
-      local builtin = require("telescope.builtin")
-      local themes = require("telescope.themes")
       require("flash").setup({
         labels = "asdfghjklqwertyuiopzxcvbnm",
         search = {
