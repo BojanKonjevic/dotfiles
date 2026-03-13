@@ -10,9 +10,6 @@ result-*
 *.backup
 *.bak
 
-# Hardware config (machine-specific, optional - remove this if you want it tracked)
-system/system/hardware-configuration.nix
-
 # Secrets (if you accidentally put any here before setting up agenix/sops)
 secrets/
 *.age
