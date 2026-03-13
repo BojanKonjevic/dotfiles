@@ -5,7 +5,6 @@
     extraPackages = with pkgs; [
       alejandra
       stylua
-      isort
     ];
 
     extraPlugins = with pkgs.vimPlugins; [
@@ -148,7 +147,7 @@
           formatters_by_ft = {
             nix = ["alejandra"];
             lua = ["stylua"];
-            python = ["ruff_format" "isort"];
+            python = ["ruff_format"];
           };
         };
       };
@@ -158,7 +157,6 @@
         appearance.nerd_font_variant = "mono";
         completion = {
           documentation.auto_show = false;
-          documentation.auto_show_delay_ms = 500;
           ghost_text.enabled = true;
           list.selection = "auto_insert";
         };
@@ -226,8 +224,8 @@
           enable = true;
           settings.nixd = {
             formatting.command = ["alejandra"];
-            nixpkgs.expr = "import (builtins.getFlake \"/etc/nixos/\").inputs.nixpkgs { }";
-            options.nixos.expr = "(builtins.getFlake \"/etc/nixos\").nixosConfigurations.x86_64-linux.options";
+            nixpkgs.expr = "import (builtins.getFlake \"/etc/nixos\").inputs.nixpkgs { }";
+            options.nixos.expr = "(builtins.getFlake \"/etc/nixos\").nixosConfigurations.nixos.options";
           };
         };
         pyright.enable = true;

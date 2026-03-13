@@ -26,17 +26,14 @@ in {
   ];
 
   home.packages = with pkgs; [
-    postman
     glow
     nwg-look
     swayimg
-    swaynotificationcenter
     libnotify
     nix-search
     speedtest-go
     zen-browser
     eza
-    wofi
     thunar
     tumbler
     ripgrep
@@ -60,12 +57,9 @@ in {
     alsa-utils
     hyprpaper
     p7zip
-    git
     xarchiver
     pavucontrol
-    hypridle
     nerdfetch
-    networkmanager
     networkmanagerapplet
     calcurse
     (catppuccin-gtk.override {
@@ -73,14 +67,20 @@ in {
       variant = "mocha";
     })
   ];
-
   programs.zoxide.enable = true;
   programs.fzf.enable = true;
   programs.broot.enable = true;
   programs.bat.enable = true;
   programs.btop.enable = true;
   programs.cava.enable = true;
-
+  programs.git = {
+    enable = true;
+    settings = {
+      user.name = "BojanKonjevic";
+      user.email = "konjevicbojan1@gmail.com";
+      init.defaultBranch = "main";
+    };
+  };
   nixpkgs.config.allowUnfree = true;
   news.display = "silent";
 }

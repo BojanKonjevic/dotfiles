@@ -1,14 +1,6 @@
 {pkgs, ...}: {
   environment.systemPackages = with pkgs; [
-    gcc
-    gnumake
-    pkg-config
-    zlib
-    openssl
-    openssl.dev
-    libffi
-    cargo
-    python3
+    #add global system pkgs here
   ];
   imports = [
     ./system/hardware-configuration.nix

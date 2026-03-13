@@ -48,11 +48,6 @@
         inactive_timeout = 2;
       };
 
-      device = {
-        name = "epic-mouse-v1";
-        sensitivity = -0.5;
-      };
-
       general = {
         gaps_in = 3;
         gaps_out = 5;
@@ -133,7 +128,6 @@
         "$mainMod, BACKSLASH, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
         "$mainMod, N, exec, $privateWindow"
         "$mainMod, O, exec, $privateWindow \"chatgpt.com\""
-        "$mainMod, Z, exec, zathura /home/bojan/Documents/books/fluentPython.pdf"
         "$mainMod, C, exec, cliphist list | wofi --dmenu | cliphist decode | wl-copy"
 
         "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"

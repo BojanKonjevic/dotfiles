@@ -52,7 +52,7 @@
       pg = "psql -d postgres --dbname";
       dev = "nix develop";
       cal = "calcurse";
-      hf = "cd /home/bojan/dotfiles/home/ && nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
+      hf = "cd ~/dotfiles/home/ && nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
       leet = "nvim -c 'Leet'";
       n = "nvim ~/Documents/notes.txt";
       ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history";
@@ -81,11 +81,8 @@
           'm:{a-zA-Z}={A-Za-z}' \
           'r:|[._-]=* r:|=*'
 
-      setopt HIST_IGNORE_SPACE
       setopt HIST_REDUCE_BLANKS
-      setopt SHARE_HISTORY
       setopt INC_APPEND_HISTORY
-      setopt EXTENDED_HISTORY
 
       setopt AUTO_CD
       setopt AUTO_PUSHD

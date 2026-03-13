@@ -1,4 +1,4 @@
-{...}: {
+{config, ...}: {
   programs.hyprlock = {
     enable = true;
     settings = {
@@ -21,8 +21,7 @@
 
       background = [
         {
-          #path = "screenshot";
-          path = "/home/bojan/Pictures/wallpapers/wall.jpg";
+          path = "${config.home.homeDirectory}/Pictures/wallpapers/wall.jpg";
           blur_passes = 2;
           blur_size = 4;
         }
