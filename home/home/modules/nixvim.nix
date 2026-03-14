@@ -5,9 +5,12 @@
     extraPackages = with pkgs; [
       alejandra
       stylua
+      lazygit
     ];
 
     extraPlugins = with pkgs.vimPlugins; [
+      diffview-nvim
+      undotree
       tiny-inline-diagnostic-nvim
       flash-nvim
       guess-indent-nvim
@@ -36,6 +39,7 @@
         enable = true;
         settings = {
           ensure_installed = [
+            "nix"
             "bash"
             "diff"
             "html"
@@ -111,12 +115,34 @@
 
       gitsigns = {
         enable = true;
-        settings.signs = {
-          add.text = "+";
-          change.text = "~";
-          delete.text = "_";
-          topdelete.text = "‾";
-          changedelete.text = "~";
+        settings = {
+          signs = {
+            add.text = "+";
+            change.text = "~";
+            delete.text = "_";
+            topdelete.text = "‾";
+            changedelete.text = "~";
+          };
+          on_attach.__raw = ''
+            function(bufnr)
+              local gs = package.loaded.gitsigns
+              local function map(mode, l, r, desc)
+                vim.keymap.set(mode, l, r, { buffer = bufnr, desc = desc })
+              end
+              map('n', ']h', gs.next_hunk, 'Next [H]unk')
+              map('n', '[h', gs.prev_hunk, 'Prev [H]unk')
+              map('n', '<leader>hs', gs.stage_hunk, '[H]unk [S]tage')
+              map('n', '<leader>hu', gs.undo_stage_hunk, '[H]unk [U]ndo stage')
+              map('n', '<leader>hS', gs.stage_buffer, '[H]unk [S]tage buffer')
+              map('v', '<leader>hs', function() gs.stage_hunk { vim.fn.line('.'), vim.fn.line('v') } end, '[H]unk [S]tage selection')
+              map('n', '<leader>hr', gs.reset_hunk, '[H]unk [R]eset')
+              map('v', '<leader>hr', function() gs.reset_hunk { vim.fn.line('.'), vim.fn.line('v') } end, '[H]unk [R]eset selection')
+              map('n', '<leader>hR', gs.reset_buffer, '[H]unk [R]eset buffer')
+              map('n', '<leader>hp', gs.preview_hunk, '[H]unk [P]review')
+              map('n', '<leader>hb', function() gs.blame_line { full = true } end, '[H]unk [B]lame line')
+              map({'o','x'}, 'ih', gs.select_hunk, 'select hunk')
+            end
+          '';
         };
       };
 
@@ -130,6 +156,14 @@
             {
               __unkeyed-1 = "<leader>s";
               name = "[S]earch";
+            }
+            {
+              __unkeyed-1 = "<leader>g";
+              name = "[G]it";
+            }
+            {
+              __unkeyed-1 = "<leader>h";
+              name = "[H]unk";
             }
           ];
         };
@@ -168,7 +202,6 @@
           };
         };
         snippets.preset = "luasnip";
-        fuzzy.implementation = "lua";
         signature.enabled = true;
       };
 
@@ -247,6 +280,42 @@
     };
 
     keymaps = [
+      {
+        mode = "n";
+        key = "<leader>gd";
+        action = "<cmd>DiffviewOpen<CR>";
+        options.desc = "[G]it [D]iff working tree";
+      }
+      {
+        mode = "n";
+        key = "<leader>gD";
+        action = "<cmd>DiffviewOpen HEAD~1<CR>";
+        options.desc = "[G]it [D]iff last commit";
+      }
+      {
+        mode = "n";
+        key = "<leader>gh";
+        action = "<cmd>DiffviewFileHistory %<CR>";
+        options.desc = "[G]it file [H]istory";
+      }
+      {
+        mode = "n";
+        key = "<leader>gH";
+        action = "<cmd>DiffviewFileHistory<CR>";
+        options.desc = "[G]it repo [H]istory";
+      }
+      {
+        mode = "n";
+        key = "<leader>gc";
+        action = "<cmd>DiffviewClose<CR>";
+        options.desc = "[G]it [C]lose diff";
+      }
+      {
+        mode = "n";
+        key = "<leader>u";
+        action = "<cmd>UndotreeToggle<CR>";
+        options.desc = "[U]ndo tree";
+      }
       {
         mode = "n";
         key = "<leader>r";
@@ -378,6 +447,39 @@
     };
 
     extraConfigLua = ''
+      require("diffview").setup({
+        enhanced_diff_hl = true,
+        view = {
+          default = { layout = "diff2_horizontal" },
+          merge_tool = { layout = "diff3_horizontal" },
+        },
+        keymaps = {
+          view = {
+            { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" } },
+          },
+          file_panel = {
+            { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" } },
+          },
+          file_history_panel = {
+            { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" } },
+          },
+        },
+      })
+      local Terminal = require("toggleterm.terminal").Terminal
+      local lazygit = Terminal:new({
+        cmd = "lazygit",
+        direction = "float",
+        float_opts = {
+          border = "rounded",
+          width = math.floor(vim.o.columns * 0.92),
+          height = math.floor(vim.o.lines * 0.88),
+        },
+        hidden = true,
+        on_open = function(term)
+          vim.keymap.set("t", "<C-g>", function() term:toggle() end, { buffer = term.bufnr })
+        end,
+      })
+      vim.keymap.set("n", "<C-g>", function() lazygit:toggle() end, { desc = "Toggle Lazygit" })
       require("tiny-inline-diagnostic").setup({
         preset = "modern",
         transparent_bg = true,
@@ -404,7 +506,6 @@
           duration_multiplier = 0.8,
           easing = 'cubic',
         })
-        local neoscroll = require('neoscroll')
         vim.keymap.set('n', '<ScrollWheelUp>', function()
           require('neoscroll').scroll(-5, { duration = 80, easing = 'quadratic' })
         end)

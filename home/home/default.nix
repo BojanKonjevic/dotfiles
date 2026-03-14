@@ -39,7 +39,6 @@ in {
     tumbler
     ripgrep
     fd
-    fzf
     duf
     gdu
     mpv
@@ -53,15 +52,14 @@ in {
     vesktop
     localsend
     bibata-cursors
-    nerd-fonts.jetbrains-mono
     alsa-utils
     hyprpaper
     p7zip
     xarchiver
     pavucontrol
-    nerdfetch
     networkmanagerapplet
     calcurse
+    nerd-fonts.jetbrains-mono
     (catppuccin-gtk.override {
       accents = ["mauve"];
       variant = "mocha";
