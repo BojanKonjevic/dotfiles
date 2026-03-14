@@ -60,27 +60,20 @@
         color: @red;
       }
 
-      #custom-lock    { color: @lavender; padding: 0 7px; }
-      #custom-reboot  { color: @yellow;   padding: 0 7px; }
-      #custom-power   { color: @red;      padding: 0 9px; }
-
-      #custom-clipboard {
-        color: @mauve;
-        padding: 0 9px;
-        font-weight: 900;
+      #custom-power {
+        color: @red;
+        padding: 0 10px;
+        font-size: 16px;
       }
 
-      #custom-clipboard:hover {
+      #custom-power:hover {
         color: @rosewater;
         background: alpha(@surface2, 0.45);
         border-radius: 8px;
         transition: all 0.2s ease;
       }
 
-      #pulseaudio.source:hover,
-      #custom-lock:hover,
-      #custom-reboot:hover,
-      #custom-power:hover {
+      #pulseaudio.source:hover {
         color: @rosewater;
         background: alpha(@surface2, 0.45);
         border-radius: 8px;
@@ -156,23 +149,9 @@
           "hyprland/submap"
           "cpu"
           "memory"
-          "custom/clipboard"
           "pulseaudio#source"
-          "group/power"
+          "custom/power"
         ];
-        "group/power" = {
-          orientation = "horizontal";
-          drawer = {
-            name = "power-drawer";
-            tooltip = "Power actions…";
-            state = "collapsed";
-          };
-          modules = [
-            "custom/power"
-            "custom/reboot"
-            "custom/lock"
-          ];
-        };
 
         "hyprland/workspaces" = {
           format = "{name}";
@@ -200,28 +179,11 @@
           on-click = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
         };
 
-        "custom/clipboard" = {
-          format = "󰅌";
-          tooltip = false;
-          on-click = "cliphist list | wofi --dmenu | cliphist decode | wl-copy";
-        };
-
-        "custom/lock" = {
-          format = "󰌾";
-          tooltip = "Lock session";
-          on-click = "hyprlock";
-        };
-
-        "custom/reboot" = {
-          format = "";
-          tooltip = "Reboot";
-          on-click = "reboot";
-        };
-
         "custom/power" = {
-          format = "";
-          tooltip = "Power off";
-          on-click = "poweroff";
+          format = "⏻";
+          tooltip = true;
+          tooltip-format = "Power menu";
+          on-click = "power-menu";
         };
 
         cpu = {

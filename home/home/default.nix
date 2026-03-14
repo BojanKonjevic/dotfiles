@@ -13,6 +13,8 @@ in {
   home.stateVersion = "25.11";
 
   imports = [
+    ./modules/powermenu.nix
+    ./modules/clipboard.nix
     ./modules/terminal.nix
     ./modules/nixvim.nix
     ./modules/hypridle.nix

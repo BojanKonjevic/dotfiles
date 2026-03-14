@@ -126,7 +126,8 @@
         "$mainMod, I, exec, swaync-client -t"
         "$mainMod, BACKSLASH, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
         "$mainMod, N, exec, $privateWindow"
-        "$mainMod, C, exec, cliphist list | wofi --dmenu | cliphist decode | wl-copy"
+        "$mainMod, C, exec, clip-pick-text | rofi -dmenu -display-columns 2 -theme ~/.config/rofi/clipboard.rasi -p \"  Text\" -i | cliphist decode | wl-copy"
+        "$mainMod SHIFT, C, exec, clip-pick-img | rofi -dmenu -display-columns 2 -show-icons -theme ~/.config/rofi/clipboard-img.rasi -p \"  Images\" -i | cliphist decode | wl-copy"
 
         "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"
         "$mainMod SHIFT, S, exec, wl-paste --type image/png > \"$HOME/Pictures/Screenshots/shot_$(date +%F_%H-%M-%S).png\""

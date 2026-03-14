@@ -69,7 +69,7 @@
       nr = "nh os switch";
       hm = "nh home switch";
       nu = "nh os switch -u && nh home switch -u";
-      cg = "nh clean all --keep 10";
+      gc = "nh clean all --keep 10";
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
       hgens = "nix-env --list-generations --profile ~/.local/state/nix/profiles/home-manager";
     };
