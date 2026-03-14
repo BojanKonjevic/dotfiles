@@ -189,6 +189,18 @@
       blink-cmp = {
         enable = true;
         appearance.nerd_font_variant = "mono";
+        keymap = {
+          preset = "none";
+          "<Tab>" = ["accept" "fallback"];
+          "<S-Tab>" = ["select_prev" "fallback"];
+          "<C-n>" = ["select_next" "fallback"];
+          "<C-p>" = ["select_prev" "fallback"];
+          "<C-space>" = ["show" "show_documentation" "hide_documentation"];
+          "<C-e>" = ["hide" "fallback"];
+          "<C-f>" = ["snippet_forward" "fallback"];
+          "<C-b>" = ["snippet_backward" "fallback"];
+        };
+        snippets.preset = "default";
         completion = {
           documentation.auto_show = false;
           ghost_text.enabled = true;
@@ -201,7 +213,7 @@
             score_offset = 100;
           };
         };
-        snippets.preset = "luasnip";
+        fuzzy.implementation = "prefer_rust_with_warning";
         signature.enabled = true;
       };
 
@@ -318,23 +330,6 @@
       }
       {
         mode = "n";
-        key = "<leader>r";
-        action.__raw = ''
-          function()
-            local file = vim.fn.expand('%:p')
-            local term = require("toggleterm.terminal").Terminal:new({
-              cmd = "python3 " .. vim.fn.shellescape(file),
-              direction = "horizontal",
-              close_on_exit = false,
-              auto_scroll = true,
-            })
-            term:toggle()
-          end
-        '';
-        options.desc = "[R]un Python file";
-      }
-      {
-        mode = "n";
         key = "\\";
         action = "<cmd>Neotree toggle<cr>";
         options = {
@@ -447,6 +442,16 @@
     };
 
     extraConfigLua = ''
+      vim.schedule(function()
+        vim.keymap.set("i", "<Tab>", function()
+          local blink = require("blink.cmp")
+          if blink.is_visible() then
+            blink.accept()
+          else
+            return "\t"
+          end
+        end, { expr = true, silent = true, noremap = true, desc = "blink accept" })
+      end)
       require("diffview").setup({
         enhanced_diff_hl = true,
         view = {
@@ -472,7 +477,7 @@
         float_opts = {
           border = "rounded",
           width = math.floor(vim.o.columns * 0.92),
-          height = math.floor(vim.o.lines * 0.88),
+          height = math.floor(vim.o.lines * 0.82),
         },
         hidden = true,
         on_open = function(term)
@@ -506,6 +511,21 @@
           duration_multiplier = 0.8,
           easing = 'cubic',
         })
+        vim.keymap.set('n', '<leader>r', function()
+          local file = vim.fn.expand('%:p')
+          local term = require("toggleterm.terminal").Terminal:new({
+            cmd = "python3 " .. vim.fn.shellescape(file),
+            direction = "float",
+            float_opts = {
+              border = "rounded",
+              width = math.floor(vim.o.columns * 0.92),
+              height = math.floor(vim.o.lines * 0.82),
+            },
+            close_on_exit = false,
+            auto_scroll = true,
+          })
+          term:toggle()
+        end, { desc = "[R]un Python file" })
         vim.keymap.set('n', '<ScrollWheelUp>', function()
           require('neoscroll').scroll(-5, { duration = 80, easing = 'quadratic' })
         end)
