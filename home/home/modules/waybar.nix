@@ -176,7 +176,7 @@
           format-source = "󰍬";
           format-source-muted = "<span foreground='#f38ba8'>󰍭</span>";
           tooltip = true;
-          on-click = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle";
+          on-click = "mic-toggle";
         };
 
         "custom/power" = {

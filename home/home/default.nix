@@ -13,6 +13,7 @@ in {
   home.stateVersion = "25.11";
 
   imports = [
+    ./modules/mic-toggle.nix
     ./modules/powermenu.nix
     ./modules/clipboard.nix
     ./modules/terminal.nix
@@ -28,6 +29,7 @@ in {
   ];
 
   home.packages = with pkgs; [
+    sox
     nh
     glow
     nwg-look
