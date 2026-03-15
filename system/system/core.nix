@@ -9,11 +9,12 @@
   boot.loader.timeout = 1;
   boot.loader.efi.canTouchEfiVariables = true;
   programs.zsh.enable = true;
+  programs.ydotool.enable = true;
   users.users.bojan = {
     shell = pkgs.zsh;
     isNormalUser = true;
     description = "Bojan Konjevic";
-    extraGroups = ["networkmanager" "wheel" "audio" "input"];
+    extraGroups = ["networkmanager" "wheel" "audio" "input" "ydotool"];
   };
   nixpkgs.config.allowUnfree = true;
   hardware.enableAllFirmware = true;

@@ -539,12 +539,6 @@
           require('neoscroll').scroll(5, { duration = 80, easing = 'quadratic' })
         end)
 
-        vim.api.nvim_create_autocmd("CursorHold", {
-          callback = function()
-            vim.lsp.buf.hover()
-          end,
-        })
-
         vim.api.nvim_create_autocmd("TextYankPost", {
           group = vim.api.nvim_create_augroup("highlight_on_yank", { clear = true }),
           desc = "Briefly highlight yanked text",

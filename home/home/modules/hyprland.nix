@@ -123,6 +123,7 @@
       };
 
       bind = [
+        "CTRL, ESCAPE, exec, ydotool click 0xC0"
         "$mainMod, I, exec, swaync-client -t"
         "$mainMod, BACKSLASH, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
         "$mainMod, N, exec, $privateWindow"
