@@ -26,6 +26,7 @@ in {
     ./modules/swaync.nix
     ./modules/wofi.nix
     ./modules/zathura.nix
+    ./modules/setwall.nix
   ];
 
   home.packages = with pkgs; [
@@ -57,9 +58,10 @@ in {
     localsend
     bibata-cursors
     alsa-utils
-    hyprpaper
+    swww
     p7zip
     xarchiver
+    libreoffice
     pavucontrol
     networkmanagerapplet
     calcurse

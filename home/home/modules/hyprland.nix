@@ -27,7 +27,7 @@
       ];
 
       exec-once = [
-        "waybar & hyprpaper"
+        "waybar & swww-daemon"
         "hyprlock || hyprctl dispatch exit"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
@@ -124,6 +124,7 @@
 
       bind = [
         "CTRL, ESCAPE, exec, ydotool click 0xC0"
+        "$mainMod SHIFT, W, exec, wallpaper-picker"
         "$mainMod, I, exec, swaync-client -t"
         "$mainMod, BACKSLASH, exec, mic-toggle"
         "$mainMod, N, exec, $privateWindow"
