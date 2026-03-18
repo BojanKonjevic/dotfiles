@@ -3,11 +3,11 @@
     enable = true;
 
     settings = {
-      width = 500;
-      height = 420;
+      width = 580;
+      height = 400;
       location = "center";
       show = "drun";
-      prompt = "Launch";
+      prompt = "run something";
       allow_markup = true;
       no_actions = true;
       insensitive = true;
@@ -25,8 +25,7 @@
 
     style = ''
       /* ────────────────────────────────────────────────
-         Catppuccin Mocha - Wofi launcher
-         (mauve/lavender accent)
+         Catppuccin Mocha — command palette, frosted glass
       ──────────────────────────────────────────────── */
 
       @define-color base      #1e1e2e;
@@ -46,93 +45,137 @@
 
       @define-color mauve     #cba6f7;
       @define-color lavender  #b4befe;
-      @define-color sapphire  #74c7ec;
 
       * {
         font-family: "JetBrainsMono Nerd Font", monospace;
-        font-size:   15px;
-        font-weight: 600;
+        font-size:   14px;
+        font-weight: 400;
+        outline:     none;
       }
 
+      /* ── Window ─────────────────────────────────────────────────────────── */
       window {
-        margin:           0px;
-        border:           2px solid @mauve;
-        border-radius:    16px;
-        background-color: alpha(@mantle, 0.96);
+        margin:        0px;
+        border-radius: 14px;
+        border:        1px solid alpha(@surface1, 0.45);
+        background:    linear-gradient(
+                         to bottom,
+                         alpha(@mauve, 0.08) 0px,
+                         transparent 56px
+                       ),
+                       alpha(@crust, 0.93);
+        box-shadow:    0 24px 60px rgba(0,0,0,0.50),
+                       0 0 0 1px alpha(@crust, 0.40),
+                       inset 0 1px 0 alpha(@mauve, 0.10);
       }
 
-      /* ── Search bar ─────────────────────────────────────────────────────── */
+      /* ── Search bar — underline style ───────────────────────────────────── */
       #input {
-        margin:           14px 14px 0 14px;
-        padding:          10px 14px;
-        border-radius:    12px;
-        border:           1px solid @surface1;
-        background-color: alpha(@surface0, 0.80);
+        margin:           20px 24px 0 24px;
+        padding:          4px 0 10px 0;
+        border-radius:    0;
+        border:           none;
+        border-bottom:    2px solid alpha(@surface1, 0.80);
+        background-color: transparent;
         color:            @text;
         caret-color:      @mauve;
-        box-shadow:       inset 0 1px 3px rgba(0,0,0,0.20);
+        font-size:        18px;
+        font-weight:      300;
+        letter-spacing:   0.02em;
+        box-shadow:       none;
       }
 
-      #input image { color: @overlay0; }
+      #input image {
+        color:        @overlay0;
+        margin-right: 10px;
+      }
 
       #input:focus {
-        border-color:     @mauve;
-        background-color: alpha(@surface1, 0.65);
-        box-shadow:       0 0 0 2px alpha(@mauve, 0.30);
+        border-bottom-color: @mauve;
       }
 
-      /* ── Subtle divider between search and list ─────────────────────────── */
+      /* ── Layout ─────────────────────────────────────────────────────────── */
       #outer-box {
-        margin:           0px;
-        background-color: transparent;
+        margin:     0px;
+        background: transparent;
       }
 
       #inner-box {
-        margin:           8px 8px 12px 8px;
-        padding-top:      6px;
-        border-top:       1px solid @surface1;
-        background-color: transparent;
+        margin:     10px;
+        padding-top: 6px;
+        background: transparent;
       }
 
       #scroll {
-        margin: 2px 0;
+        margin: 0;
       }
 
-      /* ── App entries ────────────────────────────────────────────────────── */
+      /* ── Scrollbar ──────────────────────────────────────────────────────── */
+      scrollbar {
+        background: transparent;
+        border:     none;
+      }
+
+      scrollbar slider {
+        min-width:        3px;
+        background-color: alpha(@surface2, 0.40);
+        border-radius:    3px;
+        margin:           3px;
+      }
+
+      scrollbar slider:hover {
+        background-color: alpha(@mauve, 0.50);
+      }
+
+      /* ── Entries ────────────────────────────────────────────────────────── */
       #entry {
-        padding:          9px 14px;
-        margin:           2px 4px;
-        border-radius:    10px;
-        color:            @text;
-        background-color: transparent;
-        transition:       background 100ms ease-out,
-                          border 100ms ease-out,
-                          box-shadow 100ms ease-out;
+        padding:    9px 14px;
+        margin:     1px 0;
+        border-radius: 8px;
+        border:     1px solid transparent;
+        color:      @subtext0;
+        background: transparent;
+        transition: background 100ms ease,
+                    color 100ms ease,
+                    border-color 100ms ease;
       }
 
+      #entry:hover {
+        background: alpha(@surface0, 0.45);
+        border-color: alpha(@surface1, 0.40);
+        color: @text;
+      }
+
+      /* inverted selection */
       #entry:selected {
-        background-color: alpha(@mauve, 0.16);
-        border:           1px solid alpha(@mauve, 0.40);
-        box-shadow:       0 0 14px alpha(@mauve, 0.14),
-                          inset 0 1px 0 alpha(@mauve, 0.08);
+        background: @mauve;
+        border-color: alpha(@lavender, 0.30);
+        color: @crust;
+        box-shadow: 0 2px 14px alpha(@mauve, 0.30);
       }
 
-      /* Icon colour tint */
+      /* ── Icons ──────────────────────────────────────────────────────────── */
       #entry image {
         margin-right: 12px;
-        color:        @mauve;
+        color:        @overlay0;
+      }
+
+      #entry:hover image {
+        color: @subtext1;
       }
 
       #entry:selected image {
-        color: @lavender;
+        color: @crust;
       }
 
+      /* ── Text ───────────────────────────────────────────────────────────── */
       #text {
         color: inherit;
       }
 
       #entry:selected #text {
-        color: @lavender;
+        color:       @crust;
+        font-weight: 600;
       }
     '';
   };

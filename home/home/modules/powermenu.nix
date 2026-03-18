@@ -15,78 +15,72 @@
       esac
     '')
   ];
-
   xdg.configFile."rofi/power.rasi".text = ''
     * {
-        base:      #1e1e2e;
-        mantle:    #181825;
-        surface0:  #313244;
-        surface1:  #45475a;
-        overlay0:  #6c7086;
-        text:      #cdd6f4;
-
         font:             "JetBrainsMono Nerd Font 13";
         background-color: transparent;
-        text-color:       @text;
+        text-color:       #cdd6f4;
     }
-
     window {
-        width:            280px;
-        background-color: @mantle;
-        border:           2px;
-        border-color:     #f38ba8;
+        width:            300px;
+        background-color: rgba(17, 17, 27, 0.93);
+        border:       1px;
+        border-color: rgba(69, 71, 90, 0.45);
         border-radius:    14px;
         padding:          0;
+        children:         [ mainbox ];
     }
-
     mainbox {
-        padding:          12px;
+        padding:          14px 14px 14px 14px;
         background-color: transparent;
         children:         [ inputbar, listview ];
-        spacing:          10px;
+        spacing:          14px;
     }
-
     inputbar {
-        background-color: @surface0;
-        border-radius:    10px;
-        border:           1px;
-        border-color:     @surface1;
-        padding:          8px 14px;
-        spacing:          8px;
+        background-color: transparent;
+        border-color:     rgba(243, 139, 168, 0.45);
+        border:           0 0 2px 0;
+        border-radius:    0;
+        padding:          0 0 10px 0;
+        spacing:          0;
         children:         [ prompt ];
     }
-
     prompt {
-        text-color: #f38ba8;
-        font:       "JetBrainsMono Nerd Font Bold 13";
+        text-color:     #f38ba8;
+        font:           "JetBrainsMono Nerd Font Light 18";
+        vertical-align: 0.5;
     }
-
     listview {
         background-color: transparent;
         scrollbar:        false;
         lines:            3;
         columns:          1;
-        spacing:          4px;
+        spacing:          3px;
         fixed-height:     true;
     }
-
     element {
         orientation:      horizontal;
         padding:          10px 14px;
-        border-radius:    9px;
+        border-radius:    8px;
         background-color: transparent;
+        border:       1px;
+        border-color: transparent;
         spacing:          12px;
     }
-
     element-text {
         vertical-align: 0.5;
-        color:          @text;
+        text-color:     #a6adc8;
+        font:           "JetBrainsMono Nerd Font 13";
     }
-
     element selected {
-        background-color: #f38ba826;
-        border:           1px;
-        border-color:     #f38ba870;
+        background-color: rgba(243, 139, 168, 0.18);
+        border:       1px;
+        border-color: rgba(243, 139, 168, 0.55);
+        border-radius:    8px;
+    }
+    element selected element-text {
+        text-color: #f38ba8;
+        font:       "JetBrainsMono Nerd Font 13";
     }
   '';
 }

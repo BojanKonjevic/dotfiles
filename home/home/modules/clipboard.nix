@@ -30,55 +30,51 @@
   ];
   xdg.configFile."rofi/clipboard.rasi".text = ''
     * {
-        base:      #1e1e2e;
-        mantle:    #181825;
-        surface0:  #313244;
-        surface1:  #45475a;
-        overlay0:  #6c7086;
-        text:      #cdd6f4;
-        sapphire:  #74c7ec;
-
         font:             "JetBrainsMono Nerd Font 13";
         background-color: transparent;
-        text-color:       @text;
-        border-color:     @sapphire;
+        text-color:       #cdd6f4;
     }
 
     window {
         width:            640px;
-        background-color: @mantle;
-        border:           2px;
-        border-color:     @sapphire;
+        background-color: rgba(17, 17, 27, 0.93);
+        border:       1px;
+        border-color: rgba(69, 71, 90, 0.45);
         border-radius:    14px;
         padding:          0;
     }
 
     mainbox {
-        padding:          14px;
+        padding:          20px 14px 14px 14px;
         background-color: transparent;
         children:         [ inputbar, listview ];
-        spacing:          10px;
+        spacing:          14px;
     }
 
+    /* underline-style search bar */
     inputbar {
-        background-color: @surface0;
-        border-radius:    10px;
-        border:           1px;
-        border-color:     @surface1;
-        padding:          8px 14px;
+        background-color: transparent;
+        border:           0 0 2px 0;
+        border-color:     rgba(69, 71, 90, 0.50);
+        border-radius:    0;
+        padding:          0 0 10px 0;
         spacing:          8px;
         children:         [ prompt, entry ];
     }
 
+
     prompt {
-        text-color:        @sapphire;
-        font:              "JetBrainsMono Nerd Font Bold 13";
+        text-color:     #74c7ec;
+        font:           "JetBrainsMono Nerd Font Light 18";
+        vertical-align: 0.5;
     }
 
     entry {
-        text-color:        @text;
-        placeholder:       "Search text…";
-        placeholder-color: @overlay0;
+        text-color:        #cdd6f4;
+        placeholder:       "search clipboard…";
+        placeholder-color: #6c7086;
+        font:              "JetBrainsMono Nerd Font Light 18";
+        vertical-align:    0.5;
     }
 
     listview {
@@ -86,81 +82,77 @@
         scrollbar:        false;
         lines:            7;
         columns:          1;
-        spacing:          4px;
+        spacing:          3px;
         fixed-height:     true;
     }
 
     element {
         orientation:      horizontal;
-        padding:          8px 12px;
-        border-radius:    9px;
+        padding:          9px 14px;
+        border-radius:    8px;
         background-color: transparent;
+        border:       1px;
+        border-color: transparent;
         spacing:          10px;
     }
 
     element-text {
-        vertical-align:   0.5;
-        color:            @text;
-        highlight:        bold #74c7ec;
+        vertical-align: 0.5;
+        text-color:     #a6adc8;
+        highlight:      bold #74c7ec;
     }
 
     element selected {
-        background-color: #74c7ec26;
-        border:           1px;
-        border-color:     #74c7ec70;
+        background-color: rgba(116, 199, 236, 0.18);
+        border:       1px;
+        border-color: rgba(116, 199, 236, 0.55);
+        border-radius:    8px;
+    }
+
+    element selected element-text {
+        text-color: #74c7ec;
+        highlight:  bold #89dceb;
+        font:       "JetBrainsMono Nerd Font 13";
     }
   '';
+
   xdg.configFile."rofi/clipboard-img.rasi".text = ''
     * {
-        base:      #1e1e2e;
-        mantle:    #181825;
-        surface0:  #313244;
-        surface1:  #45475a;
-        overlay0:  #6c7086;
-        text:      #cdd6f4;
-        green:     #a6e3a1;   /* teal/green accent – distinct from text sapphire */
-
         font:             "JetBrainsMono Nerd Font 13";
         background-color: transparent;
-        text-color:       @text;
-        border-color:     @green;
+        text-color:       #cdd6f4;
     }
 
     window {
-        width:            860px;
-        background-color: @mantle;
-        border:           2px;
-        border-color:     @green;
+        width:            880px;
+        background-color: rgba(17, 17, 27, 0.93);
+        border:       1px;
+        border-color: rgba(69, 71, 90, 0.45);
         border-radius:    14px;
         padding:          0;
     }
 
     mainbox {
-        padding:          16px;
+        padding:          20px 14px 14px 14px;
         background-color: transparent;
         children:         [ inputbar, listview ];
-        spacing:          12px;
+        spacing:          14px;
     }
 
     inputbar {
-        background-color: @surface0;
-        border-radius:    10px;
-        border:           1px;
-        border-color:     @surface1;
-        padding:          8px 14px;
-        spacing:          8px;
-        children:         [ prompt, entry ];
+        background-color: transparent;
+        border:           0 0 2px 0;
+        border-color:     rgba(69, 71, 90, 0.50);
+        border-radius:    0;
+        padding:          0 0 10px 0;
+        spacing:          0;
+        children:         [ prompt ];
     }
 
     prompt {
-        text-color:        @green;
-        font:              "JetBrainsMono Nerd Font Bold 13";
-    }
-
-    entry {
-        text-color:        @text;
-        placeholder:       "Filter images…";
-        placeholder-color: @overlay0;
+        text-color:     #a6e3a1;
+        font:           "JetBrainsMono Nerd Font Light 18";
+        vertical-align: 0.5;
     }
 
     listview {
@@ -176,29 +168,33 @@
         orientation:      vertical;
         padding:          10px;
         border-radius:    10px;
-        background-color: @surface0;
+        background-color: rgba(49, 50, 68, 0.50);
+        border:       1px;
+        border-color: rgba(69, 71, 90, 0.31);
         spacing:          8px;
     }
 
-    /* Large square thumbnail */
     element-icon {
         size:             160px;
-        border-radius:    8px;
+        border-radius:    6px;
         horizontal-align: 0.5;
     }
 
     element-text {
-        vertical-align:   0.5;
-        horizontal-align: 0.5;
-        color:            @text;
-        highlight:        bold #a6e3a1;
-        font:             "JetBrainsMono Nerd Font 11";
+        width:  0;
+        height: 0;
+        color:  transparent;
     }
 
     element selected {
-        background-color: #a6e3a126;
-        border:           1px;
-        border-color:     #a6e3a170;
+        background-color: rgba(166, 227, 161, 0.15);
+        border:       1px;
+        border-color: rgba(166, 227, 161, 0.44);
+        border-radius:    10px;
+    }
+
+    element selected element-text {
+        text-color: transparent;
     }
   '';
 }

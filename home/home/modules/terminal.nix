@@ -108,7 +108,7 @@
     settings = {
       add_newline = true;
       format = ''
-        $directory$nix_shell$python$git_branch$git_status$package$cmd_duration
+        $directory$nix_shell$python$git_branch$git_status$cmd_duration
         $character
       '';
       directory = {
