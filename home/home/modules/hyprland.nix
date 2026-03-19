@@ -8,14 +8,14 @@
       "$terminal" = "kitty";
       "$fileManager" = "thunar";
       "$menu" = "wofi --show drun";
-      "$privateWindow" = "zen --no-remote --private-window";
+      "$privateWindow" = "zen-beta --no-remote --private-window";
 
       windowrule = [
         "opacity 0.95 override 0.92 override, match:class ^(vesktop)$"
         "opacity 0.95 override 0.92 override, match:class ^(localsend_app)$"
         "opacity 0.95 override 0.92 override, match:class ^(thunar)$"
         "opacity 0.95 override 0.92 override, match:class ^(xarchiver)$"
-        "opacity 0.95 override 0.92 override, match:class ^(zen)$"
+        "opacity 0.95 override 0.92 override, match:class ^(zen-beta)$"
         "opacity 0.93 override 0.90 override, match:class ^(org.qbittorrent.qBittorrent)$"
         "opacity 0.90 override 0.87 override, match:class ^(kitty)$"
       ];

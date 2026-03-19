@@ -7,7 +7,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     catppuccin.url = "github:catppuccin/nix";
-    zen-browser.url = "github:youwen5/zen-browser-flake";
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
     nix-search-tv.url = "github:3timeslazy/nix-search-tv";
     nixvim = {
       url = "github:nix-community/nixvim";
@@ -30,6 +30,7 @@
       modules = [
         inputs.catppuccin.homeModules.catppuccin
         inputs.nixvim.homeModules.nixvim
+        inputs.zen-browser.homeModules.default
         ./home/default.nix
       ];
     };

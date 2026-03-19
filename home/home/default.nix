@@ -3,8 +3,6 @@
   inputs,
   ...
 }: let
-  zen-browser =
-    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default;
   nix-search =
     inputs.nix-search-tv.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in {
@@ -27,6 +25,7 @@ in {
     ./modules/wofi.nix
     ./modules/zathura.nix
     ./modules/setwall.nix
+    ./modules/zen-browser.nix
   ];
 
   home.packages = with pkgs; [
@@ -39,10 +38,7 @@ in {
     libnotify
     nix-search
     speedtest-go
-    zen-browser
     eza
-    thunar
-    tumbler
     ripgrep
     fd
     duf
@@ -61,6 +57,8 @@ in {
     alsa-utils
     swww
     p7zip
+    dejsonlz4
+    file-roller
     xarchiver
     libreoffice
     pavucontrol

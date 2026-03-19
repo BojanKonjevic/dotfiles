@@ -24,6 +24,15 @@
   nix.settings.download-buffer-size = 134217728;
   programs.hyprland.enable = true;
   programs.hyprland.xwayland.enable = true;
+  programs.thunar = {
+    enable = true;
+    plugins = with pkgs.xfce; [
+      thunar-archive-plugin
+      thunar-volman
+    ];
+  };
+  services.gvfs.enable = true;
+  services.tumbler.enable = true;
   networking.hostName = "nixos";
   time.timeZone = "Europe/Belgrade";
   i18n.defaultLocale = "en_US.UTF-8";

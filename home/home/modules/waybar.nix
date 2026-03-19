@@ -122,6 +122,23 @@
         text-shadow: 0 0 7px alpha(@red, 0.65);
       }
 
+      #network {
+        color: @sky;
+        padding: 0 9px;
+        font-weight: 900;
+      }
+
+      #network.disconnected {
+        color: @overlay0;
+      }
+
+      #network:hover {
+        color: @rosewater;
+        background: alpha(@surface2, 0.45);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+      }
+
       /* Hardware modules */
       #cpu {
         color: @peach;
@@ -149,6 +166,7 @@
           "hyprland/submap"
           "cpu"
           "memory"
+          "network"
           "pulseaudio#source"
           "custom/power"
         ];
@@ -169,6 +187,17 @@
           format = "{:%d %A %I:%M %p}";
           tooltip = false;
           interval = 1;
+        };
+
+        network = {
+          format-wifi = "󰤨";
+          format-ethernet = "󰈀";
+          format-disconnected = "󰤭";
+          tooltip = true;
+          tooltip-format-wifi = "{essid} ({signalStrength}%)";
+          tooltip-format-ethernet = "{ifname}";
+          tooltip-format-disconnected = "Disconnected";
+          on-click = "nm-connection-editor";
         };
 
         "pulseaudio#source" = {
