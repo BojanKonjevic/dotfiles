@@ -7,7 +7,7 @@
       "$mainMod" = "SUPER";
       "$terminal" = "kitty";
       "$fileManager" = "thunar";
-      "$menu" = "wofi --show drun";
+      "$menu" = "rofi -show drun -theme ~/.config/rofi/launcher.rasi -show-icons -icon-theme Papirus";
       "$privateWindow" = "zen-beta --no-remote --private-window";
 
       windowrule = [

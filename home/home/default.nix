@@ -22,7 +22,7 @@ in {
     ./modules/ui.nix
     ./modules/waybar.nix
     ./modules/swaync.nix
-    ./modules/wofi.nix
+    ./modules/rofi.nix
     ./modules/zathura.nix
     ./modules/setwall.nix
     ./modules/zen-browser.nix
