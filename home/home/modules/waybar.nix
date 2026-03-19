@@ -66,6 +66,11 @@
         font-size: 16px;
       }
 
+      #custom-weather {
+        padding: 0 10px;
+        font-weight: 900;
+      }
+
       #custom-power:hover {
         color: @rosewater;
         background: alpha(@surface2, 0.45);
@@ -160,7 +165,7 @@
         reload-style-on-change = true;
         spacing = 8;
 
-        modules-left = ["clock"];
+        modules-left = ["clock" "custom/weather"];
         modules-center = ["hyprland/workspaces"];
         modules-right = [
           "hyprland/submap"
@@ -208,6 +213,14 @@
           on-click = "mic-toggle";
         };
 
+        "custom/weather" = {
+          exec = "wttrbar-weather";
+          return-type = "json";
+          interval = 1800;
+          on-click = "kitty --hold weather";
+          tooltip = true;
+        };
+
         "custom/power" = {
           format = "⏻";
           tooltip = true;
@@ -216,13 +229,13 @@
         };
 
         cpu = {
-          interval = 1;
+          interval = 2;
           format = "󰍛 {usage}%";
           tooltip = false;
         };
 
         memory = {
-          interval = 1;
+          interval = 2;
           format = "󰾆 {percentage}%";
           tooltip = false;
         };

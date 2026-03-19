@@ -78,7 +78,6 @@
       l = "eza -alh --icons --group-directories-first";
       br = "br --hidden";
       brd = "br --sizes --sort-by-size";
-      wall = "~/scripts/setwall.sh";
       pyproj = "~/scripts/new-python-project.sh";
 
       nr = "nh os switch";
@@ -108,14 +107,9 @@
       export NH_HOME_FLAKE="$HOME/home-manager"
       export STARSHIP_VI_MODE=1
 
-      # zsh-vi-mode resets all keybindings on init, so fzf bindings
-      # must be registered here or they get wiped out
       zvm_after_init() {
         eval "$(fzf --zsh)"
       }
-
-      # optional: uncomment to use jk as escape (like in nvim)
-      # ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
     '';
 
     history = {

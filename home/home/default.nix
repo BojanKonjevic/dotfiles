@@ -26,9 +26,11 @@ in {
     ./modules/zathura.nix
     ./modules/setwall.nix
     ./modules/zen-browser.nix
+    ./modules/weather.nix
   ];
 
   home.packages = with pkgs; [
+    python3
     ansifilter
     sox
     nh
