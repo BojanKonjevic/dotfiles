@@ -18,6 +18,7 @@
         "opacity 0.95 override 0.92 override, match:class ^(zen-beta)$"
         "opacity 0.93 override 0.90 override, match:class ^(org.qbittorrent.qBittorrent)$"
         "opacity 0.90 override 0.87 override, match:class ^(kitty)$"
+        "opacity 0.93 override 0.90 override, match:class ^(nm-connection-editor)$"
       ];
 
       env = [

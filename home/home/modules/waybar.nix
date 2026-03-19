@@ -5,7 +5,7 @@
     style = ''
       * {
         font-family: "JetBrainsMono Nerd Font";
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 900;
         padding: 0;
         margin: 0;
@@ -14,36 +14,102 @@
       }
 
       window#waybar {
-        all: unset;
+        background: alpha(@crust, 0.60);
+        border-bottom: 1px solid alpha(@mauve, 0.35);
       }
 
       .modules-left,
       .modules-center,
       .modules-right {
-        padding: 4px 12px;
-        border-radius: 12px;
-        background: alpha(@mantle, 0.82);
-        box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+        background: transparent;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0 10px;
       }
 
-      .modules-left   { margin-left:  4px; }
-      .modules-center { margin: 4px 2px 3px; }
-      .modules-right  { margin-right: 4px; }
-
       tooltip {
-        background: alpha(@mantle, 0.94);
+        background: alpha(@mantle, 0.96);
         border: 1px solid @surface1;
-        border-radius: 10px;
+        border-radius: 8px;
         color: @text;
-        padding: 8px 12px;
+        padding: 6px 10px;
         font-weight: 600;
         box-shadow: 0 4px 12px rgba(0,0,0,0.6);
       }
 
       #clock {
         color: @mauve;
-        padding: 0 12px;
+        padding: 0 10px 0 4px;
         font-weight: 900;
+        border-right: 1px solid alpha(@surface1, 0.6);
+      }
+
+      #custom-weather {
+        color: @text;
+        padding: 0 0 0 10px;
+        font-weight: 900;
+      }
+
+      #workspaces {
+        padding: 0;
+      }
+
+      #workspaces button {
+        min-width: 32px;
+        padding: 0 6px;
+        margin: 0 1px;
+        color: alpha(@lavender, 0.75);
+        border-radius: 0;
+        transition: color 0.15s ease;
+        background: transparent;
+        font-size: 17px;
+        font-weight: 900;
+        text-shadow: 0 0 8px alpha(@lavender, 0.5);
+      }
+
+      #workspaces button:hover {
+        color: @lavender;
+        background: alpha(@surface0, 0.5);
+      }
+
+      #workspaces button.active {
+        color: @mauve;
+        background: alpha(@surface0, 0.6);
+        border-bottom: 2px solid @mauve;
+        font-weight: 900;
+        text-shadow: 0 0 10px alpha(@mauve, 0.8);
+      }
+
+      #workspaces button.empty {
+        color: alpha(@overlay2, 0.6);
+        text-shadow: none;
+        font-weight: 700;
+      }
+
+      #submap {
+        color: @red;
+        font-weight: bold;
+        padding: 0 8px;
+      }
+
+      #cpu {
+        color: @peach;
+        padding: 0 8px;
+      }
+
+      #memory {
+        color: @blue;
+        padding: 0 8px;
+        border-right: 1px solid alpha(@surface1, 0.6);
+      }
+
+      #network {
+        color: @sky;
+        padding: 0 8px;
+      }
+
+      #network.disconnected {
+        color: @overlay0;
       }
 
       #pulseaudio.source {
@@ -51,110 +117,20 @@
         padding: 0 8px;
       }
 
-      #pulseaudio.muted,
-      #pulseaudio.source.muted {
-        color: @overlay0;
-      }
-
       #pulseaudio.source.muted {
         color: @red;
       }
 
       #custom-power {
-        color: @red;
-        padding: 0 10px;
-        font-size: 16px;
-      }
-
-      #custom-weather {
-        padding: 0 10px;
-        font-weight: 900;
+        color: alpha(@overlay1, 0.8);
+        padding: 0 10px 0 6px;
+        font-size: 17px;
+        border-left: 1px solid alpha(@surface1, 0.6);
       }
 
       #custom-power:hover {
-        color: @rosewater;
-        background: alpha(@surface2, 0.45);
-        border-radius: 8px;
-        transition: all 0.2s ease;
-      }
-
-      #pulseaudio.source:hover {
-        color: @rosewater;
-        background: alpha(@surface2, 0.45);
-        border-radius: 8px;
-        transition: all 0.2s ease;
-      }
-
-      #workspaces {
-        padding: 0 4px;
-      }
-
-      #workspaces button {
-        min-width: 36px;          /* good for 1–10 + some padding */
-        padding: 0 8px;
-        margin: 0 2px;
-        color: alpha(@mauve, 0.85);
-        border-radius: 6px;
-        transition: all 0.2s ease;
-      }
-
-      #workspaces button:hover {
-        color: @lavender;
-        text-shadow: 0 0 6px alpha(@lavender, 0.6);
-        background: alpha(@surface1, 0.45);
-      }
-
-      #workspaces button.active {
-        color: @lavender;
-        background: alpha(@surface2, 0.65);
-        text-shadow: 0 0 8px alpha(@lavender, 0.9);
-        font-weight: 900;
-        border-radius: 8px;
-      }
-
-      #workspaces button.empty {
-        color: alpha(@overlay1, 0.65);
-      }
-
-      #workspaces button.empty:hover {
-        color: alpha(@lavender, 0.9);
-      }
-
-      #submap {
         color: @red;
-        font-weight: bold;
-        padding: 0 10px;
-        text-shadow: 0 0 7px alpha(@red, 0.65);
-      }
-
-      #network {
-        color: @sky;
-        padding: 0 9px;
-        font-weight: 900;
-      }
-
-      #network.disconnected {
-        color: @overlay0;
-      }
-
-      #network:hover {
-        color: @rosewater;
-        background: alpha(@surface2, 0.45);
-        border-radius: 8px;
-        transition: all 0.2s ease;
-      }
-
-      /* Hardware modules */
-      #cpu {
-        color: @peach;
-        padding: 0 9px;
-        font-weight: 900;
-      }
-
-      #memory {
-        color: @blue;
-        padding: 0 9px;
-        font-weight: 900;
+        transition: color 0.15s ease;
       }
     '';
 
@@ -162,8 +138,13 @@
       main = {
         layer = "top";
         position = "top";
+        height = 28;
+        margin-top = 0;
+        margin-left = 0;
+        margin-right = 0;
         reload-style-on-change = true;
-        spacing = 8;
+        spacing = 0;
+        exclusive = true;
 
         modules-left = ["clock" "custom/weather"];
         modules-center = ["hyprland/workspaces"];

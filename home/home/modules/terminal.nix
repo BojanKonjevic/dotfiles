@@ -109,6 +109,10 @@
 
       zvm_after_init() {
         eval "$(fzf --zsh)"
+        if [[ -z "$_direnv_hooked" ]]; then
+          eval "$(direnv hook zsh)"
+          export _direnv_hooked=1
+        fi
       }
     '';
 
@@ -171,6 +175,14 @@
         error_symbol = "[❯](red)";
         vimcmd_symbol = "[❮](blue)";
       };
+    };
+  };
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = false;
+    nix-direnv.enable = true;
+    config = {
+      hide_env_diff = true;
     };
   };
 }
