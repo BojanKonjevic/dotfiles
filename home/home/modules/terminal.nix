@@ -1,4 +1,8 @@
-{config, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   programs.kitty = {
     enable = true;
 
@@ -14,15 +18,18 @@
       url_style = "single";
       copy_on_select = "yes";
       confirm_os_window_close = 0;
-      shell_integration = "no-cursor";
+      shell_integration = "disabled";
     };
 
     keybindings = {
       "ctrl+shift+c" = "copy_to_clipboard";
       "ctrl+shift+v" = "paste_from_clipboard";
+      "ctrl+shift+h" = "show_scrollback";
     };
 
     extraConfig = ''
+      scrollback_pager bash -c "ansifilter | nvim -c 'set ft=sh | $' -"
+      scrollback_pager_history_size 0
       font_family family='JetBrainsMono Nerd Font' style=Bold
       bold_font family='JetBrainsMono Nerd Font' style=Bold
       italic_font family='JetBrainsMono Nerd Font' style='Bold Italic'
@@ -47,6 +54,14 @@
     dotDir = "${config.xdg.configHome}/zsh";
     syntaxHighlighting.enable = true;
     autosuggestion.enable = true;
+
+    plugins = [
+      {
+        name = "zsh-vi-mode";
+        src = pkgs.zsh-vi-mode;
+        file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
+      }
+    ];
 
     shellAliases = {
       pg = "psql -d postgres --dbname";
@@ -73,6 +88,7 @@
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
       hgens = "nix-env --list-generations --profile ~/.local/state/nix/profiles/home-manager";
     };
+
     initContent = ''
       autoload -Uz compinit
       zstyle ':completion:*' menu select
@@ -90,7 +106,16 @@
 
       export NH_OS_FLAKE="/etc/nixos"
       export NH_HOME_FLAKE="$HOME/home-manager"
-      export STARSHIP_VI_MODE=0
+      export STARSHIP_VI_MODE=1
+
+      # zsh-vi-mode resets all keybindings on init, so fzf bindings
+      # must be registered here or they get wiped out
+      zvm_after_init() {
+        eval "$(fzf --zsh)"
+      }
+
+      # optional: uncomment to use jk as escape (like in nvim)
+      # ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
     '';
 
     history = {
@@ -101,6 +126,17 @@
       size = 10000;
       share = true;
     };
+  };
+
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = false;
+    defaultOptions = [
+      "--height=40%"
+      "--layout=reverse"
+      "--border=rounded"
+      "--preview-window=right:55%:wrap"
+    ];
   };
 
   programs.starship = {
@@ -127,7 +163,7 @@
         disabled = false;
       };
       git_branch = {
-        symbol = " ";
+        symbol = " ";
       };
       git_status = {
         format = "([\\[$all_status$ahead_behind\\]]($style)) ";
@@ -135,6 +171,11 @@
       cmd_duration = {
         min_time = 1000;
         format = "󰔚 [$duration]($style) ";
+      };
+      character = {
+        success_symbol = "[❯](green)";
+        error_symbol = "[❯](red)";
+        vimcmd_symbol = "[❮](blue)";
       };
     };
   };
