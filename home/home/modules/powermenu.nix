@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, theme, ...}: {
   home.packages = with pkgs; [
     (writeShellScriptBin "power-menu" ''
       choice=$(printf '󰌾 Lock\n󰜉 Reboot\n󰐥 Power Off' \
@@ -19,13 +19,13 @@
     * {
         font:             "JetBrainsMono Nerd Font 13";
         background-color: transparent;
-        text-color:       #cdd6f4;
+        text-color:       ${theme.text};
     }
     window {
         width:            300px;
-        background-color: rgba(17, 17, 27, 0.93);
+        background-color: rgba(${theme.crustRgb}, 0.93);
         border:       1px;
-        border-color: rgba(69, 71, 90, 0.45);
+        border-color: rgba(${theme.surface1Rgb}, 0.45);
         border-radius:    14px;
         padding:          0;
         children:         [ mainbox ];
@@ -38,7 +38,7 @@
     }
     inputbar {
         background-color: transparent;
-        border-color:     rgba(243, 139, 168, 0.45);
+        border-color:     rgba(${theme.redRgb}, 0.45);
         border:           0 0 2px 0;
         border-radius:    0;
         padding:          0 0 10px 0;
@@ -46,7 +46,7 @@
         children:         [ prompt ];
     }
     prompt {
-        text-color:     #f38ba8;
+        text-color:     ${theme.red};
         font:           "JetBrainsMono Nerd Font Light 18";
         vertical-align: 0.5;
     }
@@ -69,17 +69,17 @@
     }
     element-text {
         vertical-align: 0.5;
-        text-color:     #a6adc8;
+        text-color:     ${theme.subtext0};
         font:           "JetBrainsMono Nerd Font 13";
     }
     element selected {
-        background-color: rgba(243, 139, 168, 0.18);
+        background-color: rgba(${theme.redRgb}, 0.18);
         border:       1px;
-        border-color: rgba(243, 139, 168, 0.55);
+        border-color: rgba(${theme.redRgb}, 0.55);
         border-radius:    8px;
     }
     element selected element-text {
-        text-color: #f38ba8;
+        text-color: ${theme.red};
         font:       "JetBrainsMono Nerd Font 13";
     }
   '';

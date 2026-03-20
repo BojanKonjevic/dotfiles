@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  theme,
+  ...
+}: {
   home.packages = with pkgs; [
     rofi
     (writeShellScriptBin "clip-pick-text" ''
@@ -32,14 +36,14 @@
     * {
         font:             "JetBrainsMono Nerd Font 13";
         background-color: transparent;
-        text-color:       #cdd6f4;
+        text-color:       ${theme.text};
     }
 
     window {
         width:            640px;
-        background-color: rgba(17, 17, 27, 0.93);
+        background-color: rgba(${theme.crustRgb}, 0.93);
         border:       1px;
-        border-color: rgba(69, 71, 90, 0.45);
+        border-color: rgba(${theme.surface1Rgb}, 0.45);
         border-radius:    14px;
         padding:          0;
     }
@@ -55,7 +59,7 @@
     inputbar {
         background-color: transparent;
         border:           0 0 2px 0;
-        border-color:     rgba(69, 71, 90, 0.50);
+        border-color:     rgba(${theme.surface1Rgb}, 0.50);
         border-radius:    0;
         padding:          0 0 10px 0;
         spacing:          8px;
@@ -64,15 +68,15 @@
 
 
     prompt {
-        text-color:     #74c7ec;
+        text-color:     ${theme.sapphire};
         font:           "JetBrainsMono Nerd Font Light 18";
         vertical-align: 0.5;
     }
 
     entry {
-        text-color:        #cdd6f4;
+        text-color:        ${theme.text};
         placeholder:       "search clipboard…";
-        placeholder-color: #6c7086;
+        placeholder-color: ${theme.overlay0};
         font:              "JetBrainsMono Nerd Font Light 18";
         vertical-align:    0.5;
     }
@@ -98,20 +102,20 @@
 
     element-text {
         vertical-align: 0.5;
-        text-color:     #a6adc8;
-        highlight:      bold #74c7ec;
+        text-color:     ${theme.subtext0};
+        highlight:      bold ${theme.sapphire};
     }
 
     element selected {
-        background-color: rgba(116, 199, 236, 0.18);
+        background-color: rgba(${theme.sapphireRgb}, 0.18);
         border:       1px;
-        border-color: rgba(116, 199, 236, 0.55);
+        border-color: rgba(${theme.sapphireRgb}, 0.55);
         border-radius:    8px;
     }
 
     element selected element-text {
-        text-color: #74c7ec;
-        highlight:  bold #89dceb;
+        text-color: ${theme.sapphire};
+        highlight:  bold ${theme.sky};
         font:       "JetBrainsMono Nerd Font 13";
     }
   '';
@@ -120,14 +124,14 @@
     * {
         font:             "JetBrainsMono Nerd Font 13";
         background-color: transparent;
-        text-color:       #cdd6f4;
+        text-color:       ${theme.text};
     }
 
     window {
         width:            880px;
-        background-color: rgba(17, 17, 27, 0.93);
+        background-color: rgba(${theme.crustRgb}, 0.93);
         border:       1px;
-        border-color: rgba(69, 71, 90, 0.45);
+        border-color: rgba(${theme.surface1Rgb}, 0.45);
         border-radius:    14px;
         padding:          0;
     }
@@ -142,7 +146,7 @@
     inputbar {
         background-color: transparent;
         border:           0 0 2px 0;
-        border-color:     rgba(69, 71, 90, 0.50);
+        border-color:     rgba(${theme.surface1Rgb}, 0.50);
         border-radius:    0;
         padding:          0 0 10px 0;
         spacing:          0;
@@ -150,7 +154,7 @@
     }
 
     prompt {
-        text-color:     #a6e3a1;
+        text-color:     ${theme.green};
         font:           "JetBrainsMono Nerd Font Light 18";
         vertical-align: 0.5;
     }
@@ -168,9 +172,9 @@
         orientation:      vertical;
         padding:          10px;
         border-radius:    10px;
-        background-color: rgba(49, 50, 68, 0.50);
+        background-color: rgba(${theme.surface0Rgb}, 0.50);
         border:       1px;
-        border-color: rgba(69, 71, 90, 0.31);
+        border-color: rgba(${theme.surface1Rgb}, 0.31);
         spacing:          8px;
     }
 
@@ -187,9 +191,9 @@
     }
 
     element selected {
-        background-color: rgba(166, 227, 161, 0.15);
+        background-color: rgba(${theme.greenRgb}, 0.15);
         border:       1px;
-        border-color: rgba(166, 227, 161, 0.44);
+        border-color: rgba(${theme.greenRgb}, 0.44);
         border-radius:    10px;
     }
 

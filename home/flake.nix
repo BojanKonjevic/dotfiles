@@ -26,6 +26,7 @@
       inherit pkgs;
       extraSpecialArgs = {
         inherit inputs;
+        theme = import ./home/modules/theme.nix;
       };
       modules = [
         inputs.catppuccin.homeModules.catppuccin

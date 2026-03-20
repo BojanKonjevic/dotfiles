@@ -1,4 +1,4 @@
-{...}: {
+{theme, ...}: {
   programs.waybar = {
     enable = true;
 
@@ -189,7 +189,7 @@
         "pulseaudio#source" = {
           format = "{format_source}";
           format-source = "󰍬";
-          format-source-muted = "<span foreground='#f38ba8'>󰍭</span>";
+          format-source-muted = "<span foreground='${theme.red}'>󰍭</span>";
           tooltip = true;
           on-click = "mic-toggle";
         };

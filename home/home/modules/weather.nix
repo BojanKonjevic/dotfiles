@@ -1,4 +1,4 @@
-{pkgs, ...}: let
+{pkgs, theme, ...}: let
   weatherCodes = {
     "113" = "☀️";
     "116" = "⛅";
@@ -48,6 +48,15 @@
     "389" = "⛈️";
     "392" = "⛈️";
     "395" = "❄️";
+  };
+
+  tempColors = {
+    frozen  = theme.sky;      # <= 0°C
+    cold    = theme.blue;     # <= 8°C
+    cool    = theme.text;     # <= 15°C
+    mild    = theme.green;    # <= 22°C
+    warm    = theme.peach;    # <= 28°C
+    hot     = theme.red;      # > 28°C
   };
 
   weatherScript = pkgs.writeShellScriptBin "weather" ''
@@ -104,6 +113,7 @@
         ${pkgs.python3}/bin/python3 - "$TMPFILE" <<'PYEOF' || echo '{"text":"?","tooltip":"error"}'
     import json, sys
     codes = ${builtins.toJSON weatherCodes}
+    tc    = ${builtins.toJSON tempColors}
     def icon(code): return codes.get(str(code), "🌡️")
     with open(sys.argv[1]) as f:
         data = json.load(f)
@@ -115,17 +125,17 @@
     desc = current['weatherDesc'][0]['value']
     temp_int = int(temp)
     if temp_int <= 0:
-        color = "#89dceb"
+        color = tc["frozen"]
     elif temp_int <= 8:
-        color = "#89b4fa"
+        color = tc["cold"]
     elif temp_int <= 15:
-        color = "#cdd6f4"
+        color = tc["cool"]
     elif temp_int <= 22:
-        color = "#a6e3a1"
+        color = tc["mild"]
     elif temp_int <= 28:
-        color = "#fab387"
+        color = tc["warm"]
     else:
-        color = "#f38ba8"
+        color = tc["hot"]
     print(json.dumps({"text": f"<span color='{color}'>{ic} {temp}°C</span>", "tooltip": f"{desc} · feels {feels}°C"}))
     PYEOF
   '';

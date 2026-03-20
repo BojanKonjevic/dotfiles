@@ -1,0 +1,48 @@
+# Catppuccin Mocha — single source of truth for all colors.
+# Imported via extraSpecialArgs so every module receives it as `theme`.
+# *Rgb variants are the decimal R,G,B triplets for use inside rgba(..., alpha).
+{
+  # ── Base layers ─────────────────────────────────────────────────────────────
+  base = "#1e1e2e";
+  mantle = "#181825";
+  crust = "#11111b";
+  crustRgb = "17, 17, 27";
+
+  # ── Surfaces ─────────────────────────────────────────────────────────────────
+  surface0 = "#313244";
+  surface0Rgb = "49, 50, 68";
+  surface1 = "#45475a";
+  surface1Rgb = "69, 71, 90";
+  surface2 = "#585b70";
+
+  # ── Overlays ─────────────────────────────────────────────────────────────────
+  overlay0 = "#6c7086";
+  overlay1 = "#7f849c";
+  overlay2 = "#9399b2";
+
+  # ── Text ─────────────────────────────────────────────────────────────────────
+  subtext0 = "#a6adc8";
+  subtext1 = "#bac2de";
+  text = "#cdd6f4";
+
+  # ── Accent colors ────────────────────────────────────────────────────────────
+  rosewater = "#f5e0dc";
+  flamingo = "#f2cdcd";
+  pink = "#f5c2e7";
+  mauve = "#cba6f7";
+  mauveRgb = "203, 166, 247";
+  red = "#f38ba8";
+  redRgb = "243, 139, 168";
+  maroon = "#eba0ac";
+  peach = "#fab387";
+  yellow = "#f9e2af";
+  green = "#a6e3a1";
+  greenRgb = "166, 227, 161";
+  teal = "#94e2d5";
+  sky = "#89dceb";
+  sapphire = "#74c7ec";
+  sapphireRgb = "116, 199, 236";
+  blue = "#89b4fa";
+  lavender = "#b4befe";
+  lavenderRgb = "180, 190, 254";
+}

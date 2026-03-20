@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, theme, ...}: {
   home.packages = with pkgs; [
     (writeShellScriptBin "wallpaper-picker" ''
       WALLPAPER_DIR="$HOME/Pictures/wallpapers"
@@ -44,14 +44,14 @@
     * {
         font:             "JetBrainsMono Nerd Font 13";
         background-color: transparent;
-        text-color:       #cdd6f4;
+        text-color:       ${theme.text};
     }
 
     window {
         width:            880px;
-        background-color: rgba(17, 17, 27, 0.93);
+        background-color: rgba(${theme.crustRgb}, 0.93);
         border:       1px;
-        border-color: rgba(69, 71, 90, 0.45);
+        border-color: rgba(${theme.surface1Rgb}, 0.45);
         border-radius:    14px;
         padding:          0;
     }
@@ -67,7 +67,7 @@
     inputbar {
         background-color: transparent;
         border:           0 0 2px 0;
-        border-color:     rgba(69, 71, 90, 0.50);
+        border-color:     rgba(${theme.surface1Rgb}, 0.50);
         border-radius:    0;
         padding:          0 0 10px 0;
         spacing:          8px;
@@ -75,15 +75,15 @@
     }
 
     prompt {
-        text-color:     #b4befe;
+        text-color:     ${theme.lavender};
         font:           "JetBrainsMono Nerd Font Light 18";
         vertical-align: 0.5;
     }
 
     entry {
-        text-color:        #cdd6f4;
+        text-color:        ${theme.text};
         placeholder:       "filter wallpapers…";
-        placeholder-color: #6c7086;
+        placeholder-color: ${theme.overlay0};
         font:              "JetBrainsMono Nerd Font Light 18";
         vertical-align:    0.5;
     }
@@ -101,9 +101,9 @@
         orientation:      vertical;
         padding:          10px;
         border-radius:    10px;
-        background-color: rgba(49, 50, 68, 0.50);
+        background-color: rgba(${theme.surface0Rgb}, 0.50);
         border:       1px;
-        border-color: rgba(69, 71, 90, 0.31);
+        border-color: rgba(${theme.surface1Rgb}, 0.31);
         spacing:          8px;
     }
 
@@ -116,21 +116,21 @@
     element-text {
         vertical-align:   0.5;
         horizontal-align: 0.5;
-        text-color:       #a6adc8;
-        highlight:        bold #b4befe;
+        text-color:       ${theme.subtext0};
+        highlight:        bold ${theme.lavender};
         font:             "JetBrainsMono Nerd Font 11";
     }
 
     /* glow ring on hover/select — lavender */
     element selected {
-        background-color: rgba(180, 190, 254, 0.15);
+        background-color: rgba(${theme.lavenderRgb}, 0.15);
         border:       1px;
-        border-color: rgba(180, 190, 254, 0.44);
+        border-color: rgba(${theme.lavenderRgb}, 0.44);
         border-radius:    10px;
     }
 
     element selected element-text {
-        text-color: #b4befe;
+        text-color: ${theme.lavender};
         font:       "JetBrainsMono Nerd Font Bold 11";
     }
   '';
