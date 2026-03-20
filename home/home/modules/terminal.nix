@@ -95,8 +95,7 @@
           'm:{a-zA-Z}={A-Za-z}' \
           'r:|[._-]=* r:|=*'
 
-      setopt HIST_REDUCE_BLANKS
-      setopt INC_APPEND_HISTORY
+      setopt HIST_IGNORE_SPACE
 
       setopt AUTO_CD
       setopt AUTO_PUSHD
@@ -115,15 +114,6 @@
         fi
       }
     '';
-
-    history = {
-      expireDuplicatesFirst = true;
-      extended = true;
-      ignoreSpace = true;
-      save = 10000;
-      size = 10000;
-      share = true;
-    };
   };
 
   programs.fzf = {
@@ -135,6 +125,19 @@
       "--border=rounded"
       "--preview-window=right:55%:wrap"
     ];
+  };
+
+  programs.atuin = {
+    enable = true;
+    enableZshIntegration = true;
+    settings = {
+      style = "compact";
+      search_mode = "fuzzy";
+      filter_mode_shell_up_arrow = "session";
+      show_preview = true;
+      exit_mode = "return-query";
+      secrets_filter = true;
+    };
   };
 
   programs.starship = {

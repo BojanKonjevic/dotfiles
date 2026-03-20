@@ -2,6 +2,18 @@
   programs.zen-browser = {
     enable = true;
     policies = {
+      SearchEngines = {
+        Default = "Google EN";
+        Add = [
+          {
+            Name = "Google EN";
+            URLTemplate = "https://www.google.com/search?q={searchTerms}&hl=en&gl=us";
+            Method = "GET";
+            IconURL = "https://www.google.com/favicon.ico";
+            SuggestURLTemplate = "https://www.google.com/complete/search?client=firefox&q={searchTerms}";
+          }
+        ];
+      };
       DisableAppUpdate = true;
       DisableTelemetry = true;
       ExtensionSettings = {
@@ -69,7 +81,6 @@
     user_pref("browser.shell.checkDefaultBrowser", false);
     user_pref("browser.warnOnQuitShortcut", false);
     user_pref("browser.aboutConfig.showWarning", false);
-    user_pref("browser.search.region", "RS");
     user_pref("browser.search.separatePrivateDefault", false);
     user_pref("browser.newtabpage.activity-stream.showSearch", false);
     user_pref("browser.newtabpage.activity-stream.feeds.topsites", true);
@@ -86,6 +97,15 @@
     user_pref("zen.view.compact.sidebar-keep-hover-duration", 150);
     user_pref("zen.view.show-newtab-button-top", false);
     user_pref("zen.workspaces.continue-where-left-off", true);
+    user_pref("intl.locale.requested", "en-US");
+    user_pref("browser.search.region", "US");
+    user_pref("browser.search.detectCurrentRegion", false);
+    user_pref("browser.search.geoSpecificDefaults", false);
+    user_pref("browser.search.geoip.url", "");
+    user_pref("geo.enabled", false);
+    user_pref("geo.provider.network.url", "");
+    user_pref("geo.provider.use_gpsd", false);
+    user_pref("geo.provider.use_geoclue", false);
   '';
 
   home.file.".zen/bojan.default/chrome/userChrome.css".text = ''

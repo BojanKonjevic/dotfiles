@@ -14,7 +14,7 @@
     shell = pkgs.zsh;
     isNormalUser = true;
     description = "Bojan Konjevic";
-    extraGroups = ["networkmanager" "wheel" "audio" "input" "ydotool"];
+    extraGroups = ["networkmanager" "wheel" "audio" "input" "ydotool" "video"];
   };
   nixpkgs.config.allowUnfree = true;
   hardware.enableAllFirmware = true;
