@@ -69,7 +69,7 @@
         if diff == 1: return "Tomorrow "
         return d.strftime("%-d %b     ")[:9]
     with open(sys.argv[1]) as f:
-        data = json.load(f)['data']
+        data = json.load(f)
     current = data['current_condition'][0]
     days = data['weather']
     temp = current['temp_C']
@@ -101,12 +101,12 @@
           echo '{"text":"?","tooltip":"unavailable"}'
           exit 0
         }
-        ${pkgs.python3}/bin/python3 - "$TMPFILE" <<'PYEOF'
+        ${pkgs.python3}/bin/python3 - "$TMPFILE" <<'PYEOF' || echo '{"text":"?","tooltip":"error"}'
     import json, sys
     codes = ${builtins.toJSON weatherCodes}
     def icon(code): return codes.get(str(code), "🌡️")
     with open(sys.argv[1]) as f:
-        data = json.load(f)['data']
+        data = json.load(f)
     current = data['current_condition'][0]
     temp = current['temp_C']
     feels = current['FeelsLikeC']
