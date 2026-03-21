@@ -36,7 +36,6 @@
         authenticated = false;
         url = "https://api.vencord.dev/";
         settingsSync = false;
-        settingsSyncVersion = 1773689687818;
       };
 
       uiElements = {

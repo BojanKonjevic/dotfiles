@@ -34,7 +34,6 @@ in {
   home.packages = with pkgs; [
     python3
     ansifilter
-    sox
     nh
     glow
     nwg-look
@@ -52,13 +51,10 @@ in {
     pinta
     grim
     slurp
-    wl-clipboard
-    cliphist
     nixd
     localsend
     bibata-cursors
     alsa-utils
-    swww
     p7zip
     dejsonlz4
     file-roller

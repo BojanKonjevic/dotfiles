@@ -125,9 +125,10 @@
 
       misc = {
         vfr = true;
-        force_default_wallpaper = -1;
+        force_default_wallpaper = 0;
         disable_hyprland_logo = false;
       };
+
       bind =
         [
           "CTRL, ESCAPE, exec, ydotool click 0xC0"

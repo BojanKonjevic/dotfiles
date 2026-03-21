@@ -4,6 +4,8 @@
   ...
 }: {
   home.packages = with pkgs; [
+    wl-clipboard
+    cliphist
     (writeShellScriptBin "clip-pick-text" ''
       cliphist list | while IFS=$'\t' read -r id content; do
         [[ "$content" == *"[[ binary data"* ]] && continue

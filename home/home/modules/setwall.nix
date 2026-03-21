@@ -5,6 +5,7 @@
   ...
 }: {
   home.packages = with pkgs; [
+    swww
     (writeShellScriptBin "wallpaper-picker" ''
       WALLPAPER_DIR="${userConfig.wallpaperDir}"
       LOCK_LINK="$WALLPAPER_DIR/wall.jpg"

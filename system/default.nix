@@ -15,7 +15,6 @@
 
   services.postgresql = {
     enable = true;
-    ensureDatabases = [];
     ensureUsers = [
       {
         name = userConfig.username;

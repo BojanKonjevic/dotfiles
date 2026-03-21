@@ -65,16 +65,24 @@
   };
 
   weatherScript = pkgs.writeShellScriptBin "weather" ''
-        TMPFILE=$(mktemp)
-        trap "rm -f $TMPFILE" EXIT
-        ${pkgs.curl}/bin/curl -sf "wttr.in/${userConfig.weatherCity}?format=j1" > "$TMPFILE" || {
-          echo "Could not fetch weather data"
-          exit 1
-        }
-        ${pkgs.python3}/bin/python3 - "$TMPFILE" <<'PYEOF'
+      BAR_MODE=0
+      [[ "''${1:-}" == "--bar" ]] && BAR_MODE=1
+
+      TMPFILE=$(mktemp)
+      trap "rm -f $TMPFILE" EXIT
+      ${pkgs.curl}/bin/curl -sf "wttr.in/${userConfig.weatherCity}?format=j1" > "$TMPFILE" 2>/dev/null || {
+        (( BAR_MODE )) \
+          && echo '{"text":"?","tooltip":"unavailable"}' \
+          || echo "Could not fetch weather data"
+        exit 1
+      }
+      ${pkgs.python3}/bin/python3 - "$TMPFILE" "$BAR_MODE" <<'PYEOF'
     import json, sys
     from datetime import datetime
+
     codes = ${builtins.toJSON weatherCodes}
+    tc    = ${builtins.toJSON tempColors}
+
     def icon(code): return codes.get(str(code), "🌡️")
     def day_name(date_str):
         d = datetime.strptime(date_str, "%Y-%m-%d")
@@ -82,68 +90,49 @@
         if diff == 0: return "Today    "
         if diff == 1: return "Tomorrow "
         return d.strftime("%-d %b     ")[:9]
-    with open(sys.argv[1]) as f:
-        data = json.load(f)
-    current = data['current_condition'][0]
-    days = data['weather']
-    temp = current['temp_C']
-    feels = current['FeelsLikeC']
-    desc = current['weatherDesc'][0]['value']
-    code = current['weatherCode']
-    humidity = current['humidity']
-    wind = current['windspeedKmph']
-    print(f" {icon(code)}  {desc}")
-    print(f"    {temp}°C  feels {feels}°C  💧{humidity}%  💨{wind}km/h")
-    print()
-    print("  Today throughout the day")
-    print("  " + "─" * 34)
-    for h in days[0]['hourly']:
-        t = int(h['time']) // 100
-        print(f"  {t:02d}:00  {icon(h['weatherCode'])}  {h['tempC']:>3}°C  feels {h['FeelsLikeC']}°C")
-    print()
-    print("  Forecast")
-    print("  " + "─" * 34)
-    for day in days:
-        print(f"  {day_name(day['date'])}  {icon(day['hourly'][4]['weatherCode'])}  {day['maxtempC']:>3}° / {day['mintempC']:>3}°")
-    PYEOF
-  '';
 
-  wttrbarScript = pkgs.writeShellScriptBin "wttrbar-weather" ''
-        TMPFILE=$(mktemp)
-        trap "rm -f $TMPFILE" EXIT
-        ${pkgs.curl}/bin/curl -sf "wttr.in/${userConfig.weatherCity}?format=j1" > "$TMPFILE" 2>/dev/null || {
-          echo '{"text":"?","tooltip":"unavailable"}'
-          exit 0
-        }
-        ${pkgs.python3}/bin/python3 - "$TMPFILE" <<'PYEOF' || echo '{"text":"?","tooltip":"error"}'
-    import json, sys
-    codes = ${builtins.toJSON weatherCodes}
-    tc    = ${builtins.toJSON tempColors}
-    def icon(code): return codes.get(str(code), "🌡️")
     with open(sys.argv[1]) as f:
         data = json.load(f)
-    current = data['current_condition'][0]
-    temp = current['temp_C']
-    feels = current['FeelsLikeC']
-    code = current['weatherCode']
-    ic = icon(code)
-    desc = current['weatherDesc'][0]['value']
-    temp_int = int(temp)
-    if temp_int <= 0:
-        color = tc["frozen"]
-    elif temp_int <= 8:
-        color = tc["cold"]
-    elif temp_int <= 15:
-        color = tc["cool"]
-    elif temp_int <= 22:
-        color = tc["mild"]
-    elif temp_int <= 28:
-        color = tc["warm"]
+
+    bar_mode = sys.argv[2] == "1"
+    current  = data['current_condition'][0]
+    days     = data['weather']
+    temp     = current['temp_C']
+    feels    = current['FeelsLikeC']
+    desc     = current['weatherDesc'][0]['value']
+    code     = current['weatherCode']
+
+    if bar_mode:
+        temp_int = int(temp)
+        if   temp_int <= 0:  color = tc["frozen"]
+        elif temp_int <= 8:  color = tc["cold"]
+        elif temp_int <= 15: color = tc["cool"]
+        elif temp_int <= 22: color = tc["mild"]
+        elif temp_int <= 28: color = tc["warm"]
+        else:                color = tc["hot"]
+        ic = icon(code)
+        print(json.dumps({
+            "text":    f"<span color='{color}'>{ic} {temp}°C</span>",
+            "tooltip": f"{desc} · feels {feels}°C",
+        }))
     else:
-        color = tc["hot"]
-    print(json.dumps({"text": f"<span color='{color}'>{ic} {temp}°C</span>", "tooltip": f"{desc} · feels {feels}°C"}))
+        humidity = current['humidity']
+        wind     = current['windspeedKmph']
+        print(f" {icon(code)}  {desc}")
+        print(f"    {temp}°C  feels {feels}°C  💧{humidity}%  💨{wind}km/h")
+        print()
+        print("  Today throughout the day")
+        print("  " + "─" * 34)
+        for h in days[0]['hourly']:
+            t = int(h['time']) // 100
+            print(f"  {t:02d}:00  {icon(h['weatherCode'])}  {h['tempC']:>3}°C  feels {h['FeelsLikeC']}°C")
+        print()
+        print("  Forecast")
+        print("  " + "─" * 34)
+        for day in days:
+            print(f"  {day_name(day['date'])}  {icon(day['hourly'][4]['weatherCode'])}  {day['maxtempC']:>3}° / {day['mintempC']:>3}°")
     PYEOF
   '';
 in {
-  home.packages = [weatherScript wttrbarScript];
+  home.packages = [weatherScript];
 }

@@ -195,9 +195,9 @@
         };
 
         "custom/weather" = {
-          exec = "wttrbar-weather";
+          exec = "weather --bar";
           return-type = "json";
-          interval = 1800;
+          interval = 600;
           on-click = "kitty --hold weather";
           tooltip = true;
         };

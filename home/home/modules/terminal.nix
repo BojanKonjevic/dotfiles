@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   userConfig,
   ...
 }: {
@@ -89,32 +90,33 @@
       hgens = "nix-env --list-generations --profile $HOME/.local/state/nix/profiles/home-manager";
     };
 
-    initContent = ''
-      autoload -Uz compinit
-      zstyle ':completion:*' menu select
-      zstyle ':completion:*' matcher-list \
-          'm:{a-zA-Z}={A-Za-z}' \
-          'r:|[._-]=* r:|=*'
+    initContent = lib.mkMerge [
+      (lib.mkOrder 550 ''
+        zstyle ':completion:*' menu select
+        zstyle ':completion:*' matcher-list \
+            'm:{a-zA-Z}={A-Za-z}' \
+            'r:|[._-]=* r:|=*'
+      '')
+      ''
+        setopt HIST_IGNORE_SPACE
+        setopt AUTO_CD
+        setopt AUTO_PUSHD
+        setopt PUSHD_IGNORE_DUPS
+        setopt PUSHD_SILENT
 
-      setopt HIST_IGNORE_SPACE
+        export NH_OS_FLAKE="${userConfig.osFlakePath}"
+        export NH_HOME_FLAKE="${userConfig.hmFlakePath}"
+        export STARSHIP_VI_MODE=1
 
-      setopt AUTO_CD
-      setopt AUTO_PUSHD
-      setopt PUSHD_IGNORE_DUPS
-      setopt PUSHD_SILENT
-
-      export NH_OS_FLAKE="${userConfig.osFlakePath}"
-      export NH_HOME_FLAKE="${userConfig.hmFlakePath}"
-      export STARSHIP_VI_MODE=1
-
-      zvm_after_init() {
-        eval "$(fzf --zsh)"
-        if [[ -z "$_direnv_hooked" ]]; then
-          eval "$(direnv hook zsh)"
-          export _direnv_hooked=1
-        fi
-      }
-    '';
+        zvm_after_init() {
+          eval "$(fzf --zsh)"
+          if [[ -z "$_direnv_hooked" ]]; then
+            eval "$(direnv hook zsh)"
+            export _direnv_hooked=1
+          fi
+        }
+      ''
+    ];
   };
 
   programs.fzf = {
