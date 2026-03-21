@@ -1,14 +1,15 @@
 {
   pkgs,
   inputs,
+  userConfig,
   ...
 }: let
   nix-search =
     inputs.nix-search-tv.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in {
-  home.username = "bojan";
-  home.homeDirectory = "/home/bojan";
-  home.stateVersion = "25.11";
+  home.username = userConfig.username;
+  home.homeDirectory = userConfig.homeDirectory;
+  home.stateVersion = userConfig.stateVersion;
 
   imports = [
     ./modules/vesktop.nix
@@ -81,8 +82,8 @@ in {
   programs.git = {
     enable = true;
     settings = {
-      user.name = "BojanKonjevic";
-      user.email = "konjevicbojan1@gmail.com";
+      user.name = userConfig.fullName;
+      user.email = userConfig.email;
       init.defaultBranch = "main";
     };
   };

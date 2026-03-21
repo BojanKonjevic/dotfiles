@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, userConfig, ...}: {
   environment.systemPackages = with pkgs; [
     #add global system pkgs here
   ];
@@ -14,7 +14,7 @@
     ensureDatabases = [];
     ensureUsers = [
       {
-        name = "bojan";
+        name = userConfig.username;
         ensureClauses.superuser = true;
         ensureClauses.createdb = true;
       }
@@ -33,8 +33,8 @@
   };
   services.gvfs.enable = true;
   services.tumbler.enable = true;
-  networking.hostName = "nixos";
-  time.timeZone = "Europe/Belgrade";
-  i18n.defaultLocale = "en_US.UTF-8";
-  system.stateVersion = "25.11";
+  networking.hostName = userConfig.hostname;
+  time.timeZone = userConfig.timezone;
+  i18n.defaultLocale = userConfig.locale;
+  system.stateVersion = userConfig.stateVersion;
 }

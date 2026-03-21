@@ -1,4 +1,4 @@
-{pkgs, theme, ...}: let
+{pkgs, theme, userConfig, ...}: let
   weatherCodes = {
     "113" = "☀️";
     "116" = "⛅";
@@ -62,7 +62,7 @@
   weatherScript = pkgs.writeShellScriptBin "weather" ''
         TMPFILE=$(mktemp)
         trap "rm -f $TMPFILE" EXIT
-        ${pkgs.curl}/bin/curl -sf "wttr.in/Novi+Sad?format=j1" > "$TMPFILE" || {
+        ${pkgs.curl}/bin/curl -sf "wttr.in/${userConfig.weatherCity}?format=j1" > "$TMPFILE" || {
           echo "Could not fetch weather data"
           exit 1
         }
@@ -106,7 +106,7 @@
   wttrbarScript = pkgs.writeShellScriptBin "wttrbar-weather" ''
         TMPFILE=$(mktemp)
         trap "rm -f $TMPFILE" EXIT
-        ${pkgs.curl}/bin/curl -sf "wttr.in/Novi+Sad?format=j1" > "$TMPFILE" 2>/dev/null || {
+        ${pkgs.curl}/bin/curl -sf "wttr.in/${userConfig.weatherCity}?format=j1" > "$TMPFILE" 2>/dev/null || {
           echo '{"text":"?","tooltip":"unavailable"}'
           exit 0
         }

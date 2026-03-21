@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, userConfig, ...}: {
   programs.nixvim = {
     enable = true;
 
@@ -269,8 +269,8 @@
           enable = true;
           settings.nixd = {
             formatting.command = ["alejandra"];
-            nixpkgs.expr = "import (builtins.getFlake \"/etc/nixos\").inputs.nixpkgs { }";
-            options.nixos.expr = "(builtins.getFlake \"/etc/nixos\").nixosConfigurations.nixos.options";
+            nixpkgs.expr = "import (builtins.getFlake \"${userConfig.osFlakePath}\").inputs.nixpkgs { }";
+            options.nixos.expr = "(builtins.getFlake \"${userConfig.osFlakePath}\").nixosConfigurations.${userConfig.hostname}.options";
           };
         };
         pyright.enable = true;

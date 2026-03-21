@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, userConfig, ...}: {
   services.dbus.enable = true;
   security.polkit.enable = true;
   services.udisks2.enable = true;
@@ -10,10 +10,10 @@
   boot.loader.efi.canTouchEfiVariables = true;
   programs.zsh.enable = true;
   programs.ydotool.enable = true;
-  users.users.bojan = {
+  users.users.${userConfig.username} = {
     shell = pkgs.zsh;
     isNormalUser = true;
-    description = "Bojan Konjevic";
+    description = userConfig.fullName;
     extraGroups = ["networkmanager" "wheel" "audio" "input" "ydotool" "video"];
   };
   nixpkgs.config.allowUnfree = true;

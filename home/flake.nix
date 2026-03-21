@@ -1,5 +1,5 @@
 {
-  description = "Bojan's Home Manager config";
+  description = "Home Manager config";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager = {
@@ -19,13 +19,14 @@
     home-manager,
     ...
   } @ inputs: let
-    system = "x86_64-linux";
+    userConfig = import ../user.nix;
+    system = userConfig.system;
     pkgs = nixpkgs.legacyPackages.${system};
   in {
-    homeConfigurations.bojan = home-manager.lib.homeManagerConfiguration {
+    homeConfigurations.${userConfig.username} = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
       extraSpecialArgs = {
-        inherit inputs;
+        inherit inputs userConfig;
         theme = import ./home/modules/theme.nix;
       };
       modules = [

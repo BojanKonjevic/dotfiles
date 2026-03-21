@@ -1,7 +1,7 @@
-{pkgs, theme, ...}: {
+{pkgs, theme, userConfig, ...}: {
   home.packages = with pkgs; [
     (writeShellScriptBin "wallpaper-picker" ''
-      WALLPAPER_DIR="$HOME/Pictures/wallpapers"
+      WALLPAPER_DIR="${userConfig.wallpaperDir}"
       LOCK_LINK="$WALLPAPER_DIR/wall.jpg"
 
       # Ensure swww-daemon is running

@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, userConfig, ...}: {
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     GBM_BACKEND = "nvidia-drm";
@@ -17,7 +17,7 @@
     variant = "";
   };
   services.xserver.videoDrivers = ["nvidia"];
-  services.getty.autologinUser = "bojan";
+  services.getty.autologinUser = userConfig.username;
   environment.loginShellInit = ''
     if [ "$(tty)" = "/dev/tty1" ]; then
       exec start-hyprland

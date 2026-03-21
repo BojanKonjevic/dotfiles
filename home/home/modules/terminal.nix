@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  userConfig,
   ...
 }: {
   programs.kitty = {
@@ -67,9 +68,9 @@
       pg = "psql -d postgres --dbname";
       dev = "nix develop";
       cal = "calcurse";
-      hf = "cd $HOME/dotfiles/home/ && nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
+      hf = "cd ${userConfig.dotfilesDir}/home/ && nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
       leet = "nvim -c 'Leet'";
-      n = "nvim $HOME/Documents/notes.txt";
+      n = "nvim ${userConfig.notesFile}";
       ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history";
       f = "thunar .";
       ls = "eza --icons";
@@ -102,8 +103,8 @@
       setopt PUSHD_IGNORE_DUPS
       setopt PUSHD_SILENT
 
-      export NH_OS_FLAKE="/etc/nixos"
-      export NH_HOME_FLAKE="$HOME/home-manager"
+      export NH_OS_FLAKE="${userConfig.osFlakePath}"
+      export NH_HOME_FLAKE="${userConfig.hmFlakePath}"
       export STARSHIP_VI_MODE=1
 
       zvm_after_init() {
