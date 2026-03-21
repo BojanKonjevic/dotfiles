@@ -45,4 +45,8 @@
   blue = "#89b4fa";
   lavender = "#b4befe";
   lavenderRgb = "180, 190, 254";
+
+  # ── Cursor theme ─────────────────────────────────────────────────────────────
+  cursorTheme = "Bibata-Modern-Ice";
+  cursorSize = "16";
 }

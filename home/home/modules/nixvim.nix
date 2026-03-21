@@ -266,32 +266,30 @@
           "gW" = "workspace_symbol";
           "grt" = "type_definition";
         };
-      };
-
-      lsp.servers = {
-        nixd = {
-          enable = true;
-          settings.nixd = {
-            formatting.command = ["alejandra"];
-            nixpkgs.expr = "import (builtins.getFlake \"${userConfig.osFlakePath}\").inputs.nixpkgs { }";
-            options.nixos.expr = "(builtins.getFlake \"${userConfig.osFlakePath}\").nixosConfigurations.${userConfig.hostname}.options";
+        servers = {
+          nixd = {
+            enable = true;
+            settings.nixd = {
+              formatting.command = ["alejandra"];
+              nixpkgs.expr = "import (builtins.getFlake \"${userConfig.osFlakePath}\").inputs.nixpkgs { }";
+              options.nixos.expr = "(builtins.getFlake \"${userConfig.osFlakePath}\").nixosConfigurations.${userConfig.hostname}.options";
+            };
+          };
+          pyright.enable = true;
+          ruff.enable = true;
+          lua_ls = {
+            enable = true;
+            settings.Lua = {
+              completion.callSnippet = "Replace";
+            };
           };
         };
-        pyright.enable = true;
-        ruff.enable = true;
-        lua_ls = {
-          enable = true;
-          settings.Lua = {
-            completion.callSnippet = "Replace";
-          };
+        diagnostics = {
+          severity_sort = true;
+          float.border = "rounded";
+          float.source = "if_many";
+          underline.severity = "ERROR";
         };
-      };
-
-      lsp.diagnostics = {
-        severity_sort = true;
-        float.border = "rounded";
-        float.source = "if_many";
-        underline.severity = "ERROR";
       };
     };
 
@@ -445,78 +443,102 @@
       confirm = true;
     };
 
-    extraConfigLua = ''
-      vim.schedule(function()
-        vim.keymap.set("i", "<Tab>", function()
-          local blink = require("blink.cmp")
-          if blink.is_visible() then
-            blink.accept()
-          else
-            return "\t"
-          end
-        end, { expr = true, silent = true, noremap = true, desc = "blink accept" })
-      end)
-      require("diffview").setup({
-        enhanced_diff_hl = true,
-        view = {
-          default = { layout = "diff2_horizontal" },
-          merge_tool = { layout = "diff3_horizontal" },
-        },
-        keymaps = {
+    extraFiles = {
+      "plugin/blink.lua".text = ''
+        vim.schedule(function()
+          vim.keymap.set("i", "<Tab>", function()
+            local blink = require("blink.cmp")
+            if blink.is_visible() then
+              blink.accept()
+            else
+              return "\t"
+            end
+          end, { expr = true, silent = true, noremap = true, desc = "blink accept" })
+        end)
+      '';
+
+      "plugin/diffview.lua".text = ''
+        require("diffview").setup({
+          enhanced_diff_hl = true,
           view = {
-            { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" } },
+            default = { layout = "diff2_horizontal" },
+            merge_tool = { layout = "diff3_horizontal" },
           },
-          file_panel = {
-            { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" } },
+          keymaps = {
+            view = {
+              { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" } },
+            },
+            file_panel = {
+              { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" } },
+            },
+            file_history_panel = {
+              { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" } },
+            },
           },
-          file_history_panel = {
-            { "n", "q", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" } },
+        })
+      '';
+
+      "plugin/lazygit.lua".text = ''
+        local Terminal = require("toggleterm.terminal").Terminal
+        local lazygit = Terminal:new({
+          cmd = "lazygit",
+          direction = "float",
+          float_opts = {
+            border = "rounded",
+            width = math.floor(vim.o.columns * 0.92),
+            height = math.floor(vim.o.lines * 0.82),
           },
-        },
-      })
-      local Terminal = require("toggleterm.terminal").Terminal
-      local lazygit = Terminal:new({
-        cmd = "lazygit",
-        direction = "float",
-        float_opts = {
-          border = "rounded",
-          width = math.floor(vim.o.columns * 0.92),
-          height = math.floor(vim.o.lines * 0.82),
-        },
-        hidden = true,
-        on_open = function(term)
-          vim.keymap.set("t", "<C-g>", function() term:toggle() end, { buffer = term.bufnr })
-        end,
-      })
-      vim.keymap.set("n", "<C-g>", function() lazygit:toggle() end, { desc = "Toggle Lazygit" })
-      require("tiny-inline-diagnostic").setup({
-        preset = "modern",
-        transparent_bg = true,
-        transparent_cursorline = true,
-        signs = {
-          arrow = "  ",
-        },
-        hi = {
-          error = "DiagnosticError",
-          warn  = "DiagnosticWarn",
-          info  = "DiagnosticInfo",
-          hint  = "DiagnosticHint",
-        },
-        mixing_color = "None",
-      })
-      vim.diagnostic.config({ virtual_text = false })
-      require('neoscroll').setup({
-        mappings = {
+          hidden = true,
+          on_open = function(term)
+            vim.keymap.set("t", "<C-g>", function() term:toggle() end, { buffer = term.bufnr })
+          end,
+        })
+        vim.keymap.set("n", "<C-g>", function() lazygit:toggle() end, { desc = "Toggle Lazygit" })
+      '';
+
+      "plugin/diagnostic.lua".text = ''
+        require("tiny-inline-diagnostic").setup({
+          preset = "modern",
+          transparent_bg = true,
+          transparent_cursorline = true,
+          signs = {
+            arrow = "  ",
           },
+          hi = {
+            error = "DiagnosticError",
+            warn  = "DiagnosticWarn",
+            info  = "DiagnosticInfo",
+            hint  = "DiagnosticHint",
+          },
+          mixing_color = "None",
+        })
+        vim.diagnostic.config({ virtual_text = false })
+      '';
+
+      "plugin/neoscroll.lua".text = ''
+        require("neoscroll").setup({
+          mappings = {},
           hide_cursor = true,
           stop_eof = true,
           respect_scrolloff = true,
           cursor_scrolls_alone = false,
           duration_multiplier = 0.8,
-          easing = 'cubic',
+          easing = "cubic",
         })
-        vim.keymap.set('n', '<leader>r', function()
-          local file = vim.fn.expand('%:p')
+        vim.keymap.set("n", "<ScrollWheelUp>", function()
+          require("neoscroll").scroll(-5, { duration = 80, easing = "quadratic" })
+        end)
+        vim.keymap.set("n", "<ScrollWheelDown>", function()
+          require("neoscroll").scroll(5, { duration = 80, easing = "quadratic" })
+        end)
+        vim.keymap.set("i", "<ScrollWheelUp>", function()
+          require("neoscroll").scroll(-5, { duration = 80, easing = "quadratic" })
+        end)
+        vim.keymap.set("i", "<ScrollWheelDown>", function()
+          require("neoscroll").scroll(5, { duration = 80, easing = "quadratic" })
+        end)
+        vim.keymap.set("n", "<leader>r", function()
+          local file = vim.fn.expand("%:p")
           local term = require("toggleterm.terminal").Terminal:new({
             cmd = "python3 " .. vim.fn.shellescape(file),
             direction = "float",
@@ -530,35 +552,20 @@
           })
           term:toggle()
         end, { desc = "[R]un Python file" })
-        vim.keymap.set('n', '<ScrollWheelUp>', function()
-          require('neoscroll').scroll(-5, { duration = 80, easing = 'quadratic' })
-        end)
-        vim.keymap.set('n', '<ScrollWheelDown>', function()
-          require('neoscroll').scroll(5, { duration = 80, easing = 'quadratic' })
-        end)
-        vim.keymap.set('i', '<ScrollWheelUp>', function()
-          require('neoscroll').scroll(-5, { duration = 80, easing = 'quadratic' })
-        end)
-        vim.keymap.set('i', '<ScrollWheelDown>', function()
-          require('neoscroll').scroll(5, { duration = 80, easing = 'quadratic' })
-        end)
+      '';
 
+      "plugin/autocmds.lua".text = ''
         vim.api.nvim_create_autocmd("TextYankPost", {
           group = vim.api.nvim_create_augroup("highlight_on_yank", { clear = true }),
           desc = "Briefly highlight yanked text",
           callback = function()
             vim.hl.on_yank({
               higroup = "IncSearch",
-              timeout   = 150,
+              timeout = 150,
               on_visual = true,
             })
           end,
         })
-        require("guess-indent").setup {}
-        require("leetcode").setup {
-          lang = "python3",
-          description = { position = "bottom" },
-        }
         vim.api.nvim_create_autocmd("LspAttach", {
           group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
           callback = function(event)
@@ -594,25 +601,37 @@
             end
           end,
         })
-      require("flash").setup({
-        labels = "asdfghjklqwertyuiopzxcvbnm",
-        search = {
-          multi_window = true,
-        },
-        jump = {
-          autojump = true,
-        },
-      })
-      vim.keymap.set({ "n", "x", "o" }, "f", function()
-        require("flash").jump()
-      end, { desc = "Flash" })
-      vim.keymap.set({ "n", "x", "o" }, "S", function()
-        require("flash").treesitter()
-      end, { desc = "Flash Treesitter" })
-      vim.keymap.set("o", "r", function()
-        require("flash").remote()
-      end, { desc = "Remote Flash" })
-    '';
+      '';
+
+      "plugin/flash.lua".text = ''
+        require("flash").setup({
+          labels = "asdfghjklqwertyuiopzxcvbnm",
+          search = {
+            multi_window = true,
+          },
+          jump = {
+            autojump = true,
+          },
+        })
+        vim.keymap.set({ "n", "x", "o" }, "f", function()
+          require("flash").jump()
+        end, { desc = "Flash" })
+        vim.keymap.set({ "n", "x", "o" }, "S", function()
+          require("flash").treesitter()
+        end, { desc = "Flash Treesitter" })
+        vim.keymap.set("o", "r", function()
+          require("flash").remote()
+        end, { desc = "Remote Flash" })
+      '';
+
+      "plugin/misc.lua".text = ''
+        require("guess-indent").setup {}
+        require("leetcode").setup {
+          lang = "python3",
+          description = { position = "bottom" },
+        }
+      '';
+    };
 
     colorschemes.catppuccin = {
       enable = true;

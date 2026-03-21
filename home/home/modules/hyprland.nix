@@ -1,4 +1,9 @@
-{userConfig, ...}: {
+{
+  userConfig,
+  theme,
+  lib,
+  ...
+}: {
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
@@ -22,9 +27,9 @@
       ];
 
       env = [
-        "XCURSOR_THEME,Bibata-Modern-Ice"
-        "XCURSOR_SIZE,16"
-        "HYPRCURSOR_SIZE,16"
+        "XCURSOR_THEME,${theme.cursorTheme}"
+        "XCURSOR_SIZE,${theme.cursorSize}"
+        "HYPRCURSOR_SIZE,${theme.cursorSize}"
       ];
 
       exec-once = [
@@ -123,57 +128,39 @@
         force_default_wallpaper = -1;
         disable_hyprland_logo = false;
       };
+      bind =
+        [
+          "CTRL, ESCAPE, exec, ydotool click 0xC0"
+          "$mainMod SHIFT, W, exec, wallpaper-picker"
+          "$mainMod, I, exec, swaync-client -t"
+          "$mainMod, BACKSLASH, exec, mic-toggle"
+          "$mainMod, N, exec, $privateWindow"
+          "$mainMod, C, exec, clip-pick-text | rofi -dmenu -display-columns 2 -theme $HOME/.config/rofi/clipboard.rasi -p \"  Text\" -i | cliphist decode | wl-copy"
+          "$mainMod SHIFT, C, exec, clip-pick-img | rofi -dmenu -display-columns 2 -show-icons -theme $HOME/.config/rofi/clipboard-img.rasi -p \"  Images\" -i | cliphist decode | wl-copy"
 
-      bind = [
-        "CTRL, ESCAPE, exec, ydotool click 0xC0"
-        "$mainMod SHIFT, W, exec, wallpaper-picker"
-        "$mainMod, I, exec, swaync-client -t"
-        "$mainMod, BACKSLASH, exec, mic-toggle"
-        "$mainMod, N, exec, $privateWindow"
-        "$mainMod, C, exec, clip-pick-text | rofi -dmenu -display-columns 2 -theme $HOME/.config/rofi/clipboard.rasi -p \"  Text\" -i | cliphist decode | wl-copy"
-        "$mainMod SHIFT, C, exec, clip-pick-img | rofi -dmenu -display-columns 2 -show-icons -theme $HOME/.config/rofi/clipboard-img.rasi -p \"  Images\" -i | cliphist decode | wl-copy"
+          "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"
+          "$mainMod SHIFT, S, exec, wl-paste --type image/png > \"${userConfig.screenshotsDir}/shot_$(date +%F_%H-%M-%S).png\""
 
-        "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"
-        "$mainMod SHIFT, S, exec, wl-paste --type image/png > \"${userConfig.screenshotsDir}/shot_$(date +%F_%H-%M-%S).png\""
+          "$mainMod, RETURN, exec, $terminal"
+          "$mainMod, e, exec, $fileManager"
+          "$mainMod, Q, killactive"
+          "$mainMod, V, togglefloating"
+          "$mainMod, SPACE, exec, $menu"
 
-        "$mainMod, RETURN, exec, $terminal"
-        "$mainMod, e, exec, $fileManager"
-        "$mainMod, Q, killactive"
-        "$mainMod, V, togglefloating"
-        "$mainMod, SPACE, exec, $menu"
+          "$mainMod, h, movefocus, l"
+          "$mainMod, l, movefocus, r"
+          "$mainMod, k, movefocus, u"
+          "$mainMod, j, movefocus, d"
 
-        "$mainMod, h, movefocus, l"
-        "$mainMod, l, movefocus, r"
-        "$mainMod, k, movefocus, u"
-        "$mainMod, j, movefocus, d"
-
-        "$mainMod SHIFT, h, movewindow, l"
-        "$mainMod SHIFT, l, movewindow, r"
-        "$mainMod SHIFT, k, movewindow, u"
-        "$mainMod SHIFT, j, movewindow, d"
-
-        "$mainMod, 1, workspace, 1"
-        "$mainMod, 2, workspace, 2"
-        "$mainMod, 3, workspace, 3"
-        "$mainMod, 4, workspace, 4"
-        "$mainMod, 5, workspace, 5"
-        "$mainMod, 6, workspace, 6"
-        "$mainMod, 7, workspace, 7"
-        "$mainMod, 8, workspace, 8"
-        "$mainMod, 9, workspace, 9"
-        "$mainMod, 0, workspace, 10"
-
-        "$mainMod SHIFT, 1, movetoworkspace, 1"
-        "$mainMod SHIFT, 2, movetoworkspace, 2"
-        "$mainMod SHIFT, 3, movetoworkspace, 3"
-        "$mainMod SHIFT, 4, movetoworkspace, 4"
-        "$mainMod SHIFT, 5, movetoworkspace, 5"
-        "$mainMod SHIFT, 6, movetoworkspace, 6"
-        "$mainMod SHIFT, 7, movetoworkspace, 7"
-        "$mainMod SHIFT, 8, movetoworkspace, 8"
-        "$mainMod SHIFT, 9, movetoworkspace, 9"
-        "$mainMod SHIFT, 0, movetoworkspace, 10"
-      ];
+          "$mainMod SHIFT, h, movewindow, l"
+          "$mainMod SHIFT, l, movewindow, r"
+          "$mainMod SHIFT, k, movewindow, u"
+          "$mainMod SHIFT, j, movewindow, d"
+        ]
+        ++ (map (n: "$mainMod, ${toString n}, workspace, ${toString n}") (lib.range 1 9))
+        ++ ["$mainMod, 0, workspace, 10"]
+        ++ (map (n: "$mainMod SHIFT, ${toString n}, movetoworkspace, ${toString n}") (lib.range 1 9))
+        ++ ["$mainMod SHIFT, 0, movetoworkspace, 10"];
 
       bindm = [
         "$mainMod, mouse:272, movewindow"

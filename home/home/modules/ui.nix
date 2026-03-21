@@ -8,8 +8,6 @@
     EDITOR = "nvim";
     VISUAL = "nvim";
     SUDO_EDITOR = "nvim";
-    XCURSOR_THEME = "Bibata-Modern-Ice";
-    XCURSOR_SIZE = "16";
     TERMINAL = "kitty";
     XDG_TERMINAL = "kitty";
   };

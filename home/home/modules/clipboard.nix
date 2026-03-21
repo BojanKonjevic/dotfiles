@@ -4,7 +4,6 @@
   ...
 }: {
   home.packages = with pkgs; [
-    rofi
     (writeShellScriptBin "clip-pick-text" ''
       cliphist list | while IFS=$'\t' read -r id content; do
         [[ "$content" == *"[[ binary data"* ]] && continue

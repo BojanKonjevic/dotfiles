@@ -74,7 +74,6 @@ in {
     })
   ];
   programs.zoxide.enable = true;
-  programs.fzf.enable = true;
   programs.broot.enable = true;
   programs.bat.enable = true;
   programs.btop.enable = true;
