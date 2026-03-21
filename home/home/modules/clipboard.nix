@@ -32,7 +32,36 @@
         fi
       done
     '')
+    (writeShellScriptBin "clip-text" ''
+      selection=$(clip-pick-text | rofi -dmenu -display-columns 2 \
+        -theme "$HOME/.config/rofi/clipboard.rasi" -p "  Text" -i \
+        -kb-custom-1 "ctrl+shift+x")
+      rc=$?
+      if [[ $rc -eq 10 ]]; then
+        cliphist list | while IFS=$'\t' read -r id content; do
+          [[ "$content" == *"[[ binary data"* ]] && continue
+          cliphist delete <<< "$id"$'\t'"$content"
+        done
+      elif [[ -n "$selection" ]]; then
+        cliphist decode <<< "$selection" | wl-copy
+      fi
+    '')
+    (writeShellScriptBin "clip-img" ''
+      selection=$(clip-pick-img | rofi -dmenu -display-columns 2 -show-icons \
+        -theme "$HOME/.config/rofi/clipboard-img.rasi" -p "  Images" -i \
+        -kb-custom-1 "ctrl+shift+x")
+      rc=$?
+      if [[ $rc -eq 10 ]]; then
+        cliphist list | while IFS=$'\t' read -r id content; do
+          [[ "$content" == *"[[ binary data"* ]] || continue
+          cliphist delete <<< "$id"$'\t'"$content"
+        done
+      elif [[ -n "$selection" ]]; then
+        cliphist decode <<< "$selection" | wl-copy
+      fi
+    '')
   ];
+
   xdg.configFile."rofi/clipboard.rasi".text = ''
     * {
         font:             "JetBrainsMono Nerd Font 13";
@@ -62,11 +91,10 @@
         border:           0 0 2px 0;
         border-color:     rgba(${theme.surface1Rgb}, 0.50);
         border-radius:    0;
-        padding:          0 0 10px 0;
+        padding:          0 0 15px 0;
         spacing:          8px;
-        children:         [ prompt, entry ];
+        children:         [ prompt, entry, button ];
     }
-
 
     prompt {
         text-color:     ${theme.sapphire};
@@ -80,6 +108,26 @@
         placeholder-color: ${theme.overlay0};
         font:              "JetBrainsMono Nerd Font Light 18";
         vertical-align:    0.5;
+        expand:            true;
+    }
+
+    /* ── Trash button ────────────────────────────────────────────────── */
+    button {
+        str:              "󰆴";
+        action:           "kb-custom-1";
+        text-color:       rgba(${theme.redRgb}, 0.50);
+        font:             "JetBrainsMono Nerd Font Bold 24";
+        vertical-align:   0.5;
+        horizontal-align: 1.0;
+        background-color: transparent;
+        padding:          0 10 0 8px;
+        cursor:           pointer;
+        expand:           false;
+    }
+
+    button selected {
+        text-color:       ${theme.red};
+        background-color: transparent;
     }
 
     listview {
@@ -131,8 +179,8 @@
     window {
         width:            880px;
         background-color: rgba(${theme.crustRgb}, 0.93);
-        border:       1px;
-        border-color: rgba(${theme.surface1Rgb}, 0.45);
+        border:           1px;
+        border-color:     rgba(${theme.surface1Rgb}, 0.45);
         border-radius:    14px;
         padding:          0;
     }
@@ -150,14 +198,34 @@
         border-color:     rgba(${theme.surface1Rgb}, 0.50);
         border-radius:    0;
         padding:          0 0 10px 0;
-        spacing:          0;
-        children:         [ prompt ];
+        spacing:          8px;
+        children:         [ prompt, button ];
     }
 
     prompt {
         text-color:     ${theme.green};
         font:           "JetBrainsMono Nerd Font Light 18";
         vertical-align: 0.5;
+        expand:         true;
+    }
+
+    /* ── Trash button ────────────────────────────────────────────────── */
+    button {
+        str:              "󰆴";
+        action:           "kb-custom-1";
+        text-color:       rgba(${theme.redRgb}, 0.50);
+        font:             "JetBrainsMono Nerd Font Bold 24";
+        vertical-align:   0.5;
+        horizontal-align: 1.0;
+        background-color: transparent;
+        padding:          0 15 0 8px;
+        cursor:           pointer;
+        expand:           false;
+    }
+
+    button selected {
+        text-color:       ${theme.red};
+        background-color: transparent;
     }
 
     listview {
@@ -193,8 +261,8 @@
 
     element selected {
         background-color: rgba(${theme.greenRgb}, 0.15);
-        border:       1px;
-        border-color: rgba(${theme.greenRgb}, 0.44);
+        border:           1px;
+        border-color:     rgba(${theme.greenRgb}, 0.44);
         border-radius:    10px;
     }
 
