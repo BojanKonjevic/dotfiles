@@ -1,4 +1,4 @@
-{config, ...}: {
+{userConfig, ...}: {
   programs.hyprlock = {
     enable = true;
     settings = {
@@ -21,7 +21,7 @@
 
       background = [
         {
-          path = "${config.home.homeDirectory}/Pictures/wallpapers/wall.jpg";
+          path = "${userConfig.wallpaperDir}/wall.jpg";
           blur_passes = 2;
           blur_size = 4;
         }

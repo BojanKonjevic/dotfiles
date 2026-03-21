@@ -1,4 +1,8 @@
-{pkgs, userConfig, ...}: {
+{
+  pkgs,
+  userConfig,
+  ...
+}: {
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     GBM_BACKEND = "nvidia-drm";
@@ -13,7 +17,7 @@
     ];
   };
   services.xserver.xkb = {
-    layout = "us";
+    layout = userConfig.kbLayout;
     variant = "";
   };
   services.xserver.videoDrivers = ["nvidia"];

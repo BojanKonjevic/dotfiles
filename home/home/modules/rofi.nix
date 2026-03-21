@@ -1,4 +1,4 @@
-{pkgs, theme, ...}: {
+{theme, ...}: {
   programs.rofi = {
     enable = true;
   };

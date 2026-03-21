@@ -1,4 +1,8 @@
-{config, theme, ...}: let
+{
+  config,
+  theme,
+  ...
+}: let
   zenProfile = "${config.home.username}.default";
 in {
   programs.zen-browser = {

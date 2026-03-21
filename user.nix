@@ -17,6 +17,7 @@
   # ── Locale / Time ──────────────────────────────────────────────────────────
   timezone = "Europe/Belgrade";
   locale   = "en_US.UTF-8";
+  kbLayout = "us"; # keyboard layout — must match in both Hyprland and xserver
 
   # ── Paths ──────────────────────────────────────────────────────────────────
   # Shell variables ($HOME, etc.) are intentionally left unexpanded so they
@@ -30,4 +31,5 @@
 
   # ── Weather ────────────────────────────────────────────────────────────────
   weatherCity = "Novi+Sad"; # wttr.in city string (use + for spaces)
+
 }

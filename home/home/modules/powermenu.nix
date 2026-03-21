@@ -1,4 +1,8 @@
-{pkgs, theme, ...}: {
+{
+  pkgs,
+  theme,
+  ...
+}: {
   home.packages = with pkgs; [
     (writeShellScriptBin "power-menu" ''
       choice=$(printf '󰌾 Lock\n󰜉 Reboot\n󰐥 Power Off' \

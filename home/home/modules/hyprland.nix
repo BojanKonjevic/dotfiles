@@ -1,4 +1,4 @@
-{...}: {
+{userConfig, ...}: {
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
@@ -38,7 +38,7 @@
       monitor = [",preferred,auto,auto"];
 
       input = {
-        kb_layout = "us";
+        kb_layout = userConfig.kbLayout;
         follow_mouse = 1;
         sensitivity = 0;
         repeat_delay = 200;
@@ -134,7 +134,7 @@
         "$mainMod SHIFT, C, exec, clip-pick-img | rofi -dmenu -display-columns 2 -show-icons -theme $HOME/.config/rofi/clipboard-img.rasi -p \"  Images\" -i | cliphist decode | wl-copy"
 
         "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"
-        "$mainMod SHIFT, S, exec, wl-paste --type image/png > \"$HOME/Pictures/Screenshots/shot_$(date +%F_%H-%M-%S).png\""
+        "$mainMod SHIFT, S, exec, wl-paste --type image/png > \"${userConfig.screenshotsDir}/shot_$(date +%F_%H-%M-%S).png\""
 
         "$mainMod, RETURN, exec, $terminal"
         "$mainMod, e, exec, $fileManager"

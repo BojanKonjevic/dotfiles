@@ -1,4 +1,8 @@
-{pkgs, userConfig, ...}: {
+{
+  pkgs,
+  userConfig,
+  ...
+}: {
   environment.systemPackages = with pkgs; [
     #add global system pkgs here
   ];
@@ -26,12 +30,11 @@
   programs.hyprland.xwayland.enable = true;
   programs.thunar = {
     enable = true;
-    plugins = with pkgs.xfce; [
+    plugins = with pkgs; [
       thunar-archive-plugin
       thunar-volman
     ];
   };
-  services.gvfs.enable = true;
   services.tumbler.enable = true;
   networking.hostName = userConfig.hostname;
   time.timeZone = userConfig.timezone;

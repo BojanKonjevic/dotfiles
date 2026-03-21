@@ -1,4 +1,9 @@
-{pkgs, theme, userConfig, ...}: {
+{
+  pkgs,
+  theme,
+  userConfig,
+  ...
+}: {
   home.packages = with pkgs; [
     (writeShellScriptBin "wallpaper-picker" ''
       WALLPAPER_DIR="${userConfig.wallpaperDir}"

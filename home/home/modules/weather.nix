@@ -1,4 +1,9 @@
-{pkgs, theme, userConfig, ...}: let
+{
+  pkgs,
+  theme,
+  userConfig,
+  ...
+}: let
   weatherCodes = {
     "113" = "☀️";
     "116" = "⛅";
@@ -51,12 +56,12 @@
   };
 
   tempColors = {
-    frozen  = theme.sky;      # <= 0°C
-    cold    = theme.blue;     # <= 8°C
-    cool    = theme.text;     # <= 15°C
-    mild    = theme.green;    # <= 22°C
-    warm    = theme.peach;    # <= 28°C
-    hot     = theme.red;      # > 28°C
+    frozen = theme.sky; # <= 0°C
+    cold = theme.blue; # <= 8°C
+    cool = theme.text; # <= 15°C
+    mild = theme.green; # <= 22°C
+    warm = theme.peach; # <= 28°C
+    hot = theme.red; # > 28°C
   };
 
   weatherScript = pkgs.writeShellScriptBin "weather" ''
