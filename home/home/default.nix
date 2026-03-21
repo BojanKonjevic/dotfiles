@@ -11,6 +11,7 @@ in {
   home.stateVersion = "25.11";
 
   imports = [
+    ./modules/vesktop.nix
     ./modules/mic-toggle.nix
     ./modules/powermenu.nix
     ./modules/clipboard.nix
@@ -53,7 +54,6 @@ in {
     wl-clipboard
     cliphist
     nixd
-    vesktop
     localsend
     bibata-cursors
     alsa-utils

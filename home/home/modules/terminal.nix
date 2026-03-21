@@ -73,7 +73,7 @@
       ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history";
       f = "thunar .";
       ls = "eza --icons";
-      net = "speedtest-go --server=43446";
+      net = "speedtest-go --server=14476";
       cat = "bat";
       l = "eza -alh --icons --group-directories-first";
       br = "br --hidden";
