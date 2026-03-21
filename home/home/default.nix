@@ -36,7 +36,6 @@ in {
     ansifilter
     nh
     glow
-    nwg-look
     swayimg
     libnotify
     nix-search
@@ -53,7 +52,6 @@ in {
     slurp
     nixd
     localsend
-    bibata-cursors
     alsa-utils
     p7zip
     dejsonlz4
@@ -64,10 +62,6 @@ in {
     networkmanagerapplet
     calcurse
     nerd-fonts.jetbrains-mono
-    (catppuccin-gtk.override {
-      accents = ["mauve"];
-      variant = "mocha";
-    })
   ];
   programs.zoxide.enable = true;
   programs.broot.enable = true;

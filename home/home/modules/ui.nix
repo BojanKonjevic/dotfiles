@@ -1,7 +1,15 @@
-{...}: {
+{pkgs, ...}: let
+  catppuccinGtk = pkgs.catppuccin-gtk.override {
+    accents = ["mauve"];
+    variant = "mocha";
+  };
+  themeName = "catppuccin-mocha-mauve-standard";
+  themeDir = "${catppuccinGtk}/share/themes/${themeName}";
+in {
   catppuccin = {
     enable = true;
     flavor = "mocha";
+    accent = "mauve";
   };
 
   home.sessionVariables = {
@@ -14,7 +22,27 @@
 
   gtk = {
     enable = true;
-    gtk4.enable = false;
+    theme = {
+      name = themeName;
+      package = catppuccinGtk;
+    };
+    cursorTheme = {
+      name = "Bibata-Modern-Ice";
+      package = pkgs.bibata-cursors;
+      size = 16;
+    };
+    gtk3 = {
+      extraConfig.gtk-application-prefer-dark-theme = 1;
+      extraCss = builtins.readFile "${themeDir}/gtk-3.0/gtk.css";
+    };
+    gtk4 = {
+      extraConfig.gtk-application-prefer-dark-theme = 1;
+      extraCss = builtins.readFile "${themeDir}/gtk-4.0/gtk.css";
+    };
+  };
+  home.file.".config/gtk-4.0/assets" = {
+    source = "${themeDir}/gtk-4.0/assets";
+    recursive = true;
   };
 
   xdg = {
@@ -106,6 +134,7 @@
       };
     };
   };
+
   fonts = {
     fontconfig.enable = true;
     fontconfig.defaultFonts.monospace = ["JetBrainsMono Nerd Font"];
