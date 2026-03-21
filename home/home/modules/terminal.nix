@@ -67,9 +67,9 @@
       pg = "psql -d postgres --dbname";
       dev = "nix develop";
       cal = "calcurse";
-      hf = "cd ~/dotfiles/home/ && nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
+      hf = "cd $HOME/dotfiles/home/ && nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
       leet = "nvim -c 'Leet'";
-      n = "nvim ~/Documents/notes.txt";
+      n = "nvim $HOME/Documents/notes.txt";
       ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history";
       f = "thunar .";
       ls = "eza --icons";
@@ -78,14 +78,14 @@
       l = "eza -alh --icons --group-directories-first";
       br = "br --hidden";
       brd = "br --sizes --sort-by-size";
-      pyproj = "~/scripts/new-python-project.sh";
+      pyproj = "$HOME/scripts/new-python-project.sh";
 
       nr = "nh os switch";
       hm = "nh home switch";
       nu = "nh os switch -u && nh home switch -u";
       gc = "nh clean all --keep 10";
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
-      hgens = "nix-env --list-generations --profile ~/.local/state/nix/profiles/home-manager";
+      hgens = "nix-env --list-generations --profile $HOME/.local/state/nix/profiles/home-manager";
     };
 
     initContent = ''

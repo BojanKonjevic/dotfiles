@@ -7,7 +7,7 @@
       "$mainMod" = "SUPER";
       "$terminal" = "kitty";
       "$fileManager" = "thunar";
-      "$menu" = "rofi -show drun -theme ~/.config/rofi/launcher.rasi -show-icons -icon-theme Papirus";
+      "$menu" = "rofi -show drun -theme $HOME/.config/rofi/launcher.rasi -show-icons -icon-theme Papirus";
       "$privateWindow" = "zen-beta --no-remote --private-window";
 
       windowrule = [
@@ -130,8 +130,8 @@
         "$mainMod, I, exec, swaync-client -t"
         "$mainMod, BACKSLASH, exec, mic-toggle"
         "$mainMod, N, exec, $privateWindow"
-        "$mainMod, C, exec, clip-pick-text | rofi -dmenu -display-columns 2 -theme ~/.config/rofi/clipboard.rasi -p \"  Text\" -i | cliphist decode | wl-copy"
-        "$mainMod SHIFT, C, exec, clip-pick-img | rofi -dmenu -display-columns 2 -show-icons -theme ~/.config/rofi/clipboard-img.rasi -p \"  Images\" -i | cliphist decode | wl-copy"
+        "$mainMod, C, exec, clip-pick-text | rofi -dmenu -display-columns 2 -theme $HOME/.config/rofi/clipboard.rasi -p \"  Text\" -i | cliphist decode | wl-copy"
+        "$mainMod SHIFT, C, exec, clip-pick-img | rofi -dmenu -display-columns 2 -show-icons -theme $HOME/.config/rofi/clipboard-img.rasi -p \"  Images\" -i | cliphist decode | wl-copy"
 
         "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"
         "$mainMod SHIFT, S, exec, wl-paste --type image/png > \"$HOME/Pictures/Screenshots/shot_$(date +%F_%H-%M-%S).png\""

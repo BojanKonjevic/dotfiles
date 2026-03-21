@@ -1,4 +1,6 @@
-{theme, ...}: {
+{config, theme, ...}: let
+  zenProfile = "${config.home.username}.default";
+in {
   programs.zen-browser = {
     enable = true;
     policies = {
@@ -46,9 +48,9 @@
   };
   home.file.".zen/profiles.ini".text = ''
     [Profile0]
-    Name=bojan
+    Name=${config.home.username}
     IsRelative=1
-    Path=bojan.default
+    Path=${zenProfile}
     Default=1
 
     [General]
@@ -56,11 +58,11 @@
     Version=2
 
     [Install15B76BAA26BA15E7]
-    Default=bojan.default
+    Default=${zenProfile}
     Locked=1
   '';
 
-  home.file.".zen/bojan.default/user.js".text = ''
+  home.file.".zen/${zenProfile}/user.js".text = ''
     user_pref("font.name.monospace.x-western", "JetBrainsMono Nerd Font");
     user_pref("font.name.sans-serif.x-western", "JetBrainsMono Nerd Font");
     user_pref("font.name.serif.x-western", "JetBrainsMono Nerd Font");
@@ -108,7 +110,7 @@
     user_pref("geo.provider.use_geoclue", false);
   '';
 
-  home.file.".zen/bojan.default/chrome/userChrome.css".text = ''
+  home.file.".zen/${zenProfile}/chrome/userChrome.css".text = ''
     :root {
       --zen-primary-color: ${theme.mauve} !important;
       --zen-colors-primary: ${theme.surface0} !important;
@@ -187,7 +189,7 @@
     }
   '';
 
-  home.file.".zen/bojan.default/chrome/userContent.css".text = ''
+  home.file.".zen/${zenProfile}/chrome/userContent.css".text = ''
     @media (prefers-color-scheme: dark) {
 
       @-moz-document url-prefix("about:") {
@@ -270,7 +272,7 @@
     }
   '';
 
-  home.file.".zen/bojan.default/zen-keyboard-shortcuts.json".text = builtins.toJSON {
+  home.file.".zen/${zenProfile}/zen-keyboard-shortcuts.json".text = builtins.toJSON {
     shortcuts = [
       {
         id = "key_wrToggleCaptureSequenceCmd";

@@ -22,7 +22,7 @@
         | rofi -dmenu -i \
             -p "  Wallpaper" \
             -show-icons \
-            -theme ~/.config/rofi/wallpaper.rasi
+            -theme $HOME/.config/rofi/wallpaper.rasi
       )
 
       [[ -z "$selected" ]] && exit 0

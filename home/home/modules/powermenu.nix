@@ -3,7 +3,7 @@
     (writeShellScriptBin "power-menu" ''
       choice=$(printf '󰌾 Lock\n󰜉 Reboot\n󰐥 Power Off' \
         | rofi -dmenu \
-            -theme ~/.config/rofi/power.rasi \
+            -theme $HOME/.config/rofi/power.rasi \
             -p "Power" \
             -i \
             -no-custom)
