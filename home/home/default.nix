@@ -2,6 +2,7 @@
   pkgs,
   inputs,
   userConfig,
+  theme,
   ...
 }: let
   nix-search =
@@ -62,6 +63,7 @@ in {
     networkmanagerapplet
     calcurse
     nerd-fonts.jetbrains-mono
+    theme.cursorPackage
   ];
   programs.zoxide.enable = true;
   programs.broot.enable = true;

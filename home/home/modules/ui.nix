@@ -26,11 +26,6 @@ in {
       name = themeName;
       package = catppuccinGtk;
     };
-    cursorTheme = {
-      name = "Bibata-Modern-Ice";
-      package = pkgs.bibata-cursors;
-      size = 16;
-    };
     gtk3 = {
       extraConfig.gtk-application-prefer-dark-theme = 1;
       extraCss = builtins.readFile "${themeDir}/gtk-3.0/gtk.css";

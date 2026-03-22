@@ -1,7 +1,7 @@
 # Catppuccin Mocha — single source of truth for all colors.
 # Imported via extraSpecialArgs so every module receives it as `theme`.
 # *Rgb variants are the decimal R,G,B triplets for use inside rgba(..., alpha).
-{
+{pkgs}: {
   # ── Base layers ─────────────────────────────────────────────────────────────
   base = "#1e1e2e";
   mantle = "#181825";
@@ -47,6 +47,7 @@
   lavenderRgb = "180, 190, 254";
 
   # ── Cursor theme ─────────────────────────────────────────────────────────────
-  cursorTheme = "Bibata-Modern-Ice";
-  cursorSize = "16";
+  cursorTheme = "catppuccin-mocha-mauve-cursors";
+  cursorSize = "20";
+  cursorPackage = pkgs.catppuccin-cursors.mochaMauve;
 }

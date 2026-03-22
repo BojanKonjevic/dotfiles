@@ -3,9 +3,6 @@
   userConfig,
   ...
 }: {
-  environment.systemPackages = with pkgs; [
-    #add global system pkgs here
-  ];
   imports = [
     ./system/hardware-configuration.nix
     ./system/audio.nix

@@ -4,6 +4,7 @@
   lib,
   ...
 }: {
+  home.packages = [theme.cursorPackage];
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
@@ -29,6 +30,7 @@
       env = [
         "XCURSOR_THEME,${theme.cursorTheme}"
         "XCURSOR_SIZE,${theme.cursorSize}"
+        "HYPRCURSOR_THEME,${theme.cursorTheme}"
         "HYPRCURSOR_SIZE,${theme.cursorSize}"
       ];
 
