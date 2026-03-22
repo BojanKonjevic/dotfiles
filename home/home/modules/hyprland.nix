@@ -2,9 +2,11 @@
   userConfig,
   theme,
   lib,
+  pkgs,
   ...
 }: {
-  home.packages = [theme.cursorPackage];
+  home.packages = with pkgs; [grim slurp];
+
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;

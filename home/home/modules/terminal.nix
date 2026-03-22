@@ -2,9 +2,33 @@
   config,
   pkgs,
   lib,
+  inputs,
   userConfig,
   ...
-}: {
+}: let
+  nix-search = inputs.nix-search-tv.packages.${pkgs.stdenv.hostPlatform.system}.default;
+in {
+  home.packages = with pkgs; [
+    nix-search
+    ansifilter
+    nh
+    speedtest-go
+    eza
+    calcurse
+  ];
+  programs.zoxide.enable = true;
+  programs.broot.enable = true;
+  programs.bat.enable = true;
+  programs.btop.enable = true;
+  programs.cava.enable = true;
+  programs.git = {
+    enable = true;
+    settings = {
+      user.name = userConfig.fullName;
+      user.email = userConfig.email;
+      init.defaultBranch = "main";
+    };
+  };
   programs.kitty = {
     enable = true;
 

@@ -1,16 +1,5 @@
-{pkgs, ...}: let
-  catppuccinGtk = pkgs.catppuccin-gtk.override {
-    accents = ["mauve"];
-    variant = "mocha";
-  };
-  themeName = "catppuccin-mocha-mauve-standard";
-  themeDir = "${catppuccinGtk}/share/themes/${themeName}";
-in {
-  catppuccin = {
-    enable = true;
-    flavor = "mocha";
-    accent = "mauve";
-  };
+{pkgs, ...}: {
+  home.packages = with pkgs; [swayimg mpv xarchiver];
 
   home.sessionVariables = {
     EDITOR = "nvim";
@@ -18,26 +7,6 @@ in {
     SUDO_EDITOR = "nvim";
     TERMINAL = "kitty";
     XDG_TERMINAL = "kitty";
-  };
-
-  gtk = {
-    enable = true;
-    theme = {
-      name = themeName;
-      package = catppuccinGtk;
-    };
-    gtk3 = {
-      extraConfig.gtk-application-prefer-dark-theme = 1;
-      extraCss = builtins.readFile "${themeDir}/gtk-3.0/gtk.css";
-    };
-    gtk4 = {
-      extraConfig.gtk-application-prefer-dark-theme = 1;
-      extraCss = builtins.readFile "${themeDir}/gtk-4.0/gtk.css";
-    };
-  };
-  home.file.".config/gtk-4.0/assets" = {
-    source = "${themeDir}/gtk-4.0/assets";
-    recursive = true;
   };
 
   xdg = {
@@ -128,10 +97,5 @@ in {
         "application/x-xz" = ["xarchiver.desktop"];
       };
     };
-  };
-
-  fonts = {
-    fontconfig.enable = true;
-    fontconfig.defaultFonts.monospace = ["JetBrainsMono Nerd Font"];
   };
 }

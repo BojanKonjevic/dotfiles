@@ -3,6 +3,8 @@
   userConfig,
   ...
 }: {
+  home.packages = [pkgs.nixd];
+
   programs.nixvim = {
     enable = true;
 

@@ -1,4 +1,10 @@
-{theme, ...}: {
+{
+  theme,
+  pkgs,
+  ...
+}: {
+  home.packages = [pkgs.networkmanagerapplet];
+
   programs.waybar = {
     enable = true;
 
