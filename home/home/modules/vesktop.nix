@@ -10,7 +10,7 @@
       tray = false;
     };
     vencord.settings = {
-      autoUpdate = true;
+      autoUpdate = false;
       autoUpdateNotification = true;
       useQuickCss = true;
       themeLinks = [

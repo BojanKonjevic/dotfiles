@@ -25,6 +25,7 @@
     ./modules/swaync.nix
     ./modules/mic-toggle.nix
     ./modules/weather.nix
+    ./modules/qbittorrent.nix
     ./modules/zathura.nix
   ];
 
@@ -36,11 +37,11 @@
     fd
     duf
     gdu
-    qbittorrent
     pinta
     localsend
     alsa-utils
     p7zip
+    unzip
     dejsonlz4
     file-roller
     libreoffice

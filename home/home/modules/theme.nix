@@ -1,5 +1,5 @@
 {pkgs, ...}: let
-  # ── Palette ───────────────────────────────────────────────────────────────────
+  # ── Palette ──────────────────────────────────────────────────────────────────
   # Single source of truth for all colors. Exposed to every other module via
   # _module.args.theme — works identically to the old extraSpecialArgs approach.
   # *Rgb variants are the decimal R,G,B triplets for use inside rgba(..., alpha).
@@ -58,7 +58,7 @@
     fontPackage = pkgs.nerd-fonts.jetbrains-mono;
   };
 
-  # ── GTK theme ─────────────────────────────────────────────────────────────────
+  # ── GTK theme ────────────────────────────────────────────────────────────────
   catppuccinGtk = pkgs.catppuccin-gtk.override {
     accents = ["mauve"];
     variant = "mocha";
@@ -66,19 +66,17 @@
   themeName = "catppuccin-mocha-mauve-standard";
   themeDir = "${catppuccinGtk}/share/themes/${themeName}";
 in {
-  # Inject palette into every other module, replacing the old extraSpecialArgs.
   _module.args.theme = palette;
-
   home.packages = [palette.cursorPackage palette.fontPackage];
 
-  # ── Catppuccin ────────────────────────────────────────────────────────────────
+  # ── Catppuccin ───────────────────────────────────────────────────────────────
   catppuccin = {
     enable = true;
     flavor = "mocha";
     accent = "mauve";
   };
 
-  # ── GTK ───────────────────────────────────────────────────────────────────────
+  # ── GTK ──────────────────────────────────────────────────────────────────────
   gtk = {
     enable = true;
     theme = {
@@ -105,7 +103,7 @@ in {
     recursive = true;
   };
 
-  # ── Fonts ─────────────────────────────────────────────────────────────────────
+  # ── Fonts ────────────────────────────────────────────────────────────────────
   fonts = {
     fontconfig.enable = true;
     fontconfig.defaultFonts.monospace = [palette.fontName];
