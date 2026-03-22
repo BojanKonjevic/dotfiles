@@ -25,6 +25,7 @@
     ./modules/swaync.nix
     ./modules/mic-toggle.nix
     ./modules/weather.nix
+    ./modules/media.nix
     ./modules/qbittorrent.nix
     ./modules/zathura.nix
   ];

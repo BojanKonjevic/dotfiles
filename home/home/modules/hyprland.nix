@@ -27,6 +27,9 @@
         "opacity 0.93 override 0.90 override, match:class ^(org.qbittorrent.qBittorrent)$"
         "opacity 0.90 override 0.87 override, match:class ^(kitty)$"
         "opacity 0.93 override 0.90 override, match:class ^(nm-connection-editor)$"
+        "float 1, match:class ^(media-popup)$"
+        "center 1, match:class ^(media-popup)$"
+        "border_size 0, match:class ^(media-popup)$"
       ];
 
       env = [
@@ -139,6 +142,7 @@
           "$mainMod SHIFT, W, exec, wallpaper-picker"
           "$mainMod, I, exec, swaync-client -t"
           "$mainMod, BACKSLASH, exec, mic-toggle"
+          "$mainMod, M, exec, media-popup-toggle"
           "$mainMod, N, exec, $privateWindow"
           "$mainMod, C, exec, clip-text"
           "$mainMod SHIFT, C, exec, clip-img"
