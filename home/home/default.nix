@@ -8,6 +8,7 @@
   home.stateVersion = userConfig.stateVersion;
 
   imports = [
+    ./modules/quickshell.nix
     ./modules/theme.nix
     ./modules/ui.nix
     ./modules/waybar.nix

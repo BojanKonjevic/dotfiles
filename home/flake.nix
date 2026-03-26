@@ -13,6 +13,10 @@
       url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    quickshell = {
+      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs = {
     nixpkgs,
@@ -27,6 +31,7 @@
       inherit pkgs;
       extraSpecialArgs = {
         inherit inputs userConfig;
+        quickshell = inputs.quickshell.packages.${system}.default;
       };
       modules = [
         inputs.catppuccin.homeModules.catppuccin

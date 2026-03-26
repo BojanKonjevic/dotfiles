@@ -95,6 +95,7 @@ in {
     gtk4 = {
       extraConfig.gtk-application-prefer-dark-theme = 1;
       extraCss = builtins.readFile "${themeDir}/gtk-4.0/gtk.css";
+      theme = null;
     };
   };
 
