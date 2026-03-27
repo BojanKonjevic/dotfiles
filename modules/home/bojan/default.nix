@@ -3,7 +3,7 @@
   inputs,
   ...
 }: let
-  userConfig = import ../../user.nix;
+  userConfig = import ../../../user.nix;
   system = userConfig.system;
   pkgs = inputs.nixpkgs.legacyPackages.${system};
 in {
@@ -17,7 +17,7 @@ in {
       [
         self.homeModules.theme
       ]
-      ++ (builtins.attrValues (builtins.removeAttrs self.homeModules ["theme"]))
+      ++ (builtins.attrValues (removeAttrs self.homeModules ["theme"]))
       ++ [
         inputs.catppuccin.homeModules.catppuccin
         inputs.nixvim.homeModules.nixvim

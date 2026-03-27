@@ -22,12 +22,6 @@
       variant = "";
     };
     services.xserver.videoDrivers = ["nvidia"];
-    services.getty.autologinUser = userConfig.username;
-    environment.loginShellInit = ''
-      if [ "$(tty)" = "/dev/tty1" ]; then
-        exec start-hyprland
-      fi
-    '';
     hardware.nvidia = {
       modesetting.enable = true;
       powerManagement.enable = false;

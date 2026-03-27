@@ -21,6 +21,7 @@ in {
               "nix-command"
               "flakes"
             ];
+            nix.settings.auto-optimise-store = true;
             nix.settings.download-buffer-size = 134217728;
             programs.hyprland.enable = true;
             programs.hyprland.xwayland.enable = true;
