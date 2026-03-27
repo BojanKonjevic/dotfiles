@@ -48,7 +48,9 @@
     import-tree,
     treefmt-nix,
     ...
-  }:
+  }: let
+    userConfig = import ./user.nix;
+  in
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports =
         [
@@ -56,6 +58,6 @@
           inputs.git-hooks.flakeModule
         ]
         ++ (import-tree ./modules).imports;
-      systems = ["x86_64-linux"];
+      systems = [userConfig.system];
     };
 }

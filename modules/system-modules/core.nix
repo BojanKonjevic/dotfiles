@@ -18,6 +18,9 @@
     programs.ydotool.enable = true;
     hardware.enableAllFirmware = true;
     nixpkgs.config.allowUnfree = true;
+    virtualisation.libvirtd.enable = true;
+    programs.virt-manager.enable = true;
+    virtualisation.spiceUSBRedirection.enable = true;
     nix.registry.nixpkgs.flake = inputs.nixpkgs;
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
     nix.gc = {
@@ -26,11 +29,13 @@
       options = "--delete-older-than 30d";
     };
     nix.optimise.automatic = true;
+
     users.users.${userConfig.username} = {
       shell = pkgs.zsh;
       isNormalUser = true;
       description = userConfig.fullName;
       extraGroups = [
+        "libvirtd"
         "networkmanager"
         "wheel"
         "audio"
