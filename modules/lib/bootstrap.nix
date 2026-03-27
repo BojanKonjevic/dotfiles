@@ -2,7 +2,7 @@
   perSystem = {pkgs, ...}: {
     apps.bootstrap = {
       type = "app";
-      program = builtins.toString (
+      program = toString (
         pkgs.writeShellScript "bootstrap" ''
           set -euo pipefail
 
@@ -125,12 +125,14 @@
           # ── Dependencies ──────────────────────────────────────────────────
           header "Ensuring dependencies are available…"
 
-          if ! command -v git &>/dev/null; then
-            info "git not found — making temporarily available…"
-            export PATH="$(nix build nixpkgs#git --no-link --print-out-paths 2>/dev/null)/bin:$PATH"
-            ok "git available."
+          if ! command -v git &>/dev/null || ! command -v home-manager &>/dev/null; then
+            info "Making dependencies temporarily available…"
+            GIT_PATH="$(nix build nixpkgs#git --no-link --print-out-paths 2>/dev/null)/bin"
+            HM_PATH="$(nix build nixpkgs#home-manager --no-link --print-out-paths 2>/dev/null)/bin"
+            export PATH="$GIT_PATH:$HM_PATH:$PATH"
+            ok "Dependencies available."
           else
-            ok "git available."
+            ok "Dependencies available."
           fi
 
           # ── Clone repo ────────────────────────────────────────────────────
@@ -233,15 +235,25 @@
             ok "Flakes already available."
           fi
 
+          # ── Trust current user for nix settings ──────────────────────────────
+          header "Configuring nix trusted user…"
+
+          if ! grep -q "trusted-users" /etc/nix/nix.conf 2>/dev/null; then
+            echo "trusted-users = root $DETECTED_USER" | \
+              tee -a /etc/nix/nix.conf > /dev/null
+            pkill nix-daemon 2>/dev/null || true
+            ok "Added $DETECTED_USER to trusted-users."
+          fi
+
           # ── Switch ────────────────────────────────────────────────────────
           header "Switching NixOS configuration…"
           cd "$DOTFILESDIR"
           git add -A
-          nixos-rebuild switch --flake ".#$HOSTNAME"
+          nixos-rebuild switch --flake ".#$HOSTNAME" --option download-buffer-size 134217728
           ok "NixOS switched."
 
           header "Switching Home Manager configuration…"
-          home-manager switch --flake ".#$DETECTED_USER"
+          home-manager switch --flake ".#$DETECTED_USER" --option download-buffer-size 134217728
           ok "Home Manager switched."
 
           # ── Done ──────────────────────────────────────────────────────────
