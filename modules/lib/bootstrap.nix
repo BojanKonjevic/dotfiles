@@ -79,25 +79,26 @@
           DETECTED_KB="$(localectl status 2>/dev/null | grep 'X11 Layout' | awk '{print $NF}' || echo 'us')"
           DETECTED_KB="''${DETECTED_KB:-us}"
           DETECTED_HOSTNAME="$(hostname)"
-          DETECTED_STATE="25.11"
+          DETECTED_STATE="$(grep 'system.stateVersion' /etc/nixos/configuration.nix 2>/dev/null | grep -oP '"\K[^"]+' | head -1 || echo '25.11')"
+          DETECTED_STATE="''${DETECTED_STATE:-25.11}"
 
-          ok "system     → $DETECTED_SYSTEM"
-          ok "timezone   → $DETECTED_TIMEZONE"
-          ok "locale     → $DETECTED_LOCALE"
-          ok "keyboard   → $DETECTED_KB"
+          ok "system       → $DETECTED_SYSTEM"
+          ok "timezone     → $DETECTED_TIMEZONE"
+          ok "locale       → $DETECTED_LOCALE"
+          ok "keyboard     → $DETECTED_KB"
+          ok "stateVersion → $DETECTED_STATE"
 
           # ── Interactive prompts ───────────────────────────────────────────
           header "A few things I need from you…"
 
-          prompt "Username to configure"            "$ACTUAL_USER"            DETECTED_USER
+          prompt "Username to configure"           "$ACTUAL_USER"            DETECTED_USER
           DETECTED_HOME="/home/$DETECTED_USER"
-          prompt "Hostname for this machine"        "$DETECTED_HOSTNAME"      HOSTNAME
-          prompt "Host directory name"              "desktop"                 HOSTDIR
-          prompt "Your full name"                   "Your Name"               FULLNAME
-          prompt "Your email"                       "you@example.com"         EMAIL
-          prompt "Weather city (e.g. New+York)"     "New+York"                WEATHERCITY
-          prompt "Where to clone dotfiles"          "$DETECTED_HOME/dotfiles" DOTFILESDIR
-          prompt "NixOS state version"              "$DETECTED_STATE"         STATEVERSION
+          prompt "Hostname for this machine"       "$DETECTED_HOSTNAME"      HOSTNAME
+          prompt "Host directory name"             "desktop"                 HOSTDIR
+          prompt "Your full name"                  "Your Name"               FULLNAME
+          prompt "Your email"                      "you@example.com"         EMAIL
+          prompt "Weather city (e.g. New+York)"    "New+York"                WEATHERCITY
+          prompt "Where to clone dotfiles"         "$DETECTED_HOME/dotfiles" DOTFILESDIR
 
           # ── Confirm ───────────────────────────────────────────────────────
           header "Summary"
@@ -111,7 +112,7 @@
           echo -e "    timezone      = ''${BOLD}$DETECTED_TIMEZONE''${RESET}"
           echo -e "    locale        = ''${BOLD}$DETECTED_LOCALE''${RESET}"
           echo -e "    kbLayout      = ''${BOLD}$DETECTED_KB''${RESET}"
-          echo -e "    stateVersion  = ''${BOLD}$STATEVERSION''${RESET}"
+          echo -e "    stateVersion  = ''${BOLD}$DETECTED_STATE''${RESET}"
           echo -e "    weatherCity   = ''${BOLD}$WEATHERCITY''${RESET}"
           echo -e "    dotfilesDir   = ''${BOLD}$DOTFILESDIR''${RESET}"
           echo ""
@@ -121,6 +122,17 @@
             exit 0
           fi
 
+          # ── Dependencies ──────────────────────────────────────────────────
+          header "Ensuring dependencies are available…"
+
+          if ! command -v git &>/dev/null; then
+            info "git not found — making temporarily available…"
+            export PATH="$(nix build nixpkgs#git --no-link --print-out-paths 2>/dev/null)/bin:$PATH"
+            ok "git available."
+          else
+            ok "git available."
+          fi
+
           # ── Clone repo ────────────────────────────────────────────────────
           header "Setting up dotfiles repo…"
 
@@ -128,7 +140,7 @@
             ok "Repo already exists at $DOTFILESDIR, skipping clone."
           else
             info "Cloning into $DOTFILESDIR…"
-            ${pkgs.git}/bin/git clone https://github.com/BojanKonjevic/dotfiles "$DOTFILESDIR"
+            git clone https://github.com/BojanKonjevic/dotfiles "$DOTFILESDIR"
             ok "Cloned."
           fi
 
@@ -150,7 +162,7 @@
             system        = "$DETECTED_SYSTEM";
 
             # ── Versions ───────────────────────────────────────────────────
-            stateVersion  = "$STATEVERSION";
+            stateVersion  = "$DETECTED_STATE";
 
             # ── Locale / Time ──────────────────────────────────────────────
             timezone      = "$DETECTED_TIMEZONE";
@@ -194,7 +206,7 @@
           # ── Hardware config ───────────────────────────────────────────────
           header "Generating hardware configuration…"
 
-          sudo nixos-generate-config
+          nixos-generate-config
           ok "Hardware config generated."
 
           info "Wrapping for dendritic pattern…"
@@ -214,8 +226,8 @@
           if ! nix flake --help &>/dev/null; then
             warn "Flakes not enabled — patching /etc/nixos/configuration.nix temporarily…"
             echo 'nix.settings.experimental-features = ["nix-command" "flakes"];' | \
-              sudo tee -a /etc/nixos/configuration.nix > /dev/null
-            sudo nixos-rebuild switch
+              tee -a /etc/nixos/configuration.nix > /dev/null
+            nixos-rebuild switch
             ok "Flakes enabled."
           else
             ok "Flakes already available."
@@ -224,12 +236,12 @@
           # ── Switch ────────────────────────────────────────────────────────
           header "Switching NixOS configuration…"
           cd "$DOTFILESDIR"
-          ${pkgs.git}/bin/git add -A
-          sudo nixos-rebuild switch --flake ".#$HOSTNAME"
+          git add -A
+          nixos-rebuild switch --flake ".#$HOSTNAME"
           ok "NixOS switched."
 
           header "Switching Home Manager configuration…"
-          ${pkgs.home-manager}/bin/home-manager switch --flake ".#$DETECTED_USER"
+          home-manager switch --flake ".#$DETECTED_USER"
           ok "Home Manager switched."
 
           # ── Done ──────────────────────────────────────────────────────────
