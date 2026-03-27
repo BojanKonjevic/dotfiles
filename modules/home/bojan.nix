@@ -14,16 +14,14 @@ in {
       quickshell = inputs.quickshell.packages.${system}.default;
     };
     modules =
-      # Auto-include every homeModule exported from any module in modules/
-      [self.homeModules.theme]
-      ++ (builtins.attrValues (
-        builtins.removeAttrs self.homeModules ["theme"]
-      ))
+      [
+        self.homeModules.theme
+      ]
+      ++ (builtins.attrValues (builtins.removeAttrs self.homeModules ["theme"]))
       ++ [
         inputs.catppuccin.homeModules.catppuccin
         inputs.nixvim.homeModules.nixvim
         inputs.zen-browser.homeModules.default
-        # Top-level home config (username, paths, global packages)
         {
           home.username = userConfig.username;
           home.homeDirectory = userConfig.homeDirectory;

@@ -198,14 +198,39 @@
           appearance.nerd_font_variant = "mono";
           keymap = {
             preset = "none";
-            "<Tab>" = ["accept" "fallback"];
-            "<S-Tab>" = ["select_prev" "fallback"];
-            "<C-n>" = ["select_next" "fallback"];
-            "<C-p>" = ["select_prev" "fallback"];
-            "<C-space>" = ["show" "show_documentation" "hide_documentation"];
-            "<C-e>" = ["hide" "fallback"];
-            "<C-f>" = ["snippet_forward" "fallback"];
-            "<C-b>" = ["snippet_backward" "fallback"];
+            "<Tab>" = [
+              "accept"
+              "fallback"
+            ];
+            "<S-Tab>" = [
+              "select_prev"
+              "fallback"
+            ];
+            "<C-n>" = [
+              "select_next"
+              "fallback"
+            ];
+            "<C-p>" = [
+              "select_prev"
+              "fallback"
+            ];
+            "<C-space>" = [
+              "show"
+              "show_documentation"
+              "hide_documentation"
+            ];
+            "<C-e>" = [
+              "hide"
+              "fallback"
+            ];
+            "<C-f>" = [
+              "snippet_forward"
+              "fallback"
+            ];
+            "<C-b>" = [
+              "snippet_backward"
+              "fallback"
+            ];
           };
           snippets.preset = "default";
           completion = {
@@ -214,7 +239,12 @@
             list.selection = "auto_insert";
           };
           sources = {
-            default = ["lsp" "path" "snippets" "lazydev"];
+            default = [
+              "lsp"
+              "path"
+              "snippets"
+              "lazydev"
+            ];
             providers.lazydev = {
               module = "lazydev.integrations.blink";
               score_offset = 100;
@@ -242,7 +272,9 @@
         mini = {
           enable = true;
           modules = {
-            ai = {n_lines = 500;};
+            ai = {
+              n_lines = 500;
+            };
             surround = {};
             pairs = {};
             move = {};
@@ -259,7 +291,10 @@
             "grn" = "rename";
             "gra" = {
               action = "code_action";
-              mode = ["n" "x"];
+              mode = [
+                "n"
+                "x"
+              ];
             };
             "grr" = "references";
             "gri" = "implementation";

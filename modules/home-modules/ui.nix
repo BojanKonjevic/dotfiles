@@ -1,6 +1,10 @@
 {...}: {
   flake.homeModules.ui = {pkgs, ...}: {
-    home.packages = with pkgs; [swayimg mpv xarchiver];
+    home.packages = with pkgs; [
+      swayimg
+      mpv
+      xarchiver
+    ];
 
     home.sessionVariables = {
       EDITOR = "nvim";
@@ -21,7 +25,11 @@
           terminal = false;
           type = "Application";
           icon = "nvim";
-          categories = ["Development" "TextEditor" "Utility"];
+          categories = [
+            "Development"
+            "TextEditor"
+            "Utility"
+          ];
           startupNotify = true;
         };
         kitty = {
@@ -32,7 +40,10 @@
           terminal = false;
           type = "Application";
           icon = "kitty";
-          categories = ["System" "TerminalEmulator"];
+          categories = [
+            "System"
+            "TerminalEmulator"
+          ];
           startupNotify = true;
         };
         swayimg = {
@@ -43,8 +54,17 @@
           terminal = false;
           type = "Application";
           icon = "swayimg";
-          categories = ["Graphics" "Viewer"];
-          mimeType = ["image/png" "image/jpeg" "image/gif" "image/webp" "image/svg+xml"];
+          categories = [
+            "Graphics"
+            "Viewer"
+          ];
+          mimeType = [
+            "image/png"
+            "image/jpeg"
+            "image/gif"
+            "image/webp"
+            "image/svg+xml"
+          ];
           startupNotify = true;
         };
         mpv = {
@@ -55,8 +75,18 @@
           terminal = false;
           type = "Application";
           icon = "mpv";
-          categories = ["AudioVideo" "Player" "Audio" "Video"];
-          mimeType = ["video/mp4" "video/webm" "video/x-matroska" "audio/mp3"];
+          categories = [
+            "AudioVideo"
+            "Player"
+            "Audio"
+            "Video"
+          ];
+          mimeType = [
+            "video/mp4"
+            "video/webm"
+            "video/x-matroska"
+            "audio/mp3"
+          ];
           startupNotify = true;
         };
       };

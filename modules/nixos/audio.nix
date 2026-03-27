@@ -3,7 +3,11 @@
     services.pulseaudio.enable = false;
     security.rtkit.enable = true;
 
-    boot.kernelModules = ["uinput" "snd_hda_intel" "snd_hda_codec_realtek"];
+    boot.kernelModules = [
+      "uinput"
+      "snd_hda_intel"
+      "snd_hda_codec_realtek"
+    ];
     boot.blacklistedKernelModules = [
       "snd_sof_pci_intel_cnl"
       "snd_sof_intel_hda_generic"

@@ -11,65 +11,67 @@
       stripRoot = false;
     };
 
-    configJson = pkgs.writeText "config.json" (builtins.toJSON {
-      colors = {
-        "Palette.Window" = theme.base;
-        "Palette.WindowText" = theme.text;
-        "Palette.Base" = theme.crust;
-        "Palette.AlternateBase" = theme.mantle;
-        "Palette.Text" = theme.text;
-        "Palette.ToolTipBase" = theme.surface0;
-        "Palette.ToolTipText" = theme.text;
-        "Palette.BrightText" = theme.mauve;
-        "Palette.Highlight" = theme.blue;
-        "Palette.HighlightedText" = theme.crust;
-        "Palette.Button" = theme.surface0;
-        "Palette.ButtonText" = theme.text;
-        "Palette.Link" = theme.blue;
-        "Palette.LinkVisited" = theme.lavender;
-        "Palette.Light" = theme.surface2;
-        "Palette.Midlight" = theme.surface1;
-        "Palette.Mid" = theme.base;
-        "Palette.Dark" = theme.mantle;
-        "Palette.Shadow" = theme.crust;
-        "Palette.PlaceholderText" = theme.overlay2;
-        "Palette.WindowTextDisabled" = theme.overlay1;
-        "Palette.TextDisabled" = theme.overlay1;
-        "Palette.ToolTipTextDisabled" = theme.overlay1;
-        "Palette.BrightTextDisabled" = theme.overlay1;
-        "Palette.HighlightedTextDisabled" = theme.overlay1;
-        "Palette.ButtonTextDisabled" = theme.overlay1;
+    configJson = pkgs.writeText "config.json" (
+      builtins.toJSON {
+        colors = {
+          "Palette.Window" = theme.base;
+          "Palette.WindowText" = theme.text;
+          "Palette.Base" = theme.crust;
+          "Palette.AlternateBase" = theme.mantle;
+          "Palette.Text" = theme.text;
+          "Palette.ToolTipBase" = theme.surface0;
+          "Palette.ToolTipText" = theme.text;
+          "Palette.BrightText" = theme.mauve;
+          "Palette.Highlight" = theme.blue;
+          "Palette.HighlightedText" = theme.crust;
+          "Palette.Button" = theme.surface0;
+          "Palette.ButtonText" = theme.text;
+          "Palette.Link" = theme.blue;
+          "Palette.LinkVisited" = theme.lavender;
+          "Palette.Light" = theme.surface2;
+          "Palette.Midlight" = theme.surface1;
+          "Palette.Mid" = theme.base;
+          "Palette.Dark" = theme.mantle;
+          "Palette.Shadow" = theme.crust;
+          "Palette.PlaceholderText" = theme.overlay2;
+          "Palette.WindowTextDisabled" = theme.overlay1;
+          "Palette.TextDisabled" = theme.overlay1;
+          "Palette.ToolTipTextDisabled" = theme.overlay1;
+          "Palette.BrightTextDisabled" = theme.overlay1;
+          "Palette.HighlightedTextDisabled" = theme.overlay1;
+          "Palette.ButtonTextDisabled" = theme.overlay1;
 
-        "RSS.ReadArticle" = theme.overlay2;
-        "RSS.UnreadArticle" = theme.blue;
+          "RSS.ReadArticle" = theme.overlay2;
+          "RSS.UnreadArticle" = theme.blue;
 
-        "Log.TimeStamp" = theme.subtext1;
-        "Log.Normal" = theme.text;
-        "Log.Info" = theme.blue;
-        "Log.Warning" = theme.peach;
-        "Log.Critical" = theme.red;
-        "Log.BannedPeer" = theme.red;
+          "Log.TimeStamp" = theme.subtext1;
+          "Log.Normal" = theme.text;
+          "Log.Info" = theme.blue;
+          "Log.Warning" = theme.peach;
+          "Log.Critical" = theme.red;
+          "Log.BannedPeer" = theme.red;
 
-        "TransferList.Downloading" = theme.green;
-        "TransferList.StalledDownloading" = theme.overlay1;
-        "TransferList.DownloadingMetadata" = theme.green;
-        "TransferList.ForcedDownloadingMetadata" = theme.sky;
-        "TransferList.ForcedDownloading" = theme.green;
-        "TransferList.Uploading" = theme.blue;
-        "TransferList.StalledUploading" = theme.overlay1;
-        "TransferList.ForcedUploading" = theme.blue;
-        "TransferList.QueuedDownloading" = theme.teal;
-        "TransferList.QueuedUploading" = theme.teal;
-        "TransferList.CheckingDownloading" = theme.teal;
-        "TransferList.CheckingUploading" = theme.teal;
-        "TransferList.CheckingResumeData" = theme.teal;
-        "TransferList.PausedDownloading" = theme.peach;
-        "TransferList.PausedUploading" = theme.peach;
-        "TransferList.Moving" = theme.teal;
-        "TransferList.MissingFiles" = theme.red;
-        "TransferList.Error" = theme.red;
-      };
-    });
+          "TransferList.Downloading" = theme.green;
+          "TransferList.StalledDownloading" = theme.overlay1;
+          "TransferList.DownloadingMetadata" = theme.green;
+          "TransferList.ForcedDownloadingMetadata" = theme.sky;
+          "TransferList.ForcedDownloading" = theme.green;
+          "TransferList.Uploading" = theme.blue;
+          "TransferList.StalledUploading" = theme.overlay1;
+          "TransferList.ForcedUploading" = theme.blue;
+          "TransferList.QueuedDownloading" = theme.teal;
+          "TransferList.QueuedUploading" = theme.teal;
+          "TransferList.CheckingDownloading" = theme.teal;
+          "TransferList.CheckingUploading" = theme.teal;
+          "TransferList.CheckingResumeData" = theme.teal;
+          "TransferList.PausedDownloading" = theme.peach;
+          "TransferList.PausedUploading" = theme.peach;
+          "TransferList.Moving" = theme.teal;
+          "TransferList.MissingFiles" = theme.red;
+          "TransferList.Error" = theme.red;
+        };
+      }
+    );
 
     qbtheme = pkgs.runCommand "catppuccin-mocha-mauve.qbtheme" {} ''
       base="${src}/qbittorrent-2.0.1"
@@ -88,8 +90,7 @@
   in {
     home.packages = [pkgs.qbittorrent];
 
-    home.file.".local/share/qBittorrent/themes/catppuccin-mocha-mauve.qbtheme".source =
-      themePath;
+    home.file.".local/share/qBittorrent/themes/catppuccin-mocha-mauve.qbtheme".source = themePath;
 
     home.activation.qbittorrentTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
       _conf="$HOME/.config/qBittorrent/qBittorrent.conf"

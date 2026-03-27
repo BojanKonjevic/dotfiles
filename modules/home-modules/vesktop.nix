@@ -46,16 +46,32 @@
 
         plugins = {
           # ── APIs (required by other plugins) ────────────────────────────
-          ChatInputButtonAPI = {enabled = true;};
-          CommandsAPI = {enabled = true;};
-          MessageAccessoriesAPI = {enabled = true;};
-          MessageEventsAPI = {enabled = true;};
-          MessagePopoverAPI = {enabled = true;};
-          UserSettingsAPI = {enabled = true;};
-          BadgeAPI = {enabled = true;};
+          ChatInputButtonAPI = {
+            enabled = true;
+          };
+          CommandsAPI = {
+            enabled = true;
+          };
+          MessageAccessoriesAPI = {
+            enabled = true;
+          };
+          MessageEventsAPI = {
+            enabled = true;
+          };
+          MessagePopoverAPI = {
+            enabled = true;
+          };
+          UserSettingsAPI = {
+            enabled = true;
+          };
+          BadgeAPI = {
+            enabled = true;
+          };
 
           # ── Core / always-on ────────────────────────────────────────────
-          CrashHandler = {enabled = true;};
+          CrashHandler = {
+            enabled = true;
+          };
           NoTrack = {
             enabled = true;
             disableAnalytics = true;
@@ -64,18 +80,28 @@
             enabled = true;
             settingsLocation = "aboveNitro";
           };
-          SupportHelper = {enabled = true;};
+          SupportHelper = {
+            enabled = true;
+          };
 
           # ── Active plugins ──────────────────────────────────────────────
-          AlwaysAnimate = {enabled = true;};
+          AlwaysAnimate = {
+            enabled = true;
+          };
           AlwaysTrust = {
             enabled = true;
             domain = true;
             file = true;
           };
-          BiggerStreamPreview = {enabled = true;};
-          ClearURLs = {enabled = true;};
-          DisableDeepLinks = {enabled = true;};
+          BiggerStreamPreview = {
+            enabled = true;
+          };
+          ClearURLs = {
+            enabled = true;
+          };
+          DisableDeepLinks = {
+            enabled = true;
+          };
 
           FakeNitro = {
             enabled = true;
@@ -102,7 +128,9 @@
             enabled = true;
             loop = true;
           };
-          ReverseImageSearch = {enabled = true;};
+          ReverseImageSearch = {
+            enabled = true;
+          };
 
           Translate = {
             enabled = true;
@@ -115,15 +143,25 @@
             sentOutput = "en";
           };
 
-          ValidUser = {enabled = true;};
+          ValidUser = {
+            enabled = true;
+          };
           VolumeBooster = {
             enabled = true;
             multiplier = 2.5;
           };
-          WebContextMenus = {enabled = true;};
-          WebKeybinds = {enabled = true;};
-          WebScreenShareFixes = {enabled = true;};
-          YoutubeAdblock = {enabled = true;};
+          WebContextMenus = {
+            enabled = true;
+          };
+          WebKeybinds = {
+            enabled = true;
+          };
+          WebScreenShareFixes = {
+            enabled = true;
+          };
+          YoutubeAdblock = {
+            enabled = true;
+          };
         };
       };
     };

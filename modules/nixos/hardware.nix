@@ -6,7 +6,13 @@
     ...
   }: {
     imports = [(modulesPath + "/installer/scan/not-detected.nix")];
-    boot.initrd.availableKernelModules = ["xhci_pci" "ahci" "usb_storage" "usbhid" "sd_mod"];
+    boot.initrd.availableKernelModules = [
+      "xhci_pci"
+      "ahci"
+      "usb_storage"
+      "usbhid"
+      "sd_mod"
+    ];
     boot.initrd.kernelModules = [];
     boot.kernelModules = ["kvm-intel"];
     boot.extraModulePackages = [];
@@ -17,7 +23,10 @@
     fileSystems."/boot" = {
       device = "/dev/disk/by-uuid/2CF2-3DDE";
       fsType = "vfat";
-      options = ["fmask=0077" "dmask=0077"];
+      options = [
+        "fmask=0077"
+        "dmask=0077"
+      ];
     };
     fileSystems."/home" = {
       device = "/dev/disk/by-uuid/c51a1808-a748-432b-a041-44672dec2412";

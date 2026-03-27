@@ -2,6 +2,7 @@
   flake.nixosModules.core = {
     pkgs,
     userConfig,
+    inputs,
     ...
   }: {
     services.dbus.enable = true;
@@ -17,11 +18,26 @@
     programs.ydotool.enable = true;
     hardware.enableAllFirmware = true;
     nixpkgs.config.allowUnfree = true;
+    nix.registry.nixpkgs.flake = inputs.nixpkgs;
+    nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
+    nix.gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+    nix.optimise.automatic = true;
     users.users.${userConfig.username} = {
       shell = pkgs.zsh;
       isNormalUser = true;
       description = userConfig.fullName;
-      extraGroups = ["networkmanager" "wheel" "audio" "input" "ydotool" "video"];
+      extraGroups = [
+        "networkmanager"
+        "wheel"
+        "audio"
+        "input"
+        "ydotool"
+        "video"
+      ];
     };
   };
 }

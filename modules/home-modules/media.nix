@@ -503,8 +503,16 @@
       name = "media-popup";
       dontUnpack = true;
       dontBuild = true;
-      nativeBuildInputs = [pkgs.gobject-introspection pkgs.wrapGAppsHook3];
-      buildInputs = [pkgs.gtk3 pkgs.gdk-pixbuf pkgs.pango pkgs.atk];
+      nativeBuildInputs = [
+        pkgs.gobject-introspection
+        pkgs.wrapGAppsHook3
+      ];
+      buildInputs = [
+        pkgs.gtk3
+        pkgs.gdk-pixbuf
+        pkgs.pango
+        pkgs.atk
+      ];
       installPhase = ''
         mkdir -p $out/bin
         echo "#!${pythonEnv}/bin/python3" > $out/bin/media-popup
@@ -533,7 +541,6 @@
     home.packages = [
       pkgs.playerctl
       pkgs.wireplumber
-      pkgs.cava
       mediaBarBin
       mediaToggleScript
       mediaPopup

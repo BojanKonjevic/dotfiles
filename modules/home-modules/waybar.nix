@@ -153,7 +153,10 @@
           spacing = 0;
           exclusive = true;
 
-          modules-left = ["clock" "custom/weather"];
+          modules-left = [
+            "clock"
+            "custom/weather"
+          ];
           modules-center = ["hyprland/workspaces"];
           modules-right = [
             "hyprland/submap"
@@ -167,7 +170,13 @@
           "hyprland/workspaces" = {
             format = "{name}";
             persistent-workspaces = {
-              "*" = [1 2 3 4 5];
+              "*" = [
+                1
+                2
+                3
+                4
+                5
+              ];
             };
           };
 
