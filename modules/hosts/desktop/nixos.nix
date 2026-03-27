@@ -3,7 +3,7 @@
   inputs,
   ...
 }: let
-  userConfig = import ../../user.nix;
+  userConfig = import ../../../user.nix;
 in {
   flake.nixosConfigurations.${userConfig.hostname} = inputs.nixpkgs.lib.nixosSystem {
     system = userConfig.system;

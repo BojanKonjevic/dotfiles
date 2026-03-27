@@ -45,6 +45,7 @@ in {
             file-roller
             libreoffice
             pavucontrol
+            tree
           ];
         }
       ];
