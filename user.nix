@@ -26,8 +26,8 @@
   screenshotsDir = "$HOME/Pictures/Screenshots";
   notesFile = "$HOME/Documents/notes.txt";
   dotfilesDir = "$HOME/dotfiles"; # root of this repo on the machine
-  osFlakePath = "/etc/nixos"; # where the NixOS system flake lives
-  hmFlakePath = "$HOME/home-manager"; # where the home-manager flake lives
+  osFlakePath = "$HOME/dotfiles/"; # where the NixOS system flake lives
+  hmFlakePath = "$HOME/dotfiles/"; # where the home-manager flake lives
 
   # ── Weather ──────────────────────────────────────────────────────────────────
   weatherCity = "Novi+Sad"; # wttr.in city string (use + for spaces)
