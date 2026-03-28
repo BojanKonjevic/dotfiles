@@ -22,7 +22,7 @@
           err()    { echo -e "  ''${RED}✗''${RESET}  $1"; }
           ask()    { echo -e -n "\n  ''${BOLD}$1''${RESET} "; }
 
-          NIX="nix --extra-experimental-features 'nix-command flakes'"
+          NIX="nix --extra-experimental-features nix-command flakes"
 
           prompt() {
             local label="$1" default="$2" varname="$3"
