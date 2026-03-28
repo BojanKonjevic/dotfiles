@@ -22,7 +22,7 @@
           err()    { echo -e "  ''${RED}✗''${RESET}  $1"; }
           ask()    { echo -e -n "\n  ''${BOLD}$1''${RESET} "; }
 
-          NIX="nix --extra-experimental-features nix-command flakes"
+          NIX=(nix --extra-experimental-features "nix-command flakes")
 
           prompt() {
             local label="$1" default="$2" varname="$3"
@@ -79,7 +79,7 @@
           header "Auto-detecting system values…"
 
           ACTUAL_USER="$(whoami)"
-          DETECTED_SYSTEM="$($NIX eval --impure --expr 'builtins.currentSystem' --raw 2>/dev/null || echo 'x86_64-linux')"
+          DETECTED_SYSTEM="$("''${NIX[@]}" eval --impure --expr 'builtins.currentSystem' --raw 2>/dev/null || echo 'x86_64-linux')"
           DETECTED_TIMEZONE="$(timedatectl show --property=Timezone --value 2>/dev/null || cat /etc/timezone 2>/dev/null || echo 'UTC')"
           DETECTED_LOCALE="$(locale 2>/dev/null | grep '^LANG=' | cut -d= -f2 | tr -d '"' || echo 'en_US.UTF-8')"
           DETECTED_LOCALE="''${DETECTED_LOCALE:-en_US.UTF-8}"
@@ -286,7 +286,7 @@
           # ── Disko — partition, format, mount ──────────────────────────────
           header "Partitioning and formatting $DISK…"
 
-          $NIX run github:nix-community/disko/latest -- \
+          "''${NIX[@]}" run github:nix-community/disko/latest -- \
             --mode destroy,format,mount \
             --flake "$TMPDIR#$HOSTNAME"
           ok "Disk partitioned, formatted and mounted at /mnt."
