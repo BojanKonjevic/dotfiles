@@ -278,17 +278,20 @@
 
           # ── Inject disko into host default.nix ────────────────────────────
           if ! grep -q "disko.nixosModules.disko" "$HOST_DIR/default.nix"; then
-            sed -i 's|(builtins.attrValues self.nixosModules)|(builtins.attrValues self.nixosModules)\n          inputs.disko.nixosModules.disko|' \
-              "$HOST_DIR/default.nix"
+          sed -i 's|(builtins.attrValues self.nixosModules)|(builtins.attrValues self.nixosModules) ++ [ inputs.disko.nixosModules.disko ]|' \
+          "$HOST_DIR/default.nix"
             ok "Injected disko nixosModule into $HOSTDIR/default.nix."
           fi
 
           # ── Disko — partition, format, mount ──────────────────────────────
           header "Partitioning and formatting $DISK…"
 
-          "''${NIX[@]}" run github:nix-community/disko/latest -- \
+          nix run \
+            --extra-experimental-features "nix-command flakes" \
+            github:nix-community/disko/latest -- \
             --mode destroy,format,mount \
             --flake "$TMPDIR#$HOSTNAME"
+
           ok "Disk partitioned, formatted and mounted at /mnt."
 
           # ── Hardware config ───────────────────────────────────────────────
