@@ -13,6 +13,7 @@
         alejandra
         stylua
         lazygit
+        kdePackages.qtdeclarative
       ];
 
       extraPlugins = with pkgs.vimPlugins; [
@@ -189,6 +190,7 @@
               nix = ["alejandra"];
               lua = ["stylua"];
               python = ["ruff_format"];
+              qml = ["qmlformat"];
             };
           };
         };
