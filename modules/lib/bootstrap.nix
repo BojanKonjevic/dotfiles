@@ -78,7 +78,7 @@
           # ── Auto-detect ───────────────────────────────────────────────────
           header "Auto-detecting system values…"
 
-          ACTUAL_USER="$(whoami)"
+          DEFAULT_USER="nixos"
           DETECTED_SYSTEM="$("''${NIX[@]}" eval --impure --expr 'builtins.currentSystem' --raw 2>/dev/null || echo 'x86_64-linux')"
           DETECTED_TIMEZONE="$(timedatectl show --property=Timezone --value 2>/dev/null || cat /etc/timezone 2>/dev/null || echo 'UTC')"
           DETECTED_LOCALE="$(locale 2>/dev/null | grep '^LANG=' | cut -d= -f2 | tr -d '"' || echo 'en_US.UTF-8')"
@@ -107,7 +107,7 @@
           # ── Interactive prompts ───────────────────────────────────────────
           header "A few things I need from you…"
 
-          prompt "Username to configure"           "$ACTUAL_USER"            DETECTED_USER
+          prompt "Username to configure"           "$DEFAULT_USER"            DETECTED_USER
           DETECTED_HOME="/home/$DETECTED_USER"
           prompt "Hostname for this machine"       "$DETECTED_HOSTNAME"      HOSTNAME
           prompt "Host directory name"             "desktop"                 HOSTDIR
