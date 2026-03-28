@@ -6,30 +6,6 @@
   }: let
     pythonEnv = pkgs.python3.withPackages (ps: [ps.pygobject3]);
 
-    # ── media-bar: simple shell script, run by waybar on an interval ─────────────
-    mediaBarBin = pkgs.writeShellScriptBin "media-bar" ''
-      OUTPUT=$(${pkgs.playerctl}/bin/playerctl metadata \
-        --format "{{status}}\t{{title}}\t{{artist}}" 2>/dev/null) || exit 0
-
-      [ -z "$OUTPUT" ] && exit 0
-
-      STATUS=$(printf '%s' "$OUTPUT" | cut -f1)
-      TITLE=$(printf  '%s' "$OUTPUT" | cut -f2)
-      ARTIST=$(printf '%s' "$OUTPUT" | cut -f3)
-
-      case "$STATUS" in
-        Playing) ICON="" ;;   # nf-md-play  U+F040A
-        Paused)  ICON="" ;;   # nf-md-pause U+F03E4
-        *)       exit 0 ;;    # Stopped / no player → hide module
-      esac
-
-      if [ ''${#TITLE} -gt 28 ]; then
-        TITLE="''${TITLE:0:27}…"
-      fi
-
-      printf '{"text":"%s %s","tooltip":"%s"}\n' "$ICON" "$TITLE" "$ARTIST"
-    '';
-
     # ── media-popup ───────────────────────────────────────────────────────────────
     mediaPopupPy = pkgs.writeText "media-popup.py" ''
       import gi, os, atexit, subprocess, urllib.request, urllib.parse
@@ -541,7 +517,6 @@
     home.packages = [
       pkgs.playerctl
       pkgs.wireplumber
-      mediaBarBin
       mediaToggleScript
       mediaPopup
     ];

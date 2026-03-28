@@ -1,0 +1,3 @@
+singleton Colours Colours.qml
+Bar Bar.qml
+WorkspaceButton WorkspaceButton.qml

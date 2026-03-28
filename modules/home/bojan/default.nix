@@ -46,6 +46,7 @@ in {
             libreoffice
             pavucontrol
             tree
+            networkmanagerapplet
           ];
         }
       ];

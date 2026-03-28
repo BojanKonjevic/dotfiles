@@ -44,7 +44,7 @@
         ];
 
         exec-once = [
-          "waybar"
+          "qs -c bar"
           "swww-daemon"
           "hyprlock || hyprctl dispatch exit"
           "wl-paste --type text --watch cliphist store"
