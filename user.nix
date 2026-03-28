@@ -31,4 +31,10 @@
 
   # ── Weather ──────────────────────────────────────────────────────────────────
   weatherCity = "Novi+Sad"; # wttr.in city string (use + for spaces)
+
+  # ── Hardware ─────────────────────────────────────────────────────────────────
+  # Only used by the bootstrap script for fresh installs via disko.
+  # Check available disks with: lsblk -d -o NAME,SIZE,MODEL
+  # Common values: /dev/sda, /dev/nvme0n1, /dev/vda (VM)
+  disk = "/dev/sda";
 }

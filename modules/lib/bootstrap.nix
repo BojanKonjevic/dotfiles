@@ -61,7 +61,6 @@
           else
             warn "Legacy BIOS detected. This config uses systemd-boot which requires UEFI."
             warn "If you're on a VM, enable UEFI firmware in your hypervisor settings."
-            warn "If you're on real hardware, this config may not boot correctly."
             if ! confirm "Continue anyway?"; then
               err "Aborted."
               exit 1
@@ -81,12 +80,21 @@
           DETECTED_HOSTNAME="$(hostname)"
           DETECTED_STATE="$(grep 'system.stateVersion' /etc/nixos/configuration.nix 2>/dev/null | grep -oP '"\K[^"]+' | head -1 || echo '25.11')"
           DETECTED_STATE="''${DETECTED_STATE:-25.11}"
+          DETECTED_RAM_KB="$(grep MemTotal /proc/meminfo | awk '{print $2}')"
+          DETECTED_RAM_GB="$(( (DETECTED_RAM_KB + 1048575) / 1048576 ))"
+          DETECTED_DISK="$(lsblk -d -n -o NAME,TYPE | awk '$2=="disk"{print "/dev/"$1}' | head -1)"
+          DETECTED_DISK="''${DETECTED_DISK:-/dev/sda}"
 
           ok "system       → $DETECTED_SYSTEM"
           ok "timezone     → $DETECTED_TIMEZONE"
           ok "locale       → $DETECTED_LOCALE"
           ok "keyboard     → $DETECTED_KB"
           ok "stateVersion → $DETECTED_STATE"
+          ok "RAM          → ''${DETECTED_RAM_GB}GB (swap will match for hibernate)"
+
+          echo ""
+          info "Available disks:"
+          lsblk -d -o NAME,SIZE,MODEL | grep -v loop | sed 's/^/    /'
 
           # ── Interactive prompts ───────────────────────────────────────────
           header "A few things I need from you…"
@@ -98,16 +106,26 @@
           prompt "Your full name"                  "Your Name"               FULLNAME
           prompt "Your email"                      "you@example.com"         EMAIL
           prompt "Weather city (e.g. New+York)"    "New+York"                WEATHERCITY
-          prompt "Where to clone dotfiles"         "$DETECTED_HOME/dotfiles" DOTFILESDIR
+          prompt "Dotfiles location on new system" "$DETECTED_HOME/dotfiles" DOTFILESDIR
+          prompt "Disk to install to"              "$DETECTED_DISK"          DISK
+          prompt "Swap size in GB (>= RAM for hibernate)" "$DETECTED_RAM_GB" SWAP_GB
 
-          # ── Confirm ───────────────────────────────────────────────────────
+          # ── Wipe warning ──────────────────────────────────────────────────
+          echo ""
+          echo -e "  ''${RED}''${BOLD}╔════════════════════════════════════════════════╗''${RESET}"
+          echo -e "  ''${RED}''${BOLD}║  WARNING: ''${DISK} WILL BE COMPLETELY WIPED    ║''${RESET}"
+          echo -e "  ''${RED}''${BOLD}║  ALL DATA ON THIS DISK WILL BE LOST FOREVER    ║''${RESET}"
+          echo -e "  ''${RED}''${BOLD}╚════════════════════════════════════════════════╝''${RESET}"
+          echo ""
+
+          # ── Summary ───────────────────────────────────────────────────────
           header "Summary"
           echo ""
           echo -e "    username      = ''${BOLD}$DETECTED_USER''${RESET}"
           echo -e "    fullName      = ''${BOLD}$FULLNAME''${RESET}"
           echo -e "    email         = ''${BOLD}$EMAIL''${RESET}"
-          echo -e "    hostname      = ''${BOLD}$HOSTNAME''${RESET}"
-          echo -e "    hostDir       = ''${BOLD}modules/hosts/$HOSTDIR''${RESET}"
+          echo -e "    hostname      = ''${BOLD}$HOSTNAME''${RESET}  ''${DIM}(nixosConfigurations key)''${RESET}"
+          echo -e "    hostDir       = ''${BOLD}modules/hosts/$HOSTDIR''${RESET}  ''${DIM}(directory name)''${RESET}"
           echo -e "    system        = ''${BOLD}$DETECTED_SYSTEM''${RESET}"
           echo -e "    timezone      = ''${BOLD}$DETECTED_TIMEZONE''${RESET}"
           echo -e "    locale        = ''${BOLD}$DETECTED_LOCALE''${RESET}"
@@ -115,73 +133,87 @@
           echo -e "    stateVersion  = ''${BOLD}$DETECTED_STATE''${RESET}"
           echo -e "    weatherCity   = ''${BOLD}$WEATHERCITY''${RESET}"
           echo -e "    dotfilesDir   = ''${BOLD}$DOTFILESDIR''${RESET}"
+          echo -e "    disk          = ''${RED}''${BOLD}$DISK  ← WILL BE WIPED''${RESET}"
+          echo -e "    swap          = ''${BOLD}''${SWAP_GB}GB''${RESET}"
           echo ""
 
-          if ! confirm "Looks good?"; then
-            warn "Aborted. Re-run the script to try again."
+          if ! confirm "Confirm — this will erase $DISK and install NixOS. Proceed?"; then
+            warn "Aborted."
             exit 0
           fi
 
           # ── Dependencies ──────────────────────────────────────────────────
           header "Ensuring dependencies are available…"
 
-          if ! command -v git &>/dev/null || ! command -v home-manager &>/dev/null; then
-            info "Making dependencies temporarily available…"
-            GIT_PATH="$(nix build nixpkgs#git --no-link --print-out-paths 2>/dev/null)/bin"
-            HM_PATH="$(nix build nixpkgs#home-manager --no-link --print-out-paths 2>/dev/null)/bin"
-            export PATH="$GIT_PATH:$HM_PATH:$PATH"
-            ok "Dependencies available."
+          EXTRA_PATHS=""
+          for pkg in git home-manager; do
+            if ! command -v $pkg &>/dev/null; then
+              info "$pkg not found — making temporarily available…"
+              STORE_PATH="$(nix build nixpkgs#$pkg --no-link --print-out-paths 2>/dev/null)/bin"
+              EXTRA_PATHS="$STORE_PATH:$EXTRA_PATHS"
+            fi
+          done
+          [[ -n "$EXTRA_PATHS" ]] && export PATH="$EXTRA_PATHS$PATH"
+          ok "Dependencies available."
+
+          # ── Trust current user ────────────────────────────────────────────
+          header "Configuring nix trusted user…"
+
+          if ! grep -q "trusted-users" /etc/nix/nix.conf 2>/dev/null; then
+            echo "trusted-users = root $DETECTED_USER" | \
+              tee -a /etc/nix/nix.conf > /dev/null
+            systemctl restart nix-daemon 2>/dev/null || true
+            ok "Added $DETECTED_USER to trusted-users."
           else
-            ok "Dependencies available."
+            ok "Already configured."
           fi
 
           # ── Clone repo ────────────────────────────────────────────────────
-          header "Setting up dotfiles repo…"
+          header "Cloning dotfiles…"
 
-          if [[ -d "$DOTFILESDIR/.git" ]]; then
-            ok "Repo already exists at $DOTFILESDIR, skipping clone."
-          else
-            info "Cloning into $DOTFILESDIR…"
-            git clone https://github.com/BojanKonjevic/dotfiles "$DOTFILESDIR"
-            ok "Cloned."
-          fi
+          TMPDIR="/tmp/dotfiles-bootstrap"
+          rm -rf "$TMPDIR"
+          git clone https://github.com/BojanKonjevic/dotfiles "$TMPDIR"
+          ok "Cloned to $TMPDIR."
 
           # ── Write user.nix ────────────────────────────────────────────────
           header "Writing user.nix…"
 
-          cat > "$DOTFILESDIR/user.nix" <<USERNIX
+          cat > "$TMPDIR/user.nix" <<USERNIX
           # user.nix — single source of truth for everything that differs between machines.
           # Generated by bootstrap — you can edit this file freely afterwards.
-          rec {
-            # ── Identity ───────────────────────────────────────────────────
-            username      = "$DETECTED_USER";
-            fullName      = "$FULLNAME";
-            email         = "$EMAIL";
-            homeDirectory = "/home/\''${username}";
+          # ── Identity ─────────────────────────────────────────────────────────────────
+          username      = "$DETECTED_USER";
+          fullName      = "$FULLNAME";
+          email         = "$EMAIL";
+          homeDirectory = "/home/$DETECTED_USER";
 
-            # ── Machine ────────────────────────────────────────────────────
-            hostname      = "$HOSTNAME";
-            system        = "$DETECTED_SYSTEM";
+          # ── Machine ───────────────────────────────────────────────────────────────────
+          hostname     = "$HOSTNAME";
+          system       = "$DETECTED_SYSTEM";
 
-            # ── Versions ───────────────────────────────────────────────────
-            stateVersion  = "$DETECTED_STATE";
+          # ── Versions ──────────────────────────────────────────────────────────────────
+          stateVersion = "$DETECTED_STATE";
 
-            # ── Locale / Time ──────────────────────────────────────────────
-            timezone      = "$DETECTED_TIMEZONE";
-            locale        = "$DETECTED_LOCALE";
-            kbLayout      = "$DETECTED_KB";
+          # ── Locale / Time ─────────────────────────────────────────────────────────────
+          timezone     = "$DETECTED_TIMEZONE";
+          locale       = "$DETECTED_LOCALE";
+          kbLayout     = "$DETECTED_KB";
 
-            # ── Paths ──────────────────────────────────────────────────────
-            wallpaperDir   = "\$HOME/Pictures/wallpapers";
-            screenshotsDir = "\$HOME/Pictures/Screenshots";
-            notesFile      = "\$HOME/Documents/notes.txt";
-            dotfilesDir    = "$DOTFILESDIR";
-            osFlakePath    = dotfilesDir;
-            hmFlakePath    = dotfilesDir;
+          # ── Paths ─────────────────────────────────────────────────────────────────────
+          wallpaperDir   = "\$HOME/Pictures/wallpapers";
+          screenshotsDir = "\$HOME/Pictures/Screenshots";
+          notesFile      = "\$HOME/Documents/notes.txt";
+          dotfilesDir    = "$DOTFILESDIR";
+          osFlakePath    = dotfilesDir;
+          hmFlakePath    = dotfilesDir;
 
-            # ── Weather ────────────────────────────────────────────────────
-            weatherCity    = "$WEATHERCITY";
-          }
+          # ── Weather ───────────────────────────────────────────────────────────────────
+          weatherCity  = "$WEATHERCITY";
+
+          # ── Hardware ──────────────────────────────────────────────────────────────────
+          # Only used by bootstrap for fresh installs via disko.
+          disk = "$DISK";
           USERNIX
 
           ok "user.nix written."
@@ -189,83 +221,139 @@
           # ── Host directory ────────────────────────────────────────────────
           header "Setting up host directory…"
 
-          HOST_DIR="$DOTFILESDIR/modules/hosts/$HOSTDIR"
-          DESKTOP_DIR="$DOTFILESDIR/modules/hosts/desktop"
+          HOST_DIR="$TMPDIR/modules/hosts/$HOSTDIR"
+          DESKTOP_DIR="$TMPDIR/modules/hosts/desktop"
 
           if [[ "$HOSTDIR" == "desktop" ]]; then
             ok "Using existing desktop host directory."
           elif [[ -d "$HOST_DIR" ]]; then
-            ok "Host directory $HOST_DIR already exists, skipping."
+            ok "Host directory already exists, skipping."
           else
-            info "Creating new host directory from desktop template…"
             mkdir -p "$HOST_DIR"
             cp "$DESKTOP_DIR/default.nix" "$HOST_DIR/default.nix"
-            ok "Copied modules/hosts/desktop/default.nix → modules/hosts/$HOSTDIR/default.nix"
-            warn "Review $HOST_DIR/default.nix — it's a copy of the desktop config."
-            warn "Remove or adjust anything specific to the desktop (e.g. Nvidia settings)."
+            ok "Created modules/hosts/$HOSTDIR/ from desktop template."
+            warn "Remember to review $HOST_DIR/default.nix after install."
           fi
+
+          # ── Generate disko config ─────────────────────────────────────────
+          header "Generating disko partition layout…"
+
+          cat > "$HOST_DIR/disko.nix" <<DISKONIX
+          { ... }: {
+            flake.nixosModules.disko-layout = { ... }: {
+              disko.devices.disk.main = {
+                device = "$DISK";
+                type = "disk";
+                content = {
+                  type = "gpt";
+                  partitions = {
+                    ESP = {
+                      size = "512M";
+                      type = "EF00";
+                      content = {
+                        type = "filesystem";
+                        format = "vfat";
+                        mountpoint = "/boot";
+                        mountOptions = [ "fmask=0077" "dmask=0077" ];
+                      };
+                    };
+                    swap = {
+                      size = "''${SWAP_GB}G";
+                      content = {
+                        type = "swap";
+                        resumeDevice = true;
+                      };
+                    };
+                    root = {
+                      size = "100%";
+                      content = {
+                        type = "filesystem";
+                        format = "ext4";
+                        mountpoint = "/";
+                      };
+                    };
+                  };
+                };
+              };
+            };
+          }
+          DISKONIX
+
+          ok "Disko config written to modules/hosts/$HOSTDIR/disko.nix."
+
+          # ── Update host default.nix to import disko ───────────────────────
+          # Inject disko nixosModule import into the host's default.nix
+          # by appending it to the modules list if not already present
+          if ! grep -q "disko.nixosModules.disko" "$HOST_DIR/default.nix"; then
+            sed -i 's|(builtins.attrValues self.nixosModules)|(builtins.attrValues self.nixosModules)\n          inputs.disko.nixosModules.disko|' \
+              "$HOST_DIR/default.nix"
+            ok "Injected disko nixosModule into $HOSTDIR/default.nix."
+          fi
+
+          # ── Disko — partition, format, mount ──────────────────────────────
+          header "Partitioning and formatting $DISK…"
+
+          nix run github:nix-community/disko/latest -- \
+            --mode destroy,format,mount \
+            --flake "$TMPDIR#$HOSTNAME"
+          ok "Disk partitioned, formatted and mounted at /mnt."
 
           # ── Hardware config ───────────────────────────────────────────────
           header "Generating hardware configuration…"
 
-          nixos-generate-config
+          nixos-generate-config --root /mnt --no-filesystems
           ok "Hardware config generated."
 
           info "Wrapping for dendritic pattern…"
           {
             echo "{ ... }: {"
             echo "  flake.nixosModules.hardware ="
-            cat /etc/nixos/hardware-configuration.nix
+            cat /mnt/etc/nixos/hardware-configuration.nix
             echo ";"
             echo "}"
           } > "$HOST_DIR/hardware.nix"
-
           ok "Hardware config written to modules/hosts/$HOSTDIR/hardware.nix."
 
-          # ── Enable flakes if needed ───────────────────────────────────────
-          header "Ensuring flakes are enabled…"
+          # ── Install ───────────────────────────────────────────────────────
+          header "Installing NixOS…"
 
-          if ! nix flake --help &>/dev/null; then
-            warn "Flakes not enabled — patching /etc/nixos/configuration.nix temporarily…"
-            echo 'nix.settings.experimental-features = ["nix-command" "flakes"];' | \
-              tee -a /etc/nixos/configuration.nix > /dev/null
-            nixos-rebuild switch
-            ok "Flakes enabled."
-          else
-            ok "Flakes already available."
-          fi
-
-          # ── Trust current user for nix settings ──────────────────────────────
-          header "Configuring nix trusted user…"
-
-          if ! grep -q "trusted-users" /etc/nix/nix.conf 2>/dev/null; then
-            echo "trusted-users = root $DETECTED_USER" | \
-              tee -a /etc/nix/nix.conf > /dev/null
-            pkill nix-daemon 2>/dev/null || true
-            ok "Added $DETECTED_USER to trusted-users."
-          fi
-
-          # ── Switch ────────────────────────────────────────────────────────
-          header "Switching NixOS configuration…"
-          cd "$DOTFILESDIR"
+          cd "$TMPDIR"
           git add -A
-          nixos-rebuild switch --flake ".#$HOSTNAME" --option download-buffer-size 134217728
-          ok "NixOS switched."
+          nixos-install \
+            --flake "$TMPDIR#$HOSTNAME" \
+            --no-root-passwd \
+            --option download-buffer-size 134217728
+          ok "NixOS installed."
 
-          header "Switching Home Manager configuration…"
-          home-manager switch --flake ".#$DETECTED_USER" --option download-buffer-size 134217728
-          ok "Home Manager switched."
+          # ── Copy dotfiles to installed system ─────────────────────────────
+          header "Copying dotfiles to new system…"
+
+          INSTALL_DOTFILES="/mnt$DOTFILESDIR"
+          mkdir -p "$(dirname "$INSTALL_DOTFILES")"
+          cp -r "$TMPDIR/." "$INSTALL_DOTFILES/"
+
+          NIXOS_UID="$(grep "^$DETECTED_USER:" /mnt/etc/passwd | cut -d: -f3 || echo 1000)"
+          NIXOS_GID="$(grep "^$DETECTED_USER:" /mnt/etc/passwd | cut -d: -f4 || echo 100)"
+          chown -R "$NIXOS_UID:$NIXOS_GID" "/mnt$DETECTED_HOME"
+          ok "Dotfiles copied to $DOTFILESDIR."
 
           # ── Done ──────────────────────────────────────────────────────────
           echo ""
-          echo -e "''${GREEN}''${BOLD}  ✓ Bootstrap complete!''${RESET}"
-          echo -e "  ''${DIM}Open a new terminal and you're good to go.''${RESET}"
+          echo -e "''${GREEN}''${BOLD}  ✓ Installation complete!''${RESET}"
+          echo ""
+          echo -e "  ''${DIM}Home Manager will run automatically on first login.''${RESET}"
           if [[ "$HOSTDIR" != "desktop" ]]; then
             echo ""
             echo -e "  ''${YELLOW}''${BOLD}Reminder:''${RESET} Review modules/hosts/$HOSTDIR/default.nix"
-            echo -e "  ''${DIM}and remove any desktop-specific hardware settings.''${RESET}"
+            echo -e "  ''${DIM}and remove any desktop-specific settings (e.g. Nvidia).''${RESET}"
           fi
           echo ""
+
+          if confirm "Reboot now?"; then
+            reboot
+          else
+            warn "Remember to reboot before using the system."
+          fi
         ''
       );
     };
