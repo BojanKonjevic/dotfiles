@@ -1,0 +1,3 @@
+singleton Colours Colours.qml
+PowerMenu PowerMenu.qml
+PowerButton PowerButton.qml
