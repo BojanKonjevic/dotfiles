@@ -125,7 +125,6 @@
           prompt "Username to configure"           "$DEFAULT_USER"            DETECTED_USER
           DETECTED_HOME="/home/$DETECTED_USER"
           prompt "Hostname for this machine"       "$DETECTED_HOSTNAME"      HOSTNAME
-          prompt "Host directory name"             "desktop"                 HOSTDIR
           prompt "Your full name"                  "Your Name"               FULLNAME
           prompt "Your email"                      "you@example.com"         EMAIL
           prompt "Weather city (e.g. New+York)"    "New+York"                WEATHERCITY
@@ -147,8 +146,7 @@
           echo -e "    username      = ''${BOLD}$DETECTED_USER''${RESET}"
           echo -e "    fullName      = ''${BOLD}$FULLNAME''${RESET}"
           echo -e "    email         = ''${BOLD}$EMAIL''${RESET}"
-          echo -e "    hostname      = ''${BOLD}$HOSTNAME''${RESET}  ''${DIM}(nixosConfigurations key)''${RESET}"
-          echo -e "    hostDir       = ''${BOLD}modules/hosts/$HOSTDIR''${RESET}  ''${DIM}(directory name)''${RESET}"
+          echo -e "    hostname      = ''${BOLD}$HOSTNAME''${RESET}"
           echo -e "    system        = ''${BOLD}$DETECTED_SYSTEM''${RESET}"
           echo -e "    timezone      = ''${BOLD}$DETECTED_TIMEZONE''${RESET}"
           echo -e "    locale        = ''${BOLD}$DETECTED_LOCALE''${RESET}"
@@ -232,18 +230,31 @@
           # ── Host directory ────────────────────────────────────────────────
           header "Setting up host directory…"
 
-          HOST_DIR="$TMPDIR/modules/hosts/$HOSTDIR"
-          DESKTOP_DIR="$TMPDIR/modules/hosts/desktop"
+          HOST_DIR="$TMPDIR/modules/hosts/$HOSTNAME"
 
-          if [[ "$HOSTDIR" == "desktop" ]]; then
+          if [[ "$HOSTNAME" == "desktop" ]]; then
             ok "Using existing desktop host directory."
           elif [[ -d "$HOST_DIR" ]]; then
             ok "Host directory already exists, skipping."
           else
             mkdir -p "$HOST_DIR"
-            cp "$DESKTOP_DIR/default.nix" "$HOST_DIR/default.nix"
-            ok "Created modules/hosts/$HOSTDIR/ from desktop template."
-            warn "Remember to review $HOST_DIR/default.nix after install."
+            printf '{ self, inputs, ... }: let\n' > "$HOST_DIR/default.nix"
+            printf '  userConfig = import ../../../user.nix;\n' >> "$HOST_DIR/default.nix"
+            printf 'in {\n' >> "$HOST_DIR/default.nix"
+            printf '  flake.nixosConfigurations.%s =\n' "$HOSTNAME" >> "$HOST_DIR/default.nix"
+            printf '    inputs.nixpkgs.lib.nixosSystem {\n' >> "$HOST_DIR/default.nix"
+            printf '      system = userConfig.system;\n' >> "$HOST_DIR/default.nix"
+            printf '      specialArgs = { inherit inputs userConfig; };\n' >> "$HOST_DIR/default.nix"
+            printf '      modules =\n' >> "$HOST_DIR/default.nix"
+            printf '        (builtins.attrValues self.nixosModules)\n' >> "$HOST_DIR/default.nix"
+            printf '        ++ [\n' >> "$HOST_DIR/default.nix"
+            printf '          inputs.disko.nixosModules.disko\n' >> "$HOST_DIR/default.nix"
+            printf '          ./hardware.nix\n' >> "$HOST_DIR/default.nix"
+            printf '          ./disko.nix\n' >> "$HOST_DIR/default.nix"
+            printf '        ];\n' >> "$HOST_DIR/default.nix"
+            printf '    };\n' >> "$HOST_DIR/default.nix"
+            printf '}\n' >> "$HOST_DIR/default.nix"
+            ok "Created modules/hosts/$HOSTNAME/default.nix."
           fi
 
           # ── Generate disko config ─────────────────────────────────────────
@@ -252,51 +263,42 @@
           SWAP_SIZE="''${SWAP_GB}G"
 
           printf '{ ... }: {\n' > "$HOST_DIR/disko.nix"
-          printf '  flake.nixosModules.disko-layout = { ... }: {\n' >> "$HOST_DIR/disko.nix"
-          printf '    disko.devices.disk.main = {\n' >> "$HOST_DIR/disko.nix"
-          printf '      device = "%s";\n' "$DISK" >> "$HOST_DIR/disko.nix"
-          printf '      type = "disk";\n' >> "$HOST_DIR/disko.nix"
-          printf '      content = {\n' >> "$HOST_DIR/disko.nix"
-          printf '        type = "gpt";\n' >> "$HOST_DIR/disko.nix"
-          printf '        partitions = {\n' >> "$HOST_DIR/disko.nix"
-          printf '          ESP = {\n' >> "$HOST_DIR/disko.nix"
-          printf '            size = "512M";\n' >> "$HOST_DIR/disko.nix"
-          printf '            type = "EF00";\n' >> "$HOST_DIR/disko.nix"
-          printf '            content = {\n' >> "$HOST_DIR/disko.nix"
-          printf '              type = "filesystem";\n' >> "$HOST_DIR/disko.nix"
-          printf '              format = "vfat";\n' >> "$HOST_DIR/disko.nix"
-          printf '              mountpoint = "/boot";\n' >> "$HOST_DIR/disko.nix"
-          printf '              mountOptions = [ "fmask=0077" "dmask=0077" ];\n' >> "$HOST_DIR/disko.nix"
-          printf '            };\n' >> "$HOST_DIR/disko.nix"
+          printf '  disko.devices.disk.main = {\n' >> "$HOST_DIR/disko.nix"
+          printf '    device = "%s";\n' "$DISK" >> "$HOST_DIR/disko.nix"
+          printf '    type = "disk";\n' >> "$HOST_DIR/disko.nix"
+          printf '    content = {\n' >> "$HOST_DIR/disko.nix"
+          printf '      type = "gpt";\n' >> "$HOST_DIR/disko.nix"
+          printf '      partitions = {\n' >> "$HOST_DIR/disko.nix"
+          printf '        ESP = {\n' >> "$HOST_DIR/disko.nix"
+          printf '          size = "512M";\n' >> "$HOST_DIR/disko.nix"
+          printf '          type = "EF00";\n' >> "$HOST_DIR/disko.nix"
+          printf '          content = {\n' >> "$HOST_DIR/disko.nix"
+          printf '            type = "filesystem";\n' >> "$HOST_DIR/disko.nix"
+          printf '            format = "vfat";\n' >> "$HOST_DIR/disko.nix"
+          printf '            mountpoint = "/boot";\n' >> "$HOST_DIR/disko.nix"
+          printf '            mountOptions = [ "fmask=0077" "dmask=0077" ];\n' >> "$HOST_DIR/disko.nix"
           printf '          };\n' >> "$HOST_DIR/disko.nix"
-          printf '          swap = {\n' >> "$HOST_DIR/disko.nix"
-          printf '            size = "%s";\n' "$SWAP_SIZE" >> "$HOST_DIR/disko.nix"
-          printf '            content = {\n' >> "$HOST_DIR/disko.nix"
-          printf '              type = "swap";\n' >> "$HOST_DIR/disko.nix"
-          printf '              resumeDevice = true;\n' >> "$HOST_DIR/disko.nix"
-          printf '            };\n' >> "$HOST_DIR/disko.nix"
+          printf '        };\n' >> "$HOST_DIR/disko.nix"
+          printf '        swap = {\n' >> "$HOST_DIR/disko.nix"
+          printf '          size = "%s";\n' "$SWAP_SIZE" >> "$HOST_DIR/disko.nix"
+          printf '          content = {\n' >> "$HOST_DIR/disko.nix"
+          printf '            type = "swap";\n' >> "$HOST_DIR/disko.nix"
+          printf '            resumeDevice = true;\n' >> "$HOST_DIR/disko.nix"
           printf '          };\n' >> "$HOST_DIR/disko.nix"
-          printf '          root = {\n' >> "$HOST_DIR/disko.nix"
-          printf '            size = "100%%";\n' >> "$HOST_DIR/disko.nix"
-          printf '            content = {\n' >> "$HOST_DIR/disko.nix"
-          printf '              type = "filesystem";\n' >> "$HOST_DIR/disko.nix"
-          printf '              format = "ext4";\n' >> "$HOST_DIR/disko.nix"
-          printf '              mountpoint = "/";\n' >> "$HOST_DIR/disko.nix"
-          printf '            };\n' >> "$HOST_DIR/disko.nix"
+          printf '        };\n' >> "$HOST_DIR/disko.nix"
+          printf '        root = {\n' >> "$HOST_DIR/disko.nix"
+          printf '          size = "100%%";\n' >> "$HOST_DIR/disko.nix"
+          printf '          content = {\n' >> "$HOST_DIR/disko.nix"
+          printf '            type = "filesystem";\n' >> "$HOST_DIR/disko.nix"
+          printf '            format = "ext4";\n' >> "$HOST_DIR/disko.nix"
+          printf '            mountpoint = "/";\n' >> "$HOST_DIR/disko.nix"
           printf '          };\n' >> "$HOST_DIR/disko.nix"
           printf '        };\n' >> "$HOST_DIR/disko.nix"
           printf '      };\n' >> "$HOST_DIR/disko.nix"
           printf '    };\n' >> "$HOST_DIR/disko.nix"
           printf '  };\n' >> "$HOST_DIR/disko.nix"
           printf '}\n' >> "$HOST_DIR/disko.nix"
-          ok "Disko config written to modules/hosts/$HOSTDIR/disko.nix."
-
-          # ── Inject disko into host default.nix ────────────────────────────
-          if ! grep -q "disko.nixosModules.disko" "$HOST_DIR/default.nix"; then
-          sed -i 's|(builtins.attrValues self.nixosModules)|(builtins.attrValues self.nixosModules) ++ [ inputs.disko.nixosModules.disko ]|' \
-          "$HOST_DIR/default.nix"
-            ok "Injected disko nixosModule into $HOSTDIR/default.nix."
-          fi
+          ok "Disko config written to modules/hosts/$HOSTNAME/disko.nix."
 
           # ── Disko — partition, format, mount ──────────────────────────────
           mount -o remount,size=4G /nix/.rw-store 2>/dev/null || true
@@ -316,15 +318,8 @@
           nixos-generate-config --root /mnt --no-filesystems
           ok "Hardware config generated."
 
-          info "Wrapping for dendritic pattern…"
-          {
-            echo "{ ... }: {"
-            echo "  flake.nixosModules.hardware ="
-            cat /mnt/etc/nixos/hardware-configuration.nix
-            echo ";"
-            echo "}"
-          } > "$HOST_DIR/hardware.nix"
-          ok "Hardware config written to modules/hosts/$HOSTDIR/hardware.nix."
+          cp /mnt/etc/nixos/hardware-configuration.nix "$HOST_DIR/hardware.nix"
+          ok "Hardware config copied to modules/hosts/$HOSTNAME/hardware.nix."
 
           # ── Install ───────────────────────────────────────────────────────
           header "Installing NixOS…"
@@ -355,10 +350,10 @@
           echo -e "''${GREEN}''${BOLD}  ✓ Installation complete!''${RESET}"
           echo ""
           echo -e "  ''${DIM}Home Manager will run automatically on first login.''${RESET}"
-          if [[ "$HOSTDIR" != "desktop" ]]; then
+          if [[ "$HOSTNAME" != "desktop" ]]; then
             echo ""
-            echo -e "  ''${YELLOW}''${BOLD}Reminder:''${RESET} Review modules/hosts/$HOSTDIR/default.nix"
-            echo -e "  ''${DIM}and remove any desktop-specific settings (e.g. Nvidia).''${RESET}"
+            echo -e "  ''${YELLOW}''${BOLD}Note:''${RESET} Add any machine-specific settings to"
+            echo -e "  ''${DIM}modules/hosts/$HOSTNAME/default.nix''${RESET}"
           fi
           echo ""
 

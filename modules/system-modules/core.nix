@@ -21,15 +21,23 @@
     virtualisation.libvirtd.enable = true;
     programs.virt-manager.enable = true;
     virtualisation.spiceUSBRedirection.enable = true;
+    networking.hostName = userConfig.hostname;
+    time.timeZone = userConfig.timezone;
+    i18n.defaultLocale = userConfig.locale;
+    system.stateVersion = userConfig.stateVersion;
     nix.registry.nixpkgs.flake = inputs.nixpkgs;
+    nix.settings.download-buffer-size = 134217728;
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
+    nix.settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
     nix.gc = {
       automatic = true;
       dates = "weekly";
       options = "--delete-older-than 30d";
     };
     nix.optimise.automatic = true;
-
     users.users.${userConfig.username} = {
       shell = pkgs.zsh;
       isNormalUser = true;

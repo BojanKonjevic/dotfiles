@@ -8,7 +8,7 @@
   homeDirectory = "/home/bojan";
 
   # ── Machine ──────────────────────────────────────────────────────────────────
-  hostname = "nixos";
+  hostname = "desktop";
   system = "x86_64-linux";
 
   # ── Versions ─────────────────────────────────────────────────────────────────

@@ -58,10 +58,14 @@
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports =
         [
+          ./modules/hosts/${userConfig.hostname}/default.nix
           treefmt-nix.flakeModule
           inputs.git-hooks.flakeModule
         ]
-        ++ (import-tree ./modules).imports;
+        ++ (import-tree ./modules/system-modules).imports
+        ++ (import-tree ./modules/home-modules).imports
+        ++ (import-tree ./modules/home).imports
+        ++ (import-tree ./modules/lib).imports;
       systems = [userConfig.system];
     };
 }
