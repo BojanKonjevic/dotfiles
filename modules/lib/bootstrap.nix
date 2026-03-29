@@ -284,6 +284,7 @@
           fi
 
           # ── Disko — partition, format, mount ──────────────────────────────
+          mount -o remount,size=4G /nix/.rw-store 2>/dev/null || true
           header "Partitioning and formatting $DISK…"
 
           nix run \
@@ -318,7 +319,8 @@
           nixos-install \
             --flake "$TMPDIR#$HOSTNAME" \
             --no-root-passwd \
-            --option download-buffer-size 134217728
+            --option download-buffer-size 134217728 \
+            --option store /mnt
           ok "NixOS installed."
 
           # ── Copy dotfiles to installed system ─────────────────────────────
