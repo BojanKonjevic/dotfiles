@@ -34,6 +34,7 @@
       shell = pkgs.zsh;
       isNormalUser = true;
       description = userConfig.fullName;
+      initialPassword = "nixos";
       extraGroups = [
         "libvirtd"
         "networkmanager"

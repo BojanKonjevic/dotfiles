@@ -28,7 +28,11 @@
             local label="$1" default="$2" varname="$3"
             ask "$label [''${DIM}$default''${RESET}]:"
             read -r input
-            eval "$varname=\"''${input:-$default}\""
+            if [[ -z "$input" ]]; then
+              printf -v "$varname" "%s" "$default"
+            else
+              printf -v "$varname" "%s" "$input"
+            fi
           }
 
           confirm() {
@@ -60,6 +64,17 @@
             err "  nix-shell -p git home-manager"
             exit 1
           fi
+
+          # ── Network check ───────────────────────────────────────────────
+          header "Checking network…"
+
+          if ! ping -c1 github.com &>/dev/null; then
+            err "No internet connection (cannot reach github.com)."
+            exit 1
+          fi
+
+          ok "Network OK."
+
 
           # ── EFI check ─────────────────────────────────────────────────────
           header "Checking system firmware…"
