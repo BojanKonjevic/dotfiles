@@ -75,5 +75,7 @@
     xdg.configFile."quickshell/bar/shell.qml".source = ./bar/shell.qml;
     xdg.configFile."quickshell/bar/Bar.qml".source = ./bar/Bar.qml;
     xdg.configFile."quickshell/bar/WorkspaceButton.qml".source = ./bar/WorkspaceButton.qml;
+    xdg.configFile."quickshell/bar/NotificationPopups.qml".source = ./bar/NotificationPopups.qml;
+    xdg.configFile."quickshell/bar/NotificationPopup.qml".source = ./bar/NotificationPopup.qml;
   };
 }

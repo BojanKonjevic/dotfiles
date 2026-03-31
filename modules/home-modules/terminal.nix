@@ -91,6 +91,7 @@
       ];
 
       shellAliases = {
+        v = "nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
         pg = "psql -d postgres --dbname";
         dev = "nix develop";
         cal = "calcurse";

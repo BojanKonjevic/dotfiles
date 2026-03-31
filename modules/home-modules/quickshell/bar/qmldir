@@ -1,3 +1,5 @@
 singleton Colours Colours.qml
 Bar Bar.qml
 WorkspaceButton WorkspaceButton.qml
+NotificationPopups NotificationPopups.qml
+NotificationPopup NotificationPopup.qml

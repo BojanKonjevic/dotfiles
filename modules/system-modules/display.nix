@@ -1,9 +1,16 @@
 {...}: {
   flake.nixosModules.display = {
+    config,
+    inputs,
     pkgs,
     userConfig,
     ...
-  }: {
+  }: let
+    nvidia-pkgs = import inputs.nixpkgs-nvidia {
+      system = pkgs.stdenv.hostPlatform.system;
+      config.allowUnfree = true;
+    };
+  in {
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1";
       GBM_BACKEND = "nvidia-drm";
@@ -28,6 +35,7 @@
       powerManagement.finegrained = false;
       open = false;
       nvidiaSettings = true;
+      package = (nvidia-pkgs.linuxKernel.packagesFor config.boot.kernelPackages.kernel).nvidiaPackages.production;
     };
     hardware.graphics = {
       enable = true;

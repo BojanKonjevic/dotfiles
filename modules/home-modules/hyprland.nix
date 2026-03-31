@@ -144,7 +144,6 @@
           [
             "CTRL, ESCAPE, exec, ydotool click 0xC0"
             "$mainMod SHIFT, W, exec, wallpaper-picker"
-            "$mainMod, I, exec, swaync-client -t"
             "$mainMod, BACKSLASH, exec, mic-toggle"
             "$mainMod, M, exec, media-popup-toggle"
             "$mainMod, N, exec, $privateWindow"
