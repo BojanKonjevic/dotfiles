@@ -5,6 +5,9 @@ ShellRoot {
     NotificationServer {
         id: notifServer
         keepOnReload: true
+        onNotification: function (notif) {
+            notif.tracked = true;
+        }
     }
 
     Variants {

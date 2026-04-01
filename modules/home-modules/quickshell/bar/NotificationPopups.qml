@@ -13,13 +13,14 @@ PanelWindow {
         right: true
     }
     margins.top: 36
-    width: 380
-    height: 800
+    implicitWidth: 380
+    implicitHeight: notifColumn.implicitHeight + 16
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     aboveWindows: true
 
     Column {
+        id: notifColumn
         anchors {
             top: parent.top
             right: parent.right

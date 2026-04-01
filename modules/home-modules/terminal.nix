@@ -91,7 +91,8 @@
       ];
 
       shellAliases = {
-        v = "nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
+        v = "nvim";
+        vf = "nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
         pg = "psql -d postgres --dbname";
         dev = "nix develop";
         cal = "calcurse";
@@ -107,6 +108,7 @@
         br = "br --hidden";
         brd = "br --sizes --sort-by-size";
         pyproj = "$HOME/scripts/new-python-project.sh";
+        yt = "$HOME/scripts/yttranscript.py";
 
         nr = "nh os switch";
         hm = "nh home switch";
