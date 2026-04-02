@@ -3,6 +3,7 @@
     quickshell,
     theme,
     pkgs,
+    userConfig,
     ...
   }: let
     coloursQml = ''
@@ -44,6 +45,8 @@
     home.packages = [
       quickshell
       (pkgs.writeShellScriptBin "power-menu" "qs -c powermenu")
+
+      # ── Bar helpers ────────────────────────────────────────────────────────
       (pkgs.writeShellScriptBin "qs-cpu" ''
         awk '
           NR==1 { u=$2+$4; t=$2+$3+$4+$5 }
@@ -59,6 +62,57 @@
       '')
       (pkgs.writeShellScriptBin "qs-mic" ''
         wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -c MUTED
+      '')
+
+      # ── Clipboard helpers ──────────────────────────────────────────────────
+      (pkgs.writeShellScriptBin "qs-clip-clear-text" ''
+        cliphist list | while IFS=$'\t' read -r id content; do
+          [[ "$content" == *"[[ binary data"* ]] && continue
+          printf '%s\t%s' "$id" "$content" | cliphist delete
+        done
+      '')
+      (pkgs.writeShellScriptBin "qs-clip-clear-img" ''
+        cliphist list | while IFS=$'\t' read -r id content; do
+          [[ "$content" == *"[[ binary data"* ]] || continue
+          printf '%s\t%s' "$id" "$content" | cliphist delete
+        done
+      '')
+      (pkgs.writeShellScriptBin "qs-clip-images" ''
+        CACHE_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/cliphist-qs"
+        mkdir -p "$CACHE_DIR"
+        mapfile -t live_ids < <(cliphist list | awk -F'\t' '{print $1}')
+        for f in "$CACHE_DIR"/*.png; do
+          [[ -f "$f" ]] || continue
+          id="''${f##*/}"; id="''${id%.png}"
+          printf '%s\n' "''${live_ids[@]}" | grep -qx "$id" || rm -f "$f"
+        done
+        while IFS=$'\t' read -r id content; do
+          [[ "$content" == *"[[ binary data"* ]] || continue
+          img="$CACHE_DIR/''${id}.png"
+          if [[ ! -s "$img" ]]; then
+            printf '%s\t%s' "$id" "$content" | cliphist decode > "$img" 2>/dev/null
+          fi
+          [[ -s "$img" ]] || continue
+          printf '{"id":"%s","content":"%s","path":"file://%s"}\n' "$id" "$content" "$img"
+        done < <(cliphist list)
+      '')
+
+      # ── Wallpaper helpers ──────────────────────────────────────────────────
+      (pkgs.writeShellScriptBin "qs-wallpapers" ''
+        find ${userConfig.wallpaperDir} -maxdepth 1 -type f \
+          \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) \
+          | sort \
+          | while read -r f; do
+              printf '{"name":"%s","path":"file://%s"}\n' "$(basename "$f")" "$f"
+            done
+      '')
+      (pkgs.writeShellScriptBin "qs-setwall" ''
+        swww img "$1" \
+          --transition-type wipe \
+          --transition-angle 30 \
+          --transition-duration 0.8 \
+          --transition-fps 60
+        ln -sf "$1" "${userConfig.wallpaperDir}/wall.jpg"
       '')
     ];
 
@@ -77,5 +131,30 @@
     xdg.configFile."quickshell/bar/WorkspaceButton.qml".source = ./bar/WorkspaceButton.qml;
     xdg.configFile."quickshell/bar/NotificationPopups.qml".source = ./bar/NotificationPopups.qml;
     xdg.configFile."quickshell/bar/NotificationPopup.qml".source = ./bar/NotificationPopup.qml;
+
+    # ── Launcher ──────────────────────────────────────────────────────────────
+    xdg.configFile."quickshell/launcher/Colours.qml".text = coloursQml;
+    xdg.configFile."quickshell/launcher/qmldir".source = ./launcher/qmldir;
+    xdg.configFile."quickshell/launcher/shell.qml".source = ./launcher/shell.qml;
+    xdg.configFile."quickshell/launcher/Launcher.qml".source = ./launcher/Launcher.qml;
+    xdg.configFile."quickshell/launcher/AppEntry.qml".source = ./launcher/AppEntry.qml;
+
+    # ── Clipboard text ────────────────────────────────────────────────────────
+    xdg.configFile."quickshell/clip-text/Colours.qml".text = coloursQml;
+    xdg.configFile."quickshell/clip-text/qmldir".source = ./clip-text/qmldir;
+    xdg.configFile."quickshell/clip-text/shell.qml".source = ./clip-text/shell.qml;
+    xdg.configFile."quickshell/clip-text/ClipText.qml".source = ./clip-text/ClipText.qml;
+
+    # ── Clipboard image ───────────────────────────────────────────────────────
+    xdg.configFile."quickshell/clip-img/Colours.qml".text = coloursQml;
+    xdg.configFile."quickshell/clip-img/qmldir".source = ./clip-img/qmldir;
+    xdg.configFile."quickshell/clip-img/shell.qml".source = ./clip-img/shell.qml;
+    xdg.configFile."quickshell/clip-img/ClipImage.qml".source = ./clip-img/ClipImage.qml;
+
+    # ── Wallpaper ─────────────────────────────────────────────────────────────
+    xdg.configFile."quickshell/wallpaper/Colours.qml".text = coloursQml;
+    xdg.configFile."quickshell/wallpaper/qmldir".source = ./wallpaper/qmldir;
+    xdg.configFile."quickshell/wallpaper/shell.qml".source = ./wallpaper/shell.qml;
+    xdg.configFile."quickshell/wallpaper/WallpaperPicker.qml".source = ./wallpaper/WallpaperPicker.qml;
   };
 }

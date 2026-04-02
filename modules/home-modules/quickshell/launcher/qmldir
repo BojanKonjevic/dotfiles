@@ -1,0 +1,4 @@
+singleton Colours Colours.qml
+Launcher Launcher.qml
+AppEntry AppEntry.qml
+
