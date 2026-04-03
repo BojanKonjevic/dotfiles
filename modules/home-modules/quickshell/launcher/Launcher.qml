@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
+import Quickshell.Services.DesktopEntries
 
 Rectangle {
     id: root
@@ -18,6 +18,8 @@ Rectangle {
 
     property string searchText: ""
 
+    Component.onCompleted: searchInput.forceActiveFocus()
+
     ColumnLayout {
         anchors {
             fill: parent
@@ -25,7 +27,6 @@ Rectangle {
         }
         spacing: 14
 
-        // ── Search bar ───────────────────────────────────────────────────────────
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 0
@@ -49,7 +50,6 @@ Rectangle {
                     font.family: Colours.fontFamily
                     font.pixelSize: 18
                     font.weight: Font.Light
-                    focus: true
                     onTextChanged: root.searchText = text.toLowerCase()
 
                     Keys.onReturnPressed: {
@@ -81,7 +81,6 @@ Rectangle {
             }
         }
 
-        // ── App list ─────────────────────────────────────────────────────────────
         Flickable {
             Layout.fillWidth: true
             Layout.fillHeight: true

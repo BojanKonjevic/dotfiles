@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Io
 
 Rectangle {
     id: root
 
     width: 820
-    implicitHeight: Math.min(620, header.implicitHeight + grid.implicitHeight + 48)
+    height: 620
     radius: 14
     color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.97)
     border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.45)
@@ -17,11 +18,25 @@ Rectangle {
     }
 
     property var wallpapers: []
+    property string searchText: ""
+
+    property var filtered: {
+        var term = searchText.toLowerCase();
+        if (term === "")
+            return wallpapers;
+        return wallpapers.filter(function (w) {
+            return w.name.toLowerCase().indexOf(term) !== -1;
+        });
+    }
+
+    Component.onCompleted: {
+        searchInput.forceActiveFocus();
+        loadProc.running = true;
+    }
 
     Process {
         id: loadProc
         command: ["qs-wallpapers"]
-        running: true
         stdout: SplitParser {
             onRead: function (line) {
                 try {
@@ -31,14 +46,6 @@ Rectangle {
         }
     }
 
-    Process {
-        id: setProc
-        property string path: ""
-        command: path !== "" ? ["qs-setwall", path] : []
-        onRunningChanged: if (!running && path !== "")
-            Qt.quit()
-    }
-
     ColumnLayout {
         anchors {
             fill: parent
@@ -46,9 +53,10 @@ Rectangle {
         }
         spacing: 14
 
+        // ── Header ───────────────────────────────────────────────────────────────
         RowLayout {
-            id: header
             Layout.fillWidth: true
+            spacing: 8
 
             Text {
                 text: "  Wallpaper"
@@ -56,6 +64,24 @@ Rectangle {
                 font.family: Colours.fontFamily
                 font.pixelSize: 18
                 font.weight: Font.Light
+            }
+
+            TextInput {
+                id: searchInput
+                Layout.fillWidth: true
+                color: Colours.text
+                font.family: Colours.fontFamily
+                font.pixelSize: 18
+                font.weight: Font.Light
+                onTextChanged: root.searchText = text
+
+                Text {
+                    anchors.fill: parent
+                    text: "filter wallpapers…"
+                    color: Colours.overlay0
+                    font: parent.font
+                    visible: parent.text === ""
+                }
             }
         }
 
@@ -69,15 +95,15 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            contentHeight: grid.implicitHeight
+            contentHeight: wallGrid.height
 
             Flow {
-                id: grid
+                id: wallGrid
                 width: parent.width
                 spacing: 10
 
                 Repeater {
-                    model: root.wallpapers
+                    model: root.filtered
                     delegate: Rectangle {
                         required property var modelData
                         width: 178
@@ -103,6 +129,9 @@ Rectangle {
                                 source: modelData.path
                                 fillMode: Image.PreserveAspectCrop
                                 smooth: true
+                                sourceSize.width: 200
+                                sourceSize.height: 150
+                                asynchronous: true
                             }
 
                             Rectangle {
@@ -150,10 +179,9 @@ Rectangle {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                // Strip file:// prefix for swww
                                 var path = modelData.path.replace("file://", "");
-                                setProc.path = path;
-                                setProc.running = true;
+                                Quickshell.execDetached(["qs-setwall", path]);
+                                Qt.quit();
                             }
                         }
                     }

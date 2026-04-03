@@ -47,6 +47,7 @@ in {
             pavucontrol
             tree
             networkmanagerapplet
+            gnome-calculator
           ];
         }
       ];

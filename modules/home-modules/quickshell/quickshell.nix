@@ -42,9 +42,17 @@
       }
     '';
   in {
-    home.packages = [
+    home.packages = with pkgs; [
       quickshell
+      wl-clipboard
+      cliphist
       (pkgs.writeShellScriptBin "power-menu" "qs -c powermenu")
+      (pkgs.writeShellScriptBin "qs-clip-copy-text" ''
+        printf '%s' "$1" | cliphist decode | wl-copy
+      '')
+      (pkgs.writeShellScriptBin "qs-clip-copy-img" ''
+        printf '%s' "$1" | cliphist decode | wl-copy
+      '')
 
       # ── Bar helpers ────────────────────────────────────────────────────────
       (pkgs.writeShellScriptBin "qs-cpu" ''

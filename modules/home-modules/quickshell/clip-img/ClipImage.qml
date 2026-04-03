@@ -18,10 +18,16 @@ Rectangle {
 
     property var images: []
 
+    function reload() {
+        root.images = [];
+        loadProc.running = true;
+    }
+
+    Component.onCompleted: loadProc.running = true
+
     Process {
         id: loadProc
         command: ["qs-clip-images"]
-        running: true
         stdout: SplitParser {
             onRead: function (line) {
                 try {
@@ -32,37 +38,16 @@ Rectangle {
     }
 
     Process {
-        id: decodeProc
-        property string entryLine: ""
-        command: ["cliphist", "decode"]
-        onStarted: {
-            stdin.write(entryLine);
-            stdin.close();
-        }
-        stdout: SplitParser {
-            onRead: function (data) {
-                copyProc.dataToCopy = data;
-            }
-        }
-        onExited: if (copyProc.dataToCopy !== "")
-            copyProc.running = true
-    }
-
-    Process {
         id: copyProc
-        property string dataToCopy: ""
-        command: ["wl-copy"]
-        onStarted: {
-            stdin.write(dataToCopy);
-            stdin.close();
-        }
+        property string entryLine: ""
+        command: ["qs-clip-copy-img", entryLine]
         onExited: Qt.quit()
     }
 
     Process {
         id: clearProc
         command: ["qs-clip-clear-img"]
-        onExited: Qt.quit()
+        onExited: root.reload()
     }
 
     ColumnLayout {
@@ -139,6 +124,10 @@ Rectangle {
                             source: modelData.path
                             fillMode: Image.PreserveAspectCrop
                             smooth: true
+                            // Cap texture size — loading full-res images as thumbs kills memory
+                            sourceSize.width: 200
+                            sourceSize.height: 150
+                            asynchronous: true
                         }
 
                         Rectangle {
@@ -159,8 +148,8 @@ Rectangle {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                decodeProc.entryLine = modelData.id + "\t" + modelData.content;
-                                decodeProc.running = true;
+                                copyProc.entryLine = modelData.id + "\t" + modelData.content;
+                                copyProc.running = true;
                             }
                         }
                     }

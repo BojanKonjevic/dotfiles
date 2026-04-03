@@ -147,8 +147,8 @@
             "$mainMod, BACKSLASH, exec, mic-toggle"
             "$mainMod, M, exec, media-popup-toggle"
             "$mainMod, N, exec, $privateWindow"
-            "$mainMod, C, exec, clip-text"
-            "$mainMod SHIFT, C, exec, clip-img"
+            "$mainMod, C, exec, qs -c clip-text"
+            "$mainMod SHIFT, C, exec, qs -c clip-img"
 
             "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"
             "$mainMod SHIFT, S, exec, wl-paste --type image/png > \"${userConfig.screenshotsDir}/shot_$(date +%F_%H-%M-%S).png\""

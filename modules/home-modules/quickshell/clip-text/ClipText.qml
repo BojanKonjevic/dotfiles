@@ -28,10 +28,19 @@ Rectangle {
         });
     }
 
+    Component.onCompleted: {
+        searchInput.forceActiveFocus();
+        listProc.running = true;
+    }
+
+    function reload() {
+        root.entries = [];
+        listProc.running = true;
+    }
+
     Process {
         id: listProc
         command: ["cliphist", "list"]
-        running: true
         stdout: SplitParser {
             onRead: function (line) {
                 var tab = line.indexOf('\t');
@@ -52,37 +61,16 @@ Rectangle {
     }
 
     Process {
-        id: decodeProc
-        property string entryLine: ""
-        command: ["cliphist", "decode"]
-        onStarted: {
-            stdin.write(entryLine);
-            stdin.close();
-        }
-        stdout: SplitParser {
-            onRead: function (data) {
-                copyProc.textToCopy = data;
-            }
-        }
-        onExited: if (copyProc.textToCopy !== "")
-            copyProc.running = true
-    }
-
-    Process {
         id: copyProc
-        property string textToCopy: ""
-        command: ["wl-copy"]
-        onStarted: {
-            stdin.write(textToCopy);
-            stdin.close();
-        }
+        property string entryLine: ""
+        command: ["qs-clip-copy-text", entryLine]
         onExited: Qt.quit()
     }
 
     Process {
         id: clearProc
         command: ["qs-clip-clear-text"]
-        onExited: Qt.quit()
+        onExited: root.reload()
     }
 
     ColumnLayout {
@@ -111,7 +99,6 @@ Rectangle {
                 font.family: Colours.fontFamily
                 font.pixelSize: 18
                 font.weight: Font.Light
-                focus: true
                 onTextChanged: root.searchText = text
 
                 Text {
@@ -195,8 +182,8 @@ Rectangle {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                decodeProc.entryLine = modelData.id + "\t" + modelData.content;
-                                decodeProc.running = true;
+                                copyProc.entryLine = modelData.id + "\t" + modelData.content;
+                                copyProc.running = true;
                             }
                         }
                     }
