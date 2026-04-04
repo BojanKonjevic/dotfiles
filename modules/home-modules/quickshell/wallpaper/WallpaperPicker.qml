@@ -18,7 +18,6 @@ Rectangle {
 
     property var wallpapers: []
     property string searchText: ""
-
     property var filtered: {
         var term = searchText.toLowerCase();
         if (term === "")
@@ -27,6 +26,11 @@ Rectangle {
             return w.name.toLowerCase().indexOf(term) !== -1;
         });
     }
+
+    readonly property int cols: 4
+    readonly property real gridWidth: root.width - 32
+    readonly property real cellW: Math.floor(gridWidth / cols)
+    readonly property real cellH: 158
 
     Component.onCompleted: {
         searchInput.forceActiveFocus();
@@ -52,7 +56,6 @@ Rectangle {
         }
         spacing: 14
 
-        // Header
         RowLayout {
             Layout.fillWidth: true
             spacing: 8
@@ -73,6 +76,7 @@ Rectangle {
                 font.pixelSize: 18
                 font.weight: Font.Light
                 onTextChanged: root.searchText = text
+                Keys.onEscapePressed: Qt.quit()
 
                 Text {
                     anchors.fill: parent
@@ -96,43 +100,63 @@ Rectangle {
             Layout.fillHeight: true
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-
-            cellWidth: 188
-            cellHeight: 158
-
+            cellWidth: root.cellW
+            cellHeight: root.cellH
+            cacheBuffer: root.cellH * 2
             model: root.filtered
 
-            delegate: Rectangle {
-                id: tile
-                width: wallGrid.cellWidth - 10
-                height: wallGrid.cellHeight - 10
-                radius: 10
-                color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
-                border.color: mouseArea.containsMouse ? Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.6) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.3)
-                border.width: 1
+            delegate: Item {
+                width: wallGrid.cellWidth
+                height: wallGrid.cellHeight
 
-                Column {
-                    anchors.fill: parent
-                    spacing: 0
+                Rectangle {
+                    id: tile
+                    anchors {
+                        fill: parent
+                        margins: 5
+                    }
+                    radius: 10
+                    color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
+                    border.color: mouseArea.containsMouse ? Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.6) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.3)
+                    border.width: 1
+                    clip: true
+                    Behavior on border.color {
+                        ColorAnimation {
+                            duration: 80
+                        }
+                    }
 
                     Image {
                         id: thumbImage
-                        width: parent.width
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                        }
                         height: parent.height - 22
                         source: modelData.path
                         fillMode: Image.PreserveAspectCrop
                         smooth: false
                         asynchronous: true
-                        cache: false
-                        sourceSize.width: 180
-                        sourceSize.height: 135
+                        sourceSize.width: root.cellW - 10
+                        sourceSize.height: root.cellH - 32
                     }
 
                     Rectangle {
-                        width: parent.width
+                        anchors.fill: thumbImage
+                        color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.3)
+                        visible: thumbImage.status !== Image.Ready
+                        radius: parent.radius
+                    }
+
+                    Rectangle {
+                        anchors {
+                            bottom: parent.bottom
+                            left: parent.left
+                            right: parent.right
+                        }
                         height: 22
                         color: Qt.rgba(Colours.mantle.r, Colours.mantle.g, Colours.mantle.b, 0.9)
-
                         Text {
                             anchors {
                                 left: parent.left
@@ -148,37 +172,29 @@ Rectangle {
                             elide: Text.ElideRight
                         }
                     }
-                }
 
-                // Hover overlay
-                Rectangle {
-                    anchors.fill: parent
-                    radius: parent.radius
-                    color: Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.10)
-                    opacity: mouseArea.containsMouse ? 1.0 : 0.0
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: 80
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: parent.radius
+                        color: Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.10)
+                        opacity: mouseArea.containsMouse ? 1.0 : 0.0
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: 80
+                            }
                         }
                     }
-                }
 
-                MouseArea {
-                    id: mouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-
-                    onClicked: {
-                        var path = modelData.path.replace("file://", "");
-                        Quickshell.execDetached(["qs-setwall", path]);
-                        Qt.quit();
-                    }
-                }
-
-                Behavior on border.color {
-                    ColorAnimation {
-                        duration: 80
+                    MouseArea {
+                        id: mouseArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            var path = modelData.path.replace("file://", "");
+                            Quickshell.execDetached(["qs-setwall", path]);
+                            Qt.quit();
+                        }
                     }
                 }
             }

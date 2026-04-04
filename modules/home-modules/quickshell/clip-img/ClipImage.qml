@@ -18,6 +18,11 @@ Rectangle {
 
     property var images: []
 
+    readonly property int cols: 4
+    readonly property real gridWidth: root.width - 32
+    readonly property real cellW: Math.floor(gridWidth / cols)
+    readonly property real cellH: 148
+
     function reload() {
         root.images = [];
         loadProc.running = true;
@@ -88,69 +93,70 @@ Rectangle {
             color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
         }
 
-        Flickable {
+        GridView {
+            id: imgGrid
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            contentHeight: imgGrid.height
+            boundsBehavior: Flickable.StopAtBounds
+            cellWidth: root.cellW
+            cellHeight: root.cellH
+            cacheBuffer: root.cellH * 2
+            model: root.images
 
-            Flow {
-                id: imgGrid
-                width: parent.width
-                spacing: 10
+            delegate: Item {
+                width: imgGrid.cellWidth
+                height: imgGrid.cellHeight
 
-                Repeater {
-                    model: root.images
-                    delegate: Rectangle {
-                        required property var modelData
-                        width: 178
-                        height: 130
-                        radius: 10
-                        color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
-                        border.color: tileHover.containsMouse ? Qt.rgba(Colours.green.r, Colours.green.g, Colours.green.b, 0.6) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.3)
-                        border.width: 1
-                        clip: true
-                        Behavior on border.color {
-                            ColorAnimation {
+                Rectangle {
+                    anchors {
+                        fill: parent
+                        margins: 5
+                    }
+                    radius: 10
+                    color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
+                    border.color: tileHover.containsMouse ? Qt.rgba(Colours.green.r, Colours.green.g, Colours.green.b, 0.6) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.3)
+                    border.width: 1
+                    clip: true
+                    Behavior on border.color {
+                        ColorAnimation {
+                            duration: 80
+                        }
+                    }
+
+                    Image {
+                        anchors {
+                            fill: parent
+                            margins: 4
+                        }
+                        source: modelData.path
+                        fillMode: Image.PreserveAspectCrop
+                        smooth: false
+                        asynchronous: true
+                        sourceSize.width: root.cellW - 10
+                        sourceSize.height: root.cellH - 10
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: parent.radius
+                        color: Qt.rgba(Colours.green.r, Colours.green.g, Colours.green.b, 0.12)
+                        opacity: tileHover.containsMouse ? 1.0 : 0.0
+                        Behavior on opacity {
+                            NumberAnimation {
                                 duration: 80
                             }
                         }
+                    }
 
-                        Image {
-                            anchors {
-                                fill: parent
-                                margins: 4
-                            }
-                            source: modelData.path
-                            fillMode: Image.PreserveAspectCrop
-                            smooth: true
-                            // Cap texture size — loading full-res images as thumbs kills memory
-                            sourceSize.width: 200
-                            sourceSize.height: 150
-                            asynchronous: true
-                        }
-
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: parent.radius
-                            color: Qt.rgba(Colours.green.r, Colours.green.g, Colours.green.b, 0.12)
-                            opacity: tileHover.containsMouse ? 1.0 : 0.0
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: 80
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            id: tileHover
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                copyProc.entryLine = modelData.id + "\t" + modelData.content;
-                                copyProc.running = true;
-                            }
+                    MouseArea {
+                        id: tileHover
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            copyProc.entryLine = modelData.id + "\t" + modelData.content;
+                            copyProc.running = true;
                         }
                     }
                 }
