@@ -143,7 +143,7 @@
         bind =
           [
             "CTRL, ESCAPE, exec, ydotool click 0xC0"
-            "$mainMod SHIFT, W, exec, wallpaper-picker"
+            "$mainMod SHIFT, W, exec, qs -c wallpaper"
             "$mainMod, BACKSLASH, exec, mic-toggle"
             "$mainMod, M, exec, media-popup-toggle"
             "$mainMod, N, exec, $privateWindow"

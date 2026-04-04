@@ -46,6 +46,7 @@
       quickshell
       wl-clipboard
       cliphist
+      awww
       (pkgs.writeShellScriptBin "power-menu" "qs -c powermenu")
       (pkgs.writeShellScriptBin "qs-clip-copy-text" ''
         printf '%s' "$1" | cliphist decode | wl-copy
