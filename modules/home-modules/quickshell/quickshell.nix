@@ -115,7 +115,7 @@
             done
       '')
       (pkgs.writeShellScriptBin "qs-setwall" ''
-        swww img "$1" \
+        awww img "$1" \
           --transition-type wipe \
           --transition-angle 30 \
           --transition-duration 0.8 \

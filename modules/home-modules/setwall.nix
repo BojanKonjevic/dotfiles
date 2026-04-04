@@ -6,14 +6,14 @@
     ...
   }: {
     home.packages = with pkgs; [
-      swww
+      awww
       (writeShellScriptBin "wallpaper-picker" ''
         WALLPAPER_DIR="${userConfig.wallpaperDir}"
         LOCK_LINK="$WALLPAPER_DIR/wall.jpg"
 
-        # Ensure swww-daemon is running
-        if ! pgrep -x swww-daemon > /dev/null; then
-          swww-daemon &
+        # Ensure awww-daemon is running
+        if ! pgrep -x awww-daemon > /dev/null; then
+          awww-daemon &
           sleep 0.5
         fi
 
@@ -37,7 +37,7 @@
         path="$WALLPAPER_DIR/$selected"
         [[ -f "$path" ]] || exit 1
 
-        swww img "$path" \
+        awww img "$path" \
           --transition-type wipe \
           --transition-angle 30 \
           --transition-duration 0.8 \

@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Services.DesktopEntries
+import Quickshell
 
 Rectangle {
     id: root

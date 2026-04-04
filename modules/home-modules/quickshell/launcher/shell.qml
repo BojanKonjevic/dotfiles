@@ -18,6 +18,7 @@ ShellRoot {
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         aboveWindows: true
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
         Rectangle {
             anchors.fill: parent
