@@ -17,26 +17,67 @@ Rectangle {
     }
 
     property string searchText: ""
-    property var currentApp: null
+    property int currentIndex: -1
 
-    onSearchTextChanged: currentApp = null
+    onSearchTextChanged: {
+        // Reset to first visible item on each keystroke
+        root.currentIndex = -1;
+        resetTimer.restart();
+    }
 
-    onCurrentAppChanged: {
-        for (var i = 0; i < appRepeater.count; i++) {
-            var item = appRepeater.itemAt(i);
-            if (item && item.app === root.currentApp) {
-                var itemY = item.y;
-                var itemH = item.height;
-                if (itemY < appFlick.contentY)
-                    appFlick.contentY = itemY;
-                else if (itemY + itemH > appFlick.contentY + appFlick.height)
-                    appFlick.contentY = itemY + itemH - appFlick.height;
-                break;
+    // Small delay so the delegates have time to update their visible state
+    Timer {
+        id: resetTimer
+        interval: 16
+        onTriggered: {
+            for (var i = 0; i < appList.count; i++) {
+                var item = appList.itemAtIndex(i);
+                if (item && item.visible) {
+                    root.currentIndex = i;
+                    appList.positionViewAtIndex(i, ListView.Beginning);
+                    return;
+                }
             }
+            root.currentIndex = -1;
         }
     }
 
     Component.onCompleted: searchInput.forceActiveFocus()
+
+    function launch(app) {
+        app.execute();
+        Qt.quit();
+    }
+
+    function nextVisible(from) {
+        for (var i = from; i < appList.count; i++) {
+            var item = appList.itemAtIndex(i);
+            if (item && item.visible)
+                return i;
+        }
+        // wrap
+        for (var j = 0; j < from; j++) {
+            var item2 = appList.itemAtIndex(j);
+            if (item2 && item2.visible)
+                return j;
+        }
+        return -1;
+    }
+
+    function prevVisible(from) {
+        for (var i = from; i >= 0; i--) {
+            var item = appList.itemAtIndex(i);
+            if (item && item.visible)
+                return i;
+        }
+        // wrap
+        for (var j = appList.count - 1; j > from; j--) {
+            var item2 = appList.itemAtIndex(j);
+            if (item2 && item2.visible)
+                return j;
+        }
+        return -1;
+    }
 
     ColumnLayout {
         anchors {
@@ -63,55 +104,39 @@ Rectangle {
 
                 TextInput {
                     id: searchInput
-                    Keys.onEscapePressed: Qt.quit()
                     Layout.fillWidth: true
                     color: Colours.text
                     font.family: Colours.fontFamily
                     font.pixelSize: 18
                     font.weight: Font.Light
+
                     onTextChanged: root.searchText = text.toLowerCase()
 
+                    Keys.onEscapePressed: Qt.quit()
+
                     Keys.onReturnPressed: {
-                        var target = root.currentApp;
-                        if (!target) {
-                            for (var i = 0; i < appRepeater.count; i++) {
-                                var item = appRepeater.itemAt(i);
-                                if (item && item.visible) {
-                                    target = item.app;
-                                    break;
-                                }
-                            }
-                        }
-                        if (target) {
-                            target.execute();
-                            Qt.quit();
-                        }
+                        var idx = root.currentIndex;
+                        if (idx < 0)
+                            return;
+                        var item = appList.itemAtIndex(idx);
+                        if (item && item.visible)
+                            root.launch(item.app);
                     }
 
                     Keys.onDownPressed: {
-                        var visible = [];
-                        for (var i = 0; i < appRepeater.count; i++) {
-                            var item = appRepeater.itemAt(i);
-                            if (item && item.visible)
-                                visible.push(item.app);
+                        var next = root.nextVisible(root.currentIndex + 1);
+                        if (next >= 0) {
+                            root.currentIndex = next;
+                            appList.positionViewAtIndex(next, ListView.Contain);
                         }
-                        if (visible.length === 0)
-                            return;
-                        var idx = visible.indexOf(root.currentApp);
-                        root.currentApp = visible[(idx + 1) % visible.length];
                     }
 
                     Keys.onUpPressed: {
-                        var visible = [];
-                        for (var i = 0; i < appRepeater.count; i++) {
-                            var item = appRepeater.itemAt(i);
-                            if (item && item.visible)
-                                visible.push(item.app);
+                        var prev = root.prevVisible(root.currentIndex - 1);
+                        if (prev >= 0) {
+                            root.currentIndex = prev;
+                            appList.positionViewAtIndex(prev, ListView.Contain);
                         }
-                        if (visible.length === 0)
-                            return;
-                        var idx = visible.indexOf(root.currentApp);
-                        root.currentApp = visible[(idx - 1 + visible.length) % visible.length];
                     }
 
                     Text {
@@ -132,34 +157,25 @@ Rectangle {
             }
         }
 
-        Flickable {
-            id: appFlick
+        ListView {
+            id: appList
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            contentHeight: appColumn.height
+            model: DesktopEntries.applications
+            currentIndex: root.currentIndex
+            boundsBehavior: Flickable.StopAtBounds
+            cacheBuffer: 200
 
-            Column {
-                id: appColumn
-                width: parent.width
-                spacing: 2
-
-                Repeater {
-                    id: appRepeater
-                    model: DesktopEntries.applications
-                    delegate: AppEntry {
-                        required property var modelData
-                        app: modelData
-                        width: appColumn.width
-                        selected: root.currentApp === modelData
-                        visible: root.searchText === "" || modelData.name.toLowerCase().indexOf(root.searchText) !== -1 || (modelData.comment && modelData.comment.toLowerCase().indexOf(root.searchText) !== -1)
-                        onClicked: {
-                            root.currentApp = modelData;
-                            modelData.execute();
-                            Qt.quit();
-                        }
-                    }
-                }
+            delegate: AppEntry {
+                required property var modelData
+                required property int index
+                app: modelData
+                width: appList.width
+                selected: index === root.currentIndex
+                visible: root.searchText === "" || modelData.name.toLowerCase().indexOf(root.searchText) !== -1 || (modelData.comment && modelData.comment.toLowerCase().indexOf(root.searchText) !== -1)
+                height: visible ? implicitHeight : 0
+                onClicked: root.launch(modelData)
             }
         }
     }
