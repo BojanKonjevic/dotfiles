@@ -47,7 +47,7 @@
       wl-clipboard
       cliphist
       awww
-      (pkgs.writeShellScriptBin "power-menu" "qs -c powermenu")
+
       (pkgs.writeShellScriptBin "qs-clip-copy-text" ''
         printf '%s' "$1" | cliphist decode | wl-copy
       '')
@@ -125,13 +125,6 @@
       '')
     ];
 
-    # ── Powermenu ──────────────────────────────────────────────────────────────
-    xdg.configFile."quickshell/powermenu/Colours.qml".text = coloursQml;
-    xdg.configFile."quickshell/powermenu/qmldir".source = ./powermenu/qmldir;
-    xdg.configFile."quickshell/powermenu/shell.qml".source = ./powermenu/shell.qml;
-    xdg.configFile."quickshell/powermenu/PowerMenu.qml".source = ./powermenu/PowerMenu.qml;
-    xdg.configFile."quickshell/powermenu/PowerButton.qml".source = ./powermenu/PowerButton.qml;
-
     # ── Bar ───────────────────────────────────────────────────────────────────
     xdg.configFile."quickshell/bar/Colours.qml".text = coloursQml;
     xdg.configFile."quickshell/bar/qmldir".source = ./bar/qmldir;
@@ -140,6 +133,8 @@
     xdg.configFile."quickshell/bar/WorkspaceButton.qml".source = ./bar/WorkspaceButton.qml;
     xdg.configFile."quickshell/bar/NotificationPopups.qml".source = ./bar/NotificationPopups.qml;
     xdg.configFile."quickshell/bar/NotificationPopup.qml".source = ./bar/NotificationPopup.qml;
+    xdg.configFile."quickshell/bar/PowerPanel.qml".source = ./bar/PowerPanel.qml;
+    xdg.configFile."quickshell/bar/PowerPanelButton.qml".source = ./bar/PowerPanelButton.qml;
 
     # ── Launcher ──────────────────────────────────────────────────────────────
     xdg.configFile."quickshell/launcher/Colours.qml".text = coloursQml;

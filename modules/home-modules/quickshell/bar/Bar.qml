@@ -8,6 +8,8 @@ import Quickshell.Io
 PanelWindow {
     id: root
 
+    required property var state_
+
     anchors {
         top: true
         left: true
@@ -16,7 +18,6 @@ PanelWindow {
     implicitHeight: 28
     color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.60)
 
-    // ── Data ──────────────────────────────────────────────────────────────────
     property string clockText: Qt.formatDateTime(new Date(), "dd dddd hh:mm AP")
     property string weatherText: ""
     property int cpuUsage: 0
@@ -123,9 +124,6 @@ PanelWindow {
             micProc.running = true
     }
 
-    // ── Layout ────────────────────────────────────────────────────────────────
-    // Root item so all three sections share the same coordinate space and
-    // the bottom border renders below everything without needing z ordering.
     Item {
         anchors.fill: parent
 
@@ -139,7 +137,7 @@ PanelWindow {
             color: Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.35)
         }
 
-        // ── Left ────────────────────────────────────────────────────────────────
+        // ── Left ────────────────────────────────────────────────────────────
         RowLayout {
             anchors {
                 left: parent.left
@@ -188,6 +186,7 @@ PanelWindow {
             }
         }
 
+        // ── Center ──────────────────────────────────────────────────────────
         RowLayout {
             anchors.centerIn: parent
             spacing: 0
@@ -201,7 +200,7 @@ PanelWindow {
             }
         }
 
-        // ── Right ────────────────────────────────────────────────────────────────
+        // ── Right ────────────────────────────────────────────────────────────
         RowLayout {
             anchors {
                 right: parent.right
@@ -279,11 +278,11 @@ PanelWindow {
                 }
             }
 
+            // ── Power button ─────────────────────────────────────────────────
             Item {
                 id: powerItem
                 implicitWidth: powerLabel.implicitWidth + 20
                 Layout.fillHeight: true
-                property bool hovered: false
 
                 Rectangle {
                     anchors {
@@ -294,6 +293,7 @@ PanelWindow {
                     width: 1
                     color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
                 }
+
                 Text {
                     id: powerLabel
                     anchors.centerIn: parent
@@ -301,19 +301,31 @@ PanelWindow {
                     font.family: Colours.fontFamily
                     font.pixelSize: 18
                     font.weight: Font.Black
-                    color: powerItem.hovered ? Colours.red : Qt.rgba(Colours.overlay1.r, Colours.overlay1.g, Colours.overlay1.b, 0.8)
+                    color: root.state_.powerOpen ? Colours.red : Qt.rgba(Colours.overlay1.r, Colours.overlay1.g, Colours.overlay1.b, 0.8)
                     Behavior on color {
                         ColorAnimation {
                             duration: 100
                         }
                     }
                 }
+
                 MouseArea {
+                    id: powerArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: powerItem.hovered = true
-                    onExited: powerItem.hovered = false
-                    onClicked: Quickshell.execDetached(["power-menu"])
+                    onEntered: {
+                        root.state_.powerOpen = true;
+                    }
+                    onExited: powerHideTimer.restart()
+                }
+
+                Timer {
+                    id: powerHideTimer
+                    interval: 300
+                    onTriggered: {
+                        if (!root.state_.powerPanelHovered)
+                            root.state_.powerOpen = false;
+                    }
                 }
             }
         }
