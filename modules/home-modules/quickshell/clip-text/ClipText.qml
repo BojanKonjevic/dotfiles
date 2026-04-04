@@ -18,6 +18,7 @@ Rectangle {
 
     property string searchText: ""
     property var entries: []
+    property int currentIndex: 0
 
     property var filteredEntries: {
         var term = searchText.toLowerCase();
@@ -26,6 +27,20 @@ Rectangle {
         return entries.filter(function (e) {
             return e.content.toLowerCase().indexOf(term) !== -1;
         });
+    }
+
+    onFilteredEntriesChanged: currentIndex = 0
+
+    onCurrentIndexChanged: {
+        var item = clipRepeater.itemAt(currentIndex);
+        if (!item)
+            return;
+        var itemY = item.y;
+        var itemH = item.height;
+        if (itemY < clipFlick.contentY)
+            clipFlick.contentY = itemY;
+        else if (itemY + itemH > clipFlick.contentY + clipFlick.height)
+            clipFlick.contentY = itemY + itemH - clipFlick.height;
     }
 
     Component.onCompleted: {
@@ -101,6 +116,28 @@ Rectangle {
                 font.weight: Font.Light
                 onTextChanged: root.searchText = text
 
+                Keys.onEscapePressed: Qt.quit()
+
+                Keys.onReturnPressed: {
+                    var entry = root.filteredEntries[root.currentIndex];
+                    if (entry) {
+                        copyProc.entryLine = entry.id + "\t" + entry.content;
+                        copyProc.running = true;
+                    }
+                }
+
+                Keys.onDownPressed: {
+                    if (root.filteredEntries.length === 0)
+                        return;
+                    root.currentIndex = (root.currentIndex + 1) % root.filteredEntries.length;
+                }
+
+                Keys.onUpPressed: {
+                    if (root.filteredEntries.length === 0)
+                        return;
+                    root.currentIndex = (root.currentIndex - 1 + root.filteredEntries.length) % root.filteredEntries.length;
+                }
+
                 Text {
                     anchors.fill: parent
                     text: "search clipboard…"
@@ -130,6 +167,7 @@ Rectangle {
         }
 
         Flickable {
+            id: clipFlick
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
@@ -141,14 +179,16 @@ Rectangle {
                 spacing: 3
 
                 Repeater {
+                    id: clipRepeater
                     model: root.filteredEntries
                     delegate: Rectangle {
                         required property var modelData
+                        required property int index
                         width: clipColumn.width
                         height: 36
                         radius: 8
-                        color: rowHover.containsMouse ? Qt.rgba(Colours.sapphire.r, Colours.sapphire.g, Colours.sapphire.b, 0.18) : "transparent"
-                        border.color: rowHover.containsMouse ? Qt.rgba(Colours.sapphire.r, Colours.sapphire.g, Colours.sapphire.b, 0.55) : "transparent"
+                        color: (index === root.currentIndex || rowHover.containsMouse) ? Qt.rgba(Colours.sapphire.r, Colours.sapphire.g, Colours.sapphire.b, 0.18) : "transparent"
+                        border.color: (index === root.currentIndex || rowHover.containsMouse) ? Qt.rgba(Colours.sapphire.r, Colours.sapphire.g, Colours.sapphire.b, 0.55) : "transparent"
                         border.width: 1
                         Behavior on color {
                             ColorAnimation {
@@ -165,7 +205,7 @@ Rectangle {
                                 rightMargin: 12
                             }
                             text: modelData.content
-                            color: rowHover.containsMouse ? Colours.sapphire : Colours.subtext0
+                            color: (index === root.currentIndex || rowHover.containsMouse) ? Colours.sapphire : Colours.subtext0
                             font.family: Colours.fontFamily
                             font.pixelSize: 13
                             elide: Text.ElideRight
@@ -182,6 +222,7 @@ Rectangle {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
+                                root.currentIndex = index;
                                 copyProc.entryLine = modelData.id + "\t" + modelData.content;
                                 copyProc.running = true;
                             }

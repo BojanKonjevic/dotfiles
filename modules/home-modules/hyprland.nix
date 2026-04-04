@@ -19,7 +19,7 @@
         "$mainMod" = "SUPER";
         "$terminal" = "kitty";
         "$fileManager" = "thunar";
-        "$menu" = "rofi -show drun -theme $HOME/.config/rofi/launcher.rasi -show-icons -icon-theme Papirus";
+        "$menu" = "qs -c launcher";
         "$privateWindow" = "zen-beta --no-remote --private-window";
 
         windowrule = [

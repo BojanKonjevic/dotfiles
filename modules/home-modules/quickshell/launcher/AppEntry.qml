@@ -5,14 +5,18 @@ Rectangle {
     id: entry
 
     required property var app
+    property bool selected: false
+    signal clicked
 
     implicitHeight: visible ? row.implicitHeight + 12 : 0
     height: implicitHeight
     clip: true
     radius: 8
-    color: hovered ? Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.15) : "transparent"
-    border.color: hovered ? Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.4) : "transparent"
+
+    color: (selected || hovered) ? Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.15) : "transparent"
+    border.color: (selected || hovered) ? Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.4) : "transparent"
     border.width: 1
+
     property bool hovered: false
     Behavior on color {
         ColorAnimation {
@@ -49,7 +53,7 @@ Rectangle {
 
             Text {
                 text: entry.app.name
-                color: entry.hovered ? Colours.mauve : Colours.text
+                color: (entry.selected || entry.hovered) ? Colours.mauve : Colours.text
                 font.family: Colours.fontFamily
                 font.pixelSize: 13
                 font.weight: Font.Medium
@@ -80,9 +84,6 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
         onEntered: entry.hovered = true
         onExited: entry.hovered = false
-        onClicked: {
-            entry.app.execute();
-            Qt.quit();
-        }
+        onClicked: entry.clicked()
     }
 }
