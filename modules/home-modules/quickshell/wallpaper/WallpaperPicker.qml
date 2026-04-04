@@ -5,7 +5,6 @@ import Quickshell.Io
 
 Rectangle {
     id: root
-
     width: 820
     height: 620
     radius: 14
@@ -53,13 +52,13 @@ Rectangle {
         }
         spacing: 14
 
-        // ── Header ───────────────────────────────────────────────────────────────
+        // Header
         RowLayout {
             Layout.fillWidth: true
             spacing: 8
 
             Text {
-                text: "  Wallpaper"
+                text: " Wallpaper"
                 color: Colours.lavender
                 font.family: Colours.fontFamily
                 font.pixelSize: 18
@@ -91,99 +90,95 @@ Rectangle {
             color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
         }
 
-        Flickable {
+        GridView {
+            id: wallGrid
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            contentHeight: wallGrid.height
+            boundsBehavior: Flickable.StopAtBounds
 
-            Flow {
-                id: wallGrid
-                width: parent.width
-                spacing: 10
+            cellWidth: 188
+            cellHeight: 158
 
-                Repeater {
-                    model: root.filtered
-                    delegate: Rectangle {
-                        required property var modelData
-                        width: 178
-                        height: 148
-                        radius: 10
-                        color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
-                        border.color: tileHover.containsMouse ? Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.6) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.3)
-                        border.width: 1
-                        clip: true
-                        Behavior on border.color {
-                            ColorAnimation {
-                                duration: 80
+            model: root.filtered
+
+            delegate: Rectangle {
+                id: tile
+                width: wallGrid.cellWidth - 10
+                height: wallGrid.cellHeight - 10
+                radius: 10
+                color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
+                border.color: mouseArea.containsMouse ? Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.6) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.3)
+                border.width: 1
+
+                Column {
+                    anchors.fill: parent
+                    spacing: 0
+
+                    Image {
+                        id: thumbImage
+                        width: parent.width
+                        height: parent.height - 22
+                        source: modelData.path
+                        fillMode: Image.PreserveAspectCrop
+                        smooth: false
+                        asynchronous: true
+                        cache: false
+                        sourceSize.width: 180
+                        sourceSize.height: 135
+                    }
+
+                    Rectangle {
+                        width: parent.width
+                        height: 22
+                        color: Qt.rgba(Colours.mantle.r, Colours.mantle.g, Colours.mantle.b, 0.9)
+
+                        Text {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                verticalCenter: parent.verticalCenter
+                                leftMargin: 6
+                                rightMargin: 6
                             }
+                            text: modelData.name
+                            color: mouseArea.containsMouse ? Colours.lavender : Colours.subtext0
+                            font.family: Colours.fontFamily
+                            font.pixelSize: 10
+                            elide: Text.ElideRight
                         }
+                    }
+                }
 
-                        ColumnLayout {
-                            anchors.fill: parent
-                            spacing: 0
-
-                            Image {
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                source: modelData.path
-                                fillMode: Image.PreserveAspectCrop
-                                smooth: true
-                                sourceSize.width: 200
-                                sourceSize.height: 150
-                                asynchronous: true
-                            }
-
-                            Rectangle {
-                                Layout.fillWidth: true
-                                height: 22
-                                color: Qt.rgba(Colours.mantle.r, Colours.mantle.g, Colours.mantle.b, 0.9)
-
-                                Text {
-                                    anchors {
-                                        left: parent.left
-                                        right: parent.right
-                                        verticalCenter: parent.verticalCenter
-                                        leftMargin: 6
-                                        rightMargin: 6
-                                    }
-                                    text: modelData.name
-                                    color: tileHover.containsMouse ? Colours.lavender : Colours.subtext0
-                                    font.family: Colours.fontFamily
-                                    font.pixelSize: 10
-                                    elide: Text.ElideRight
-                                    Behavior on color {
-                                        ColorAnimation {
-                                            duration: 80
-                                        }
-                                    }
-                                }
-                            }
+                // Hover overlay
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    color: Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.10)
+                    opacity: mouseArea.containsMouse ? 1.0 : 0.0
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 80
                         }
+                    }
+                }
 
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: parent.radius
-                            color: Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.10)
-                            opacity: tileHover.containsMouse ? 1.0 : 0.0
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: 80
-                                }
-                            }
-                        }
+                MouseArea {
+                    id: mouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
 
-                        MouseArea {
-                            id: tileHover
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                var path = modelData.path.replace("file://", "");
-                                Quickshell.execDetached(["qs-setwall", path]);
-                                Qt.quit();
-                            }
-                        }
+                    onClicked: {
+                        var path = modelData.path.replace("file://", "");
+                        Quickshell.execDetached(["qs-setwall", path]);
+                        Qt.quit();
+                    }
+                }
+
+                Behavior on border.color {
+                    ColorAnimation {
+                        duration: 80
                     }
                 }
             }
