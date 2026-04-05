@@ -1,9 +1,9 @@
 {...}: {
   flake.homeModules.hyprland = {
-    userConfig,
-    theme,
     lib,
     pkgs,
+    userConfig,
+    theme,
     ...
   }: {
     home.packages = with pkgs; [
@@ -22,15 +22,17 @@
         "$menu" = "qs -c launcher";
         "$privateWindow" = "zen-beta --no-remote --private-window";
 
-        windowrule = [
-          "opacity 0.95 override 0.92 override, match:class ^(vesktop)$"
-          "opacity 0.95 override 0.92 override, match:class ^(localsend_app)$"
-          "opacity 0.95 override 0.92 override, match:class ^(thunar)$"
-          "opacity 0.95 override 0.92 override, match:class ^(xarchiver)$"
-          "opacity 0.95 override 0.92 override, match:class ^(zen-beta)$"
-          "opacity 0.93 override 0.90 override, match:class ^(org.qbittorrent.qBittorrent)$"
-          "opacity 0.90 override 0.87 override, match:class ^(kitty)$"
-          "opacity 0.93 override 0.90 override, match:class ^(nm-connection-editor)$"
+        windowrule = let
+          opacityRule = opacity: class: "opacity ${opacity} override ${opacity} override, match:class ^(${class})$";
+        in [
+          (opacityRule "0.95 0.92" "vesktop")
+          (opacityRule "0.95 0.92" "localsend_app")
+          (opacityRule "0.95 0.92" "thunar")
+          (opacityRule "0.95 0.92" "xarchiver")
+          (opacityRule "0.95 0.92" "zen-beta")
+          (opacityRule "0.93 0.90" "org.qbittorrent.qBittorrent")
+          (opacityRule "0.90 0.87" "kitty")
+          (opacityRule "0.93 0.90" "nm-connection-editor")
         ];
 
         env = [
@@ -77,14 +79,12 @@
           rounding = 10;
           rounding_power = 2;
           active_opacity = 1.0;
-
           shadow = {
             enabled = true;
             range = 4;
             render_power = 3;
             color = "rgba(1a1a1aee)";
           };
-
           blur = {
             enabled = true;
             size = 3;
@@ -95,14 +95,12 @@
 
         animations = {
           enabled = true;
-
           bezier = [
             "myEase, 0.05, 0.9, 0.1, 1.05"
             "smoothOut, 0.22, 1.0, 0.36, 1.0"
             "linearFade, 0.3, 0.0, 0.7, 1.0"
             "quickEase, 0.25, 0.1, 0.25, 1.0"
           ];
-
           animation = [
             "global, 9, 8, smoothOut"
             "border, 1, 12, default"
@@ -137,7 +135,10 @@
           disable_hyprland_logo = false;
         };
 
-        bind =
+        bind = let
+          ws = n: "$mainMod, ${toString n}, workspace, ${toString n}";
+          move = n: "$mainMod SHIFT, ${toString n}, movetoworkspace, ${toString n}";
+        in
           [
             "CTRL, ESCAPE, exec, ydotool click 0xC0"
             "$mainMod SHIFT, W, exec, qs -c wallpaper"
@@ -145,10 +146,8 @@
             "$mainMod, N, exec, $privateWindow"
             "$mainMod, C, exec, qs -c clip-text"
             "$mainMod SHIFT, C, exec, qs -c clip-img"
-
             "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"
             "$mainMod SHIFT, S, exec, wl-paste --type image/png > \"${userConfig.screenshotsDir}/shot_$(date +%F_%H-%M-%S).png\""
-
             "$mainMod, RETURN, exec, $terminal"
             "$mainMod, e, exec, $fileManager"
             "$mainMod, Q, killactive"
@@ -159,15 +158,14 @@
             "$mainMod, l, movefocus, r"
             "$mainMod, k, movefocus, u"
             "$mainMod, j, movefocus, d"
-
             "$mainMod SHIFT, h, movewindow, l"
             "$mainMod SHIFT, l, movewindow, r"
             "$mainMod SHIFT, k, movewindow, u"
             "$mainMod SHIFT, j, movewindow, d"
           ]
-          ++ (map (n: "$mainMod, ${toString n}, workspace, ${toString n}") (lib.range 1 9))
+          ++ (map ws (lib.range 1 9))
           ++ ["$mainMod, 0, workspace, 10"]
-          ++ (map (n: "$mainMod SHIFT, ${toString n}, movetoworkspace, ${toString n}") (lib.range 1 9))
+          ++ (map move (lib.range 1 9))
           ++ ["$mainMod SHIFT, 0, movetoworkspace, 10"];
 
         bindm = [
@@ -175,6 +173,7 @@
           "$mainMod, mouse:273, resizewindow"
         ];
       };
+
       extraConfig = ''
         bind = $mainMod, R, submap, resize
         submap = resize
@@ -182,7 +181,6 @@
           binde = , L, resizeactive, 20 0
           binde = , K, resizeactive, 0 -20
           binde = , J, resizeactive, 0 20
-
           bind = , RETURN, submap, reset
           bind = , ESCAPE, submap, reset
         submap = reset
