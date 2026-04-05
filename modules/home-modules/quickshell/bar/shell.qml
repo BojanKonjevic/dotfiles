@@ -1,5 +1,6 @@
 import Quickshell
 import Quickshell.Services.Notifications
+import Quickshell.Io
 import QtQuick
 
 ShellRoot {
@@ -20,6 +21,62 @@ ShellRoot {
         property bool dateTimeOpen: false
         property bool dateTimePanelHovered: false
         property var weatherPanel: null
+        property bool mediaOpen: false
+        property bool mediaPanelHovered: false
+        property string mediaTitle: ""
+        property string mediaArtist: ""
+        property string mediaAlbum: ""
+        property string mediaArtUrl: ""
+        property string mediaStatus: "Stopped"
+        property real mediaPosition: 0
+        property real mediaLength: 0
+    }
+
+    Process {
+        id: mediaProc
+        command: ["playerctl", "metadata", "--format", '{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","art":"{{mpris:artUrl}}","status":"{{status}}","length":"{{mpris:length}}"}']
+        stdout: SplitParser {
+            onRead: function (data) {
+                try {
+                    var m = JSON.parse(data);
+                    barState.mediaTitle = m.title || "";
+                    barState.mediaArtist = m.artist || "";
+                    barState.mediaAlbum = m.album || "";
+                    barState.mediaArtUrl = m.art || "";
+                    barState.mediaStatus = m.status || "Stopped";
+                    barState.mediaLength = parseFloat(m.length) / 1000000.0 || 0;
+                } catch (_) {}
+            }
+        }
+        onExited: function (code) {
+            if (code !== 0) {
+                barState.mediaTitle = "";
+                barState.mediaStatus = "Stopped";
+            }
+        }
+    }
+
+    Process {
+        id: mediaPosProc
+        command: ["playerctl", "position"]
+        stdout: SplitParser {
+            onRead: function (data) {
+                barState.mediaPosition = parseFloat(data) || 0;
+            }
+        }
+    }
+
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (!mediaProc.running)
+                mediaProc.running = true;
+            if (!mediaPosProc.running)
+                mediaPosProc.running = true;
+        }
     }
 
     Variants {
@@ -52,6 +109,15 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         delegate: DateTimePanel {
+            required property var modelData
+            screen: modelData
+            state_: barState
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: MediaPanel {
             required property var modelData
             screen: modelData
             state_: barState

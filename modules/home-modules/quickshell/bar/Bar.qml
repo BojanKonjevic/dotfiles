@@ -18,6 +18,8 @@ PanelWindow {
     implicitHeight: 28
     color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.60)
 
+    property bool hasMedia: root.state_.mediaStatus !== "Stopped" && root.state_.mediaTitle !== ""
+
     property string clockText: Qt.formatDateTime(new Date(), "dd dddd hh:mm AP")
     property string weatherText: ""
     property int cpuUsage: 0
@@ -156,7 +158,7 @@ PanelWindow {
                     id: clockLabel
                     anchors.centerIn: parent
                     text: root.clockText
-                    color: root.state_.dateTimeOpen ? Colours.mauve : Colours.mauve
+                    color: Colours.mauve
                     font.family: Colours.fontFamily
                     font.pixelSize: 18
                     font.weight: Font.Black
@@ -200,6 +202,69 @@ PanelWindow {
                 font.weight: Font.Black
                 leftPadding: 10
                 visible: root.weatherText !== ""
+            }
+
+            // ── Media ────────────────────────────────────────────────────────
+            Item {
+                id: mediaItem
+                implicitWidth: mediaRow.implicitWidth + 16
+                Layout.fillHeight: true
+
+                RowLayout {
+                    id: mediaRow
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    Text {
+                        text: "󰎆"
+                        color: root.hasMedia ? Colours.blue : Colours.overlay0
+                        font.family: Colours.fontFamily
+                        font.pixelSize: 14
+                        font.weight: Font.Black
+                    }
+
+                    Text {
+                        text: {
+                            if (!root.hasMedia)
+                                return "No media";
+                            var t = root.state_.mediaTitle;
+                            return t.length > 30 ? t.substring(0, 30) + "…" : t;
+                        }
+                        color: root.hasMedia ? Colours.text : Colours.overlay0
+                        font.family: Colours.fontFamily
+                        font.pixelSize: 12
+                        font.weight: Font.Black
+                    }
+                }
+
+                Rectangle {
+                    anchors {
+                        right: parent.right
+                        top: parent.top
+                        bottom: parent.bottom
+                    }
+                    width: 1
+                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
+                }
+
+                HoverHandler {
+                    onHoveredChanged: {
+                        if (hovered) {
+                            root.state_.mediaOpen = true;
+                        } else {
+                            mediaHideTimer.restart();
+                        }
+                    }
+                }
+
+                Timer {
+                    id: mediaHideTimer
+                    interval: 300
+                    onTriggered: {
+                        if (!root.state_.mediaPanelHovered)
+                            root.state_.mediaOpen = false;
+                    }
+                }
             }
         }
 

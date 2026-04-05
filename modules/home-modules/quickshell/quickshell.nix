@@ -43,6 +43,7 @@
     '';
   in {
     home.packages = with pkgs; [
+      playerctl
       quickshell
       wl-clipboard
       cliphist
@@ -71,6 +72,9 @@
       '')
       (pkgs.writeShellScriptBin "qs-mic" ''
         wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -c MUTED
+      '')
+      (pkgs.writeShellScriptBin "qs-cava-bar" ''
+        exec ${pkgs.cava}/bin/cava -p ${userConfig.homeDirectory}/.config/cava/cava-bar.conf
       '')
 
       # ── Clipboard helpers ──────────────────────────────────────────────────
@@ -136,6 +140,21 @@
     xdg.configFile."quickshell/bar/PowerPanel.qml".source = ./bar/PowerPanel.qml;
     xdg.configFile."quickshell/bar/PowerPanelButton.qml".source = ./bar/PowerPanelButton.qml;
     xdg.configFile."quickshell/bar/DateTimePanel.qml".source = ./bar/DateTimePanel.qml;
+    xdg.configFile."cava/cava-bar.conf".text = ''
+      [general]
+      bars = 20
+      sleep_timer = 5
+
+      [input]
+      method = pipewire
+
+      [output]
+      method = raw
+      raw_target = /dev/stdout
+      data_format = ascii
+      ascii_max_range = 15
+    '';
+    xdg.configFile."quickshell/bar/MediaPanel.qml".source = ./bar/MediaPanel.qml;
 
     # ── Launcher ──────────────────────────────────────────────────────────────
     xdg.configFile."quickshell/launcher/Colours.qml".text = coloursQml;
