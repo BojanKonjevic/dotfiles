@@ -13,12 +13,12 @@ PanelWindow {
     }
     margins.top: 28
 
-    implicitWidth: 220
-    implicitHeight: 200
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     aboveWindows: true
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    implicitWidth: state_.powerOpen ? 220 : 0
+    implicitHeight: state_.powerOpen ? 200 : 0
 
     HoverHandler {
         id: panelHover

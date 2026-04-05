@@ -17,6 +17,9 @@ ShellRoot {
         id: barState
         property bool powerOpen: false
         property bool powerPanelHovered: false
+        property bool dateTimeOpen: false
+        property bool dateTimePanelHovered: false
+        property var weatherPanel: null
     }
 
     Variants {
@@ -40,6 +43,15 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         delegate: PowerPanel {
+            required property var modelData
+            screen: modelData
+            state_: barState
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: DateTimePanel {
             required property var modelData
             screen: modelData
             state_: barState

@@ -148,6 +148,7 @@ PanelWindow {
             spacing: 0
 
             Item {
+                id: clockItem
                 implicitWidth: clockLabel.implicitWidth + 16
                 Layout.fillHeight: true
 
@@ -155,11 +156,12 @@ PanelWindow {
                     id: clockLabel
                     anchors.centerIn: parent
                     text: root.clockText
-                    color: Colours.mauve
+                    color: root.state_.dateTimeOpen ? Colours.mauve : Colours.mauve
                     font.family: Colours.fontFamily
                     font.pixelSize: 18
                     font.weight: Font.Black
                 }
+
                 Rectangle {
                     anchors {
                         right: parent.right
@@ -168,6 +170,25 @@ PanelWindow {
                     }
                     width: 1
                     color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
+                }
+
+                HoverHandler {
+                    onHoveredChanged: {
+                        if (hovered) {
+                            root.state_.dateTimeOpen = true;
+                        } else {
+                            dateTimeHideTimer.restart();
+                        }
+                    }
+                }
+
+                Timer {
+                    id: dateTimeHideTimer
+                    interval: 300
+                    onTriggered: {
+                        if (!root.state_.dateTimePanelHovered)
+                            root.state_.dateTimeOpen = false;
+                    }
                 }
             }
 
@@ -179,10 +200,6 @@ PanelWindow {
                 font.weight: Font.Black
                 leftPadding: 10
                 visible: root.weatherText !== ""
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: Quickshell.execDetached(["kitty", "--hold", "weather"])
-                }
             }
         }
 
@@ -233,6 +250,7 @@ PanelWindow {
                     font.pixelSize: 18
                     font.weight: Font.Black
                 }
+
                 Rectangle {
                     anchors {
                         right: parent.right
@@ -313,9 +331,7 @@ PanelWindow {
                     id: powerArea
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: {
-                        root.state_.powerOpen = true;
-                    }
+                    onEntered: root.state_.powerOpen = true
                     onExited: powerHideTimer.restart()
                 }
 

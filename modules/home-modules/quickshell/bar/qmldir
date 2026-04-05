@@ -5,3 +5,4 @@ NotificationPopups NotificationPopups.qml
 NotificationPopup NotificationPopup.qml
 PowerPanel PowerPanel.qml
 PowerPanelButton PowerPanelButton.qml
+DateTimePanel DateTimePanel.qml

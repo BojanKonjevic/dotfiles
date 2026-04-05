@@ -55,35 +55,32 @@
       "392" = "⛈️";
       "395" = "❄️";
     };
-
     tempColors = {
-      frozen = theme.sky; # <= 0°C
-      cold = theme.blue; # <= 8°C
-      cool = theme.text; # <= 15°C
-      mild = theme.green; # <= 22°C
-      warm = theme.peach; # <= 28°C
-      hot = theme.red; # > 28°C
+      frozen = theme.sky;
+      cold = theme.blue;
+      cool = theme.text;
+      mild = theme.green;
+      warm = theme.peach;
+      hot = theme.red;
     };
-
     weatherScript = pkgs.writeShellScriptBin "weather" ''
         BAR_MODE=0
-        [[ "''${1:-}" == "--bar" ]] && BAR_MODE=1
-
+        PANEL_MODE=0
+        [[ "''${1:-}" == "--bar"   ]] && BAR_MODE=1
+        [[ "''${1:-}" == "--panel" ]] && PANEL_MODE=1
         TMPFILE=$(mktemp)
         trap "rm -f $TMPFILE" EXIT
         ${pkgs.curl}/bin/curl -sf "wttr.in/${userConfig.weatherCity}?format=j1" > "$TMPFILE" 2>/dev/null || {
-          (( BAR_MODE )) \
+          (( BAR_MODE || PANEL_MODE )) \
             && echo '{"text":"?","tooltip":"unavailable"}' \
             || echo "Could not fetch weather data"
           exit 1
         }
-        ${pkgs.python3}/bin/python3 - "$TMPFILE" "$BAR_MODE" <<'PYEOF'
+        ${pkgs.python3}/bin/python3 - "$TMPFILE" "$BAR_MODE" "$PANEL_MODE" <<'PYEOF'
       import json, sys
       from datetime import datetime
-
       codes = ${builtins.toJSON weatherCodes}
       tc    = ${builtins.toJSON tempColors}
-
       def icon(code): return codes.get(str(code), "🌡️")
       def day_name(date_str):
           d = datetime.strptime(date_str, "%Y-%m-%d")
@@ -91,18 +88,18 @@
           if diff == 0: return "Today    "
           if diff == 1: return "Tomorrow "
           return d.strftime("%-d %b     ")[:9]
-
       with open(sys.argv[1]) as f:
           data = json.load(f)
-
-      bar_mode = sys.argv[2] == "1"
-      current  = data['current_condition'][0]
-      days     = data['weather']
-      temp     = current['temp_C']
-      feels    = current['FeelsLikeC']
-      desc     = current['weatherDesc'][0]['value']
-      code     = current['weatherCode']
-
+      bar_mode   = sys.argv[2] == "1"
+      panel_mode = sys.argv[3] == "1"
+      current = data['current_condition'][0]
+      days    = data['weather']
+      temp    = current['temp_C']
+      feels   = current['FeelsLikeC']
+      desc    = current['weatherDesc'][0]['value']
+      code    = current['weatherCode']
+      humidity = current['humidity']
+      wind     = current['windspeedKmph']
       if bar_mode:
           temp_int = int(temp)
           if   temp_int <= 0:  color = tc["frozen"]
@@ -116,9 +113,38 @@
               "text":    f"<span color='{color}'>{ic} {temp}°C</span>",
               "tooltip": f"{desc} · feels {feels}°C",
           }))
+      elif panel_mode:
+        # always show 8 evenly spaced slots across the full day
+        all_hourly = days[0]['hourly']  # wttr gives 8 slots: 0,3,6,9,12,15,18,21
+        hourly = []
+        for h in all_hourly:
+            t = int(h['time']) // 100
+            hourly.append({
+                "time":  f"{t:02d}:00",
+                "icon":  icon(h['weatherCode']),
+                "temp":  h['tempC'],
+                "feels": h['FeelsLikeC'],
+                "isPast": t < datetime.now().hour,
+            })
+        forecast = []
+        for day in days:
+            forecast.append({
+                "date":   day_name(day['date']).strip(),
+                "icon":   icon(day['hourly'][4]['weatherCode']),
+                "high":   day['maxtempC'],
+                "low":    day['mintempC'],
+            })
+        print(json.dumps({
+            "temp":     temp,
+            "feels":    feels,
+            "desc":     desc,
+            "icon":     icon(code),
+            "humidity": humidity,
+            "wind":     wind,
+            "hourly":   hourly,
+            "forecast": forecast,
+        }))
       else:
-          humidity = current['humidity']
-          wind     = current['windspeedKmph']
           print(f" {icon(code)}  {desc}")
           print(f"    {temp}°C  feels {feels}°C  💧{humidity}%  💨{wind}km/h")
           print()
