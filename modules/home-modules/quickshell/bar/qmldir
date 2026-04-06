@@ -7,3 +7,4 @@ PowerPanel PowerPanel.qml
 PowerPanelButton PowerPanelButton.qml
 DateTimePanel DateTimePanel.qml
 MediaPanel MediaPanel.qml
+AudioPanel AudioPanel.qml

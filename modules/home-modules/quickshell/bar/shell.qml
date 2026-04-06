@@ -31,6 +31,33 @@ ShellRoot {
         property real mediaPosition: 0
         property real mediaLength: 0
         property real mediaX: 0
+        property bool audioOpen: false
+        property bool audioPanelHovered: false
+        property var audioData: null
+        property real audioX: 0
+    }
+
+    Process {
+        id: audioProc
+        command: ["qs-audio"]
+        stdout: SplitParser {
+            onRead: function (data) {
+                try {
+                    barState.audioData = JSON.parse(data);
+                } catch (_) {}
+            }
+        }
+    }
+
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (!audioProc.running)
+                audioProc.running = true;
+        }
     }
 
     Process {
@@ -77,6 +104,15 @@ ShellRoot {
                 mediaProc.running = true;
             if (!mediaPosProc.running)
                 mediaPosProc.running = true;
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: AudioPanel {
+            required property var modelData
+            screen: modelData
+            state_: barState
         }
     }
 

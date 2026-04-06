@@ -363,6 +363,61 @@ PanelWindow {
                 }
             }
 
+            // ── Volume ───────────────────────────────────────────────────────────
+            Item {
+                id: audioItem
+                implicitWidth: audioLabel.implicitWidth + 16
+                Layout.fillHeight: true
+
+                Text {
+                    id: audioLabel
+                    anchors.centerIn: parent
+                    text: {
+                        if (!root.state_.audioData)
+                            return "󰕾";
+                        var v = root.state_.audioData.output.volume;
+                        var m = root.state_.audioData.output.muted;
+                        if (m)
+                            return "󰖁";
+                        if (v < 0.33)
+                            return "󰕿";
+                        if (v < 0.66)
+                            return "󰖀";
+                        return "󰕾";
+                    }
+                    color: root.state_.audioOpen ? Colours.mauve : Colours.text
+                    font.family: Colours.fontFamily
+                    font.pixelSize: 16
+                    font.weight: Font.Black
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 100
+                        }
+                    }
+                }
+
+                HoverHandler {
+                    onHoveredChanged: {
+                        if (hovered) {
+                            var mapped = audioItem.mapToGlobal(audioItem.width / 2, 0);
+                            root.state_.audioX = mapped.x;
+                            root.state_.audioOpen = true;
+                        } else {
+                            audioHideTimer.restart();
+                        }
+                    }
+                }
+
+                Timer {
+                    id: audioHideTimer
+                    interval: 300
+                    onTriggered: {
+                        if (!root.state_.audioPanelHovered)
+                            root.state_.audioOpen = false;
+                    }
+                }
+            }
+
             // ── Power button ─────────────────────────────────────────────────
             Item {
                 id: powerItem

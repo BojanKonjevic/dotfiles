@@ -24,9 +24,7 @@ PanelWindow {
 
     HoverHandler {
         onHoveredChanged: {
-            root.state_.mediaPanelHovered = hovered;
-            if (!hovered)
-                root.state_.mediaOpen = false;
+            root.state_.audioPanelHovered = hovered;
         }
     }
 
