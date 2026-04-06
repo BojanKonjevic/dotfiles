@@ -250,6 +250,8 @@ PanelWindow {
                 HoverHandler {
                     onHoveredChanged: {
                         if (hovered) {
+                            var mapped = mediaItem.mapToGlobal(mediaItem.width / 2, 0);
+                            root.state_.mediaX = mapped.x;
                             root.state_.mediaOpen = true;
                         } else {
                             mediaHideTimer.restart();

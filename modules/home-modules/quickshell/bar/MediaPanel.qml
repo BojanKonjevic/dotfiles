@@ -13,10 +13,7 @@ PanelWindow {
         left: true
     }
     margins.top: 28
-    margins.left: {
-        var s = screen ? screen.width : 1920;
-        return Math.floor(s * 0.35);
-    }
+    margins.left: Math.max(4, Math.min(state_.mediaX - 160, screen.width - 328))
 
     implicitWidth: 340
     implicitHeight: state_.mediaOpen ? 340 : 0

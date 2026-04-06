@@ -30,6 +30,7 @@ ShellRoot {
         property string mediaStatus: "Stopped"
         property real mediaPosition: 0
         property real mediaLength: 0
+        property real mediaX: 0
     }
 
     Process {
