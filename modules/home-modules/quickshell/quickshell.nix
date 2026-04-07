@@ -265,8 +265,7 @@
       data_format = ascii
       ascii_max_range = 15
     '';
-    xdg.configFile."quickshell/bar/MediaPanel.qml".source = ./bar/MediaPanel.qml;
-    xdg.configFile."quickshell/bar/AudioPanel.qml".source = ./bar/AudioPanel.qml;
+    xdg.configFile."quickshell/bar/MediaAudioPanel.qml".source = ./bar/MediaAudioPanel.qml;
 
     # ── Launcher ──────────────────────────────────────────────────────────────
     xdg.configFile."quickshell/launcher/Colours.qml".text = coloursQml;

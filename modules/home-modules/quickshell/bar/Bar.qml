@@ -25,7 +25,6 @@ PanelWindow {
     property int cpuUsage: 0
     property int memUsage: 0
     property string netType: ""
-    property bool micMuted: false
 
     Timer {
         interval: 1000
@@ -108,24 +107,6 @@ PanelWindow {
             netProc.running = true
     }
 
-    Process {
-        id: micProc
-        command: ["qs-mic"]
-        stdout: SplitParser {
-            onRead: function (data) {
-                root.micMuted = data.trim() === "1";
-            }
-        }
-    }
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: if (!micProc.running)
-            micProc.running = true
-    }
-
     Item {
         anchors.fill: parent
 
@@ -204,7 +185,7 @@ PanelWindow {
                 visible: root.weatherText !== ""
             }
 
-            // ── Media ────────────────────────────────────────────────────────
+            // ── Media (opens combined panel) ─────────────────────────────────
             Item {
                 id: mediaItem
                 implicitWidth: mediaRow.implicitWidth + 16
@@ -251,20 +232,11 @@ PanelWindow {
                     onHoveredChanged: {
                         if (hovered) {
                             var mapped = mediaItem.mapToGlobal(mediaItem.width / 2, 0);
-                            root.state_.mediaX = mapped.x;
-                            root.state_.mediaOpen = true;
+                            root.state_.mediaAudioX = mapped.x;
+                            root.state_.mediaAudioOpen = true;
                         } else {
-                            mediaHideTimer.restart();
+                            mediaAudioHideTimer.restart();
                         }
-                    }
-                }
-
-                Timer {
-                    id: mediaHideTimer
-                    interval: 300
-                    onTriggered: {
-                        if (!root.state_.mediaPanelHovered)
-                            root.state_.mediaOpen = false;
                     }
                 }
             }
@@ -343,81 +315,6 @@ PanelWindow {
                 }
             }
 
-            Text {
-                text: root.micMuted ? "󰍭" : "󰍬"
-                color: root.micMuted ? Colours.red : Colours.green
-                font.family: Colours.fontFamily
-                font.pixelSize: 18
-                font.weight: Font.Black
-                leftPadding: 8
-                rightPadding: 8
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        Quickshell.execDetached(["mic-toggle"]);
-                        Qt.callLater(function () {
-                            if (!micProc.running)
-                                micProc.running = true;
-                        });
-                    }
-                }
-            }
-
-            // ── Volume ───────────────────────────────────────────────────────────
-            Item {
-                id: audioItem
-                implicitWidth: audioLabel.implicitWidth + 16
-                Layout.fillHeight: true
-
-                Text {
-                    id: audioLabel
-                    anchors.centerIn: parent
-                    text: {
-                        if (!root.state_.audioData)
-                            return "󰕾";
-                        var v = root.state_.audioData.output.volume;
-                        var m = root.state_.audioData.output.muted;
-                        if (m)
-                            return "󰖁";
-                        if (v < 0.33)
-                            return "󰕿";
-                        if (v < 0.66)
-                            return "󰖀";
-                        return "󰕾";
-                    }
-                    color: root.state_.audioOpen ? Colours.mauve : Colours.text
-                    font.family: Colours.fontFamily
-                    font.pixelSize: 16
-                    font.weight: Font.Black
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: 100
-                        }
-                    }
-                }
-
-                HoverHandler {
-                    onHoveredChanged: {
-                        if (hovered) {
-                            var mapped = audioItem.mapToGlobal(audioItem.width / 2, 0);
-                            root.state_.audioX = mapped.x;
-                            root.state_.audioOpen = true;
-                        } else {
-                            audioHideTimer.restart();
-                        }
-                    }
-                }
-
-                Timer {
-                    id: audioHideTimer
-                    interval: 300
-                    onTriggered: {
-                        if (!root.state_.audioPanelHovered)
-                            root.state_.audioOpen = false;
-                    }
-                }
-            }
-
             // ── Power button ─────────────────────────────────────────────────
             Item {
                 id: powerItem
@@ -465,6 +362,15 @@ PanelWindow {
                             root.state_.powerOpen = false;
                     }
                 }
+            }
+        }
+
+        Timer {
+            id: mediaAudioHideTimer
+            interval: 300
+            onTriggered: {
+                if (!root.state_.mediaAudioPanelHovered)
+                    root.state_.mediaAudioOpen = false;
             }
         }
     }

@@ -21,8 +21,9 @@ ShellRoot {
         property bool dateTimeOpen: false
         property bool dateTimePanelHovered: false
         property var weatherPanel: null
-        property bool mediaOpen: false
-        property bool mediaPanelHovered: false
+        property bool mediaAudioOpen: false
+        property bool mediaAudioPanelHovered: false
+        property real mediaAudioX: 0
         property string mediaTitle: ""
         property string mediaArtist: ""
         property string mediaAlbum: ""
@@ -30,11 +31,7 @@ ShellRoot {
         property string mediaStatus: "Stopped"
         property real mediaPosition: 0
         property real mediaLength: 0
-        property real mediaX: 0
-        property bool audioOpen: false
-        property bool audioPanelHovered: false
         property var audioData: null
-        property real audioX: 0
     }
 
     Process {
@@ -109,7 +106,7 @@ ShellRoot {
 
     Variants {
         model: Quickshell.screens
-        delegate: AudioPanel {
+        delegate: Bar {
             required property var modelData
             screen: modelData
             state_: barState
@@ -118,7 +115,7 @@ ShellRoot {
 
     Variants {
         model: Quickshell.screens
-        delegate: Bar {
+        delegate: MediaAudioPanel {
             required property var modelData
             screen: modelData
             state_: barState
@@ -146,15 +143,6 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         delegate: DateTimePanel {
-            required property var modelData
-            screen: modelData
-            state_: barState
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: MediaPanel {
             required property var modelData
             screen: modelData
             state_: barState
