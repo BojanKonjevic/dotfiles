@@ -175,16 +175,6 @@ PanelWindow {
                 }
             }
 
-            Text {
-                text: root.weatherText
-                color: Colours.text
-                font.family: Colours.fontFamily
-                font.pixelSize: 18
-                font.weight: Font.Black
-                leftPadding: 10
-                visible: root.weatherText !== ""
-            }
-
             // ── Media (opens combined panel) ─────────────────────────────────
             Item {
                 id: mediaItem
