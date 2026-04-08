@@ -25,6 +25,7 @@ PanelWindow {
     property int cpuUsage: 0
     property int memUsage: 0
     property string netType: ""
+    property string activeSubmap: root.state_.activeSubmap
 
     Timer {
         interval: 1000
@@ -255,6 +256,45 @@ PanelWindow {
                 rightMargin: 4
             }
             spacing: 0
+
+            Item {
+                id: submapItem
+                implicitWidth: submapRow.implicitWidth + 16
+                Layout.fillHeight: true
+                visible: root.activeSubmap !== ""
+
+                RowLayout {
+                    id: submapRow
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    Text {
+                        text: "󰩨"
+                        color: Colours.red
+                        font.family: Colours.fontFamily
+                        font.pixelSize: 14
+                        font.weight: Font.Black
+                    }
+
+                    Text {
+                        text: root.activeSubmap
+                        color: Colours.red
+                        font.family: Colours.fontFamily
+                        font.pixelSize: 13
+                        font.weight: Font.Black
+                    }
+                }
+
+                Rectangle {
+                    anchors {
+                        right: parent.right
+                        top: parent.top
+                        bottom: parent.bottom
+                    }
+                    width: 1
+                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
+                }
+            }
 
             Text {
                 text: "󰍛 " + root.cpuUsage + "%"

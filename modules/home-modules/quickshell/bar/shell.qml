@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Services.Notifications
 import Quickshell.Io
+import Quickshell.Hyprland
 import QtQuick
 
 ShellRoot {
@@ -32,6 +33,7 @@ ShellRoot {
         property real mediaPosition: 0
         property real mediaLength: 0
         property var audioData: null
+        property string activeSubmap: ""
     }
 
     Process {
@@ -101,6 +103,15 @@ ShellRoot {
                 mediaProc.running = true;
             if (!mediaPosProc.running)
                 mediaPosProc.running = true;
+        }
+    }
+
+    Connections {
+        target: Hyprland
+        function onRawEvent(event) {
+            if (event.name === "activespecial" || event.name === "submap") {
+                barState.activeSubmap = event.data === "" ? "" : event.data;
+            }
         }
     }
 
