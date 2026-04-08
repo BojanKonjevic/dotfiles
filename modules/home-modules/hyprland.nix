@@ -23,16 +23,19 @@
         "$privateWindow" = "zen-beta --no-remote --private-window";
 
         windowrule = let
+          subtle = "0.95 0.92"; # apps — light transparency
+          medium = "0.93 0.90"; # apps — medium transparency
+          terminal = "0.90 0.87"; # terminal — stronger transparency
           opacityRule = opacity: class: "opacity ${opacity} override ${opacity} override, match:class ^(${class})$";
         in [
-          (opacityRule "0.95 0.92" "vesktop")
-          (opacityRule "0.95 0.92" "localsend_app")
-          (opacityRule "0.95 0.92" "thunar")
-          (opacityRule "0.95 0.92" "xarchiver")
-          (opacityRule "0.95 0.92" "zen-beta")
-          (opacityRule "0.93 0.90" "org.qbittorrent.qBittorrent")
-          (opacityRule "0.90 0.87" "kitty")
-          (opacityRule "0.93 0.90" "nm-connection-editor")
+          (opacityRule subtle "vesktop")
+          (opacityRule subtle "localsend_app")
+          (opacityRule subtle "thunar")
+          (opacityRule subtle "xarchiver")
+          (opacityRule subtle "zen-beta")
+          (opacityRule medium "org.qbittorrent.qBittorrent")
+          (opacityRule medium "nm-connection-editor")
+          (opacityRule terminal "kitty")
         ];
 
         env = [
