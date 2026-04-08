@@ -310,7 +310,7 @@ PanelWindow {
 
                     Text {
                         text: "󰂚"
-                        color: Colours.mauve
+                        color: root.state_.notifPanelOpen ? Colours.mauve : Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.7)
                         font.family: Colours.fontFamily
                         font.pixelSize: 14
                         font.weight: Font.Black
@@ -318,7 +318,7 @@ PanelWindow {
 
                     Text {
                         text: root.notifCount.toString()
-                        color: Colours.mauve
+                        color: root.state_.notifPanelOpen ? Colours.mauve : Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.7)
                         font.family: Colours.fontFamily
                         font.pixelSize: 13
                         font.weight: Font.Black
@@ -335,10 +335,23 @@ PanelWindow {
                     color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.state_.clearNotifs()
+                HoverHandler {
+                    onHoveredChanged: {
+                        if (hovered) {
+                            root.state_.notifPanelOpen = true;
+                        } else {
+                            notifHideTimer.restart();
+                        }
+                    }
+                }
+
+                Timer {
+                    id: notifHideTimer
+                    interval: 300
+                    onTriggered: {
+                        if (!root.state_.notifPanelHovered)
+                            root.state_.notifPanelOpen = false;
+                    }
                 }
             }
 

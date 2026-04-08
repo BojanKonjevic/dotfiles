@@ -14,9 +14,8 @@ PanelWindow {
     }
     margins.top: 28
     margins.left: Math.max(4, Math.min(state_.mediaAudioX - 160, screen.width - 348))
-
     implicitWidth: state_.mediaAudioOpen ? 340 : 0
-    implicitHeight: state_.mediaAudioOpen ? 500 : 0
+    implicitHeight: state_.mediaAudioOpen ? content.height + 2 : 0
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     aboveWindows: true

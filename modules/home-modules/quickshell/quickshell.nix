@@ -66,6 +66,7 @@
       pkgs.wl-clipboard
       pkgs.cliphist
       pkgs.awww
+      pkgs.pulseaudio
 
       # ── Bar helpers ──────────────────────────────────────────────────────
       (mkPure "qs-cpu" "qs-cpu.sh")
@@ -96,6 +97,7 @@
     xdg.configFile."quickshell/bar/WorkspaceButton.qml".source = ./bar/WorkspaceButton.qml;
     xdg.configFile."quickshell/bar/NotificationPopups.qml".source = ./bar/NotificationPopups.qml;
     xdg.configFile."quickshell/bar/NotificationPopup.qml".source = ./bar/NotificationPopup.qml;
+    xdg.configFile."quickshell/bar/NotificationPanel.qml".source = ./bar/NotificationPanel.qml;
     xdg.configFile."quickshell/bar/PowerPanel.qml".source = ./bar/PowerPanel.qml;
     xdg.configFile."quickshell/bar/PowerPanelButton.qml".source = ./bar/PowerPanelButton.qml;
     xdg.configFile."quickshell/bar/DateTimePanel.qml".source = ./bar/DateTimePanel.qml;

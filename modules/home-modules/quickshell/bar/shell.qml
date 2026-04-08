@@ -12,13 +12,11 @@ ShellRoot {
         keepOnReload: true
         onNotification: function (notif) {
             notif.tracked = true;
-        }
-    }
-
-    Connections {
-        target: notifServer
-        function onTrackedNotificationsChanged() {
-            barState.notifCount = notifServer.trackedNotifications.length;
+            barState.notifCount += 1;
+            notif.trackedChanged.connect(function () {
+                if (!notif.tracked)
+                    barState.notifCount = Math.max(0, barState.notifCount - 1);
+            });
         }
     }
 
@@ -32,6 +30,8 @@ ShellRoot {
         property bool mediaAudioOpen: false
         property bool mediaAudioPanelHovered: false
         property real mediaAudioX: 0
+        property bool notifPanelOpen: false
+        property bool notifPanelHovered: false
         property string mediaTitle: ""
         property string mediaArtist: ""
         property string mediaAlbum: ""
@@ -43,7 +43,7 @@ ShellRoot {
         property string activeSubmap: ""
         property int notifCount: 0
         property var clearNotifs: function () {
-            var notifs = notifServer.trackedNotifications;
+            var notifs = notifServer.trackedNotifications.values;
             for (var i = notifs.length - 1; i >= 0; i--) {
                 notifs[i].tracked = false;
             }
@@ -152,6 +152,16 @@ ShellRoot {
         delegate: NotificationPopups {
             required property var modelData
             screen: modelData
+            server: notifServer
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: NotificationPanel {
+            required property var modelData
+            screen: modelData
+            state_: barState
             server: notifServer
         }
     }

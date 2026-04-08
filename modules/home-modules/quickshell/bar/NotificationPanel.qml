@@ -1,0 +1,244 @@
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Wayland
+import Quickshell.Services.Notifications
+
+PanelWindow {
+    id: root
+    required property var state_
+    required property NotificationServer server
+
+    anchors {
+        top: true
+        right: true
+    }
+    margins.top: 28
+
+    implicitWidth: state_.notifPanelOpen ? 400 : 0
+    implicitHeight: state_.notifPanelOpen ? 500 : 0
+    color: "transparent"
+    exclusionMode: ExclusionMode.Ignore
+    aboveWindows: true
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+    property var notifList: []
+
+    function refreshList() {
+        notifList = root.server.trackedNotifications.values;
+    }
+
+    Connections {
+        target: root.state_
+        function onNotifPanelOpenChanged() {
+            if (root.state_.notifPanelOpen)
+                root.refreshList();
+        }
+    }
+
+    Connections {
+        target: root.state_
+        function onNotifCountChanged() {
+            if (root.state_.notifPanelOpen)
+                root.refreshList();
+        }
+    }
+
+    HoverHandler {
+        onHoveredChanged: {
+            root.state_.notifPanelHovered = hovered;
+            if (!hovered)
+                root.state_.notifPanelOpen = false;
+        }
+    }
+
+    Rectangle {
+        id: content
+        anchors {
+            top: parent.top
+            right: parent.right
+        }
+        width: 380
+        height: root.state_.notifPanelOpen ? innerCol.implicitHeight + 24 : 0
+        radius: Colours.radiusPanel
+        color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
+        border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
+        border.width: 1
+        clip: true
+
+        Behavior on height {
+            NumberAnimation {
+                duration: 180
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        opacity: root.state_.notifPanelOpen ? 1.0 : 0.0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 140
+            }
+        }
+
+        ColumnLayout {
+            id: innerCol
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                margins: 14
+            }
+            spacing: 0
+
+            // ── Header ────────────────────────────────────────────────────
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.bottomMargin: 10
+
+                Text {
+                    text: "󰂚  Notifications"
+                    color: Colours.mauve
+                    font.family: Colours.fontFamily
+                    font.pixelSize: 14
+                    font.weight: Font.Bold
+                    Layout.fillWidth: true
+                }
+
+                Text {
+                    text: "󰆴"
+                    color: Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.6)
+                    font.family: Colours.fontFamily
+                    font.pixelSize: 18
+                    visible: root.state_.notifCount > 0
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.state_.clearNotifs()
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
+                Layout.bottomMargin: 10
+            }
+
+            // ── Empty state ───────────────────────────────────────────────
+            Item {
+                Layout.fillWidth: true
+                implicitHeight: 60
+                visible: root.state_.notifCount === 0
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "No notifications"
+                    color: Colours.overlay0
+                    font.family: Colours.fontFamily
+                    font.pixelSize: 13
+                }
+            }
+
+            // ── Notification list ─────────────────────────────────────────
+            Flickable {
+                Layout.fillWidth: true
+                implicitHeight: Math.min(notifCol.implicitHeight, 400)
+                contentHeight: notifCol.implicitHeight
+                clip: true
+                visible: root.state_.notifCount > 0
+
+                Column {
+                    id: notifCol
+                    width: parent.width
+                    spacing: 6
+
+                    Repeater {
+                        model: root.notifList
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: notifCol.width
+                            implicitHeight: notifInner.implicitHeight + 20
+                            radius: Colours.radiusRow
+                            color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
+                            border.color: modelData.urgency === NotificationUrgency.Critical ? Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.5) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.4)
+                            border.width: 1
+
+                            ColumnLayout {
+                                id: notifInner
+                                anchors {
+                                    left: parent.left
+                                    right: parent.right
+                                    top: parent.top
+                                    margins: 10
+                                }
+                                spacing: 3
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 6
+
+                                    Image {
+                                        source: modelData.appIcon !== "" ? "image://icon/" + modelData.appIcon : ""
+                                        visible: modelData.appIcon !== ""
+                                        width: 14
+                                        height: 14
+                                        Layout.alignment: Qt.AlignVCenter
+                                    }
+
+                                    Text {
+                                        text: modelData.appName
+                                        color: Colours.mauve
+                                        font.family: Colours.fontFamily
+                                        font.pixelSize: 10
+                                        font.weight: Font.Bold
+                                        Layout.fillWidth: true
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Text {
+                                        text: "✕"
+                                        color: Colours.overlay1
+                                        font.family: Colours.fontFamily
+                                        font.pixelSize: 11
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: modelData.tracked = false
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    text: modelData.summary
+                                    color: Colours.text
+                                    font.family: Colours.fontFamily
+                                    font.pixelSize: 12
+                                    font.weight: Font.Bold
+                                    Layout.fillWidth: true
+                                    wrapMode: Text.WordWrap
+                                    visible: text !== ""
+                                }
+
+                                Text {
+                                    text: modelData.body
+                                    color: Colours.subtext0
+                                    font.family: Colours.fontFamily
+                                    font.pixelSize: 11
+                                    Layout.fillWidth: true
+                                    wrapMode: Text.WordWrap
+                                    textFormat: Text.RichText
+                                    visible: text !== ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Item {
+                implicitHeight: 2
+            }
+        }
+    }
+}
