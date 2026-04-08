@@ -48,7 +48,6 @@
         exec-once = [
           "qs -c bar"
           "awww-daemon"
-          "hyprlock || hyprctl dispatch exit"
           "wl-paste --type text --watch cliphist store"
           "wl-paste --type image --watch cliphist store"
         ];

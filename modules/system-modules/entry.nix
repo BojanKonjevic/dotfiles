@@ -1,10 +1,11 @@
 {...}: {
-  flake.nixosModules.entry = {userConfig, ...}: {
-    services.getty.autologinUser = userConfig.username;
-    environment.loginShellInit = ''
-      if [ "$(tty)" = "/dev/tty1" ]; then
-        exec start-hyprland
-      fi
-    '';
+  flake.nixosModules.entry = {pkgs, ...}: {
+    services.greetd = {
+      enable = true;
+      settings.default_session = {
+        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd start-hyprland";
+        user = "greeter";
+      };
+    };
   };
 }
