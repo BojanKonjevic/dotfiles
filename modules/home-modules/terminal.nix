@@ -1,5 +1,6 @@
 {...}: {
   flake.homeModules.terminal = {
+    theme,
     config,
     pkgs,
     inputs,
@@ -33,7 +34,7 @@
       enable = true;
 
       font = {
-        name = "JetBrainsMono Nerd Font";
+        name = "theme.fontName";
         size = 16;
       };
 
@@ -56,10 +57,10 @@
       extraConfig = ''
         scrollback_pager bash -c "ansifilter | nvim -c 'set ft=sh | $' -"
         scrollback_pager_history_size 0
-        font_family family='JetBrainsMono Nerd Font' style=Bold
-        bold_font family='JetBrainsMono Nerd Font' style=Bold
-        italic_font family='JetBrainsMono Nerd Font' style='Bold Italic'
-        bold_italic_font family='JetBrainsMono Nerd Font' style='Bold Italic'
+        font_family      family='${theme.fontName}' style=Bold
+        bold_font        family='${theme.fontName}' style=Bold
+        italic_font      family='${theme.fontName}' style='Bold Italic'
+        bold_italic_font family='${theme.fontName}' style='Bold Italic'
 
         cursor_shape block
         cursor_blink_interval 0

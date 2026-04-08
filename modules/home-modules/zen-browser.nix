@@ -68,9 +68,9 @@
     '';
 
     home.file.".zen/${zenProfile}/user.js".text = ''
-      user_pref("font.name.monospace.x-western", "JetBrainsMono Nerd Font");
-      user_pref("font.name.sans-serif.x-western", "JetBrainsMono Nerd Font");
-      user_pref("font.name.serif.x-western", "JetBrainsMono Nerd Font");
+      user_pref("font.name.monospace.x-western", "${theme.fontName}");
+      user_pref("font.name.sans-serif.x-western", "${theme.fontName}");
+      user_pref("font.name.serif.x-western", "${theme.fontName}");
       user_pref("font.size.variable.x-western", 14);
       user_pref("layout.css.prefers-color-scheme.content-override", 0);
       user_pref("browser.display.document_color_use", 0);
