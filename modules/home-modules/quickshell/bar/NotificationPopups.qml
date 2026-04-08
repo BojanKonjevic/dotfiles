@@ -9,10 +9,10 @@ PanelWindow {
     required property NotificationServer server
 
     anchors {
-        top: true
-        right: true
+        bottom: true
+        left: true
     }
-    margins.top: 36
+    margins.left: 64
     implicitWidth: 380
     implicitHeight: notifColumn.implicitHeight + 16
     color: "transparent"
@@ -22,10 +22,10 @@ PanelWindow {
     Column {
         id: notifColumn
         anchors {
-            top: parent.top
-            right: parent.right
-            topMargin: 8
-            rightMargin: 8
+            bottom: parent.bottom
+            left: parent.left
+            bottomMargin: 8
+            leftMargin: 8
         }
         width: 364
         spacing: 8

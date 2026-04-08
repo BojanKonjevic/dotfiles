@@ -7,7 +7,6 @@ Rectangle {
 
     required property Notification notification
 
-    // Urgency-based border: critical gets red, normal gets surface1
     property color borderColor: notification.urgency === NotificationUrgency.Critical ? Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.8) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
 
     radius: Colours.radiusPanel
@@ -16,9 +15,8 @@ Rectangle {
     border.width: 1
     implicitHeight: inner.implicitHeight + 24
 
-    // Slide in from the right
     opacity: 0
-    x: 20
+    x: -20
     Component.onCompleted: {
         opacity = 1;
         x = 0;
@@ -35,7 +33,6 @@ Rectangle {
         }
     }
 
-    // Auto-dismiss — respect the notification's own timeout, default 5 s
     Timer {
         interval: {
             const t = root.notification.expireTimeout;
@@ -55,12 +52,10 @@ Rectangle {
         anchors.margins: 12
         spacing: 4
 
-        // ── Header row ──────────────────────────────────────────────────────────
         RowLayout {
             Layout.fillWidth: true
             spacing: 8
 
-            // App icon (if present)
             Image {
                 source: root.notification.appIcon !== "" ? "image://icon/" + root.notification.appIcon : ""
                 visible: root.notification.appIcon !== ""
@@ -92,7 +87,6 @@ Rectangle {
             }
         }
 
-        // ── Summary ─────────────────────────────────────────────────────────────
         Text {
             text: root.notification.summary
             color: Colours.text
@@ -104,7 +98,6 @@ Rectangle {
             visible: text !== ""
         }
 
-        // ── Body ────────────────────────────────────────────────────────────────
         Text {
             text: root.notification.body
             color: Colours.subtext0
@@ -116,7 +109,6 @@ Rectangle {
             visible: text !== ""
         }
 
-        // ── Actions ─────────────────────────────────────────────────────────────
         RowLayout {
             Layout.fillWidth: true
             spacing: 6
@@ -126,7 +118,7 @@ Rectangle {
                 model: root.notification.actions
                 delegate: Rectangle {
                     required property var modelData
-                    radius: 6
+                    radius: Colours.radiusSmall
                     color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.8)
                     border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
                     border.width: 1

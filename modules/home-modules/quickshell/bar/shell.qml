@@ -30,6 +30,7 @@ ShellRoot {
         property bool mediaAudioOpen: false
         property bool mediaAudioPanelHovered: false
         property real mediaAudioX: 0
+        property real mediaAudioY: 0
         property bool notifPanelOpen: false
         property bool notifPanelHovered: false
         property string mediaTitle: ""

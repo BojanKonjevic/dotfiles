@@ -18,18 +18,19 @@ Rectangle {
 
     visible: wsId <= 5 || isActive || isOccupied
 
-    implicitWidth: 32
-    implicitHeight: 28
+    implicitWidth: 56
+    implicitHeight: 30
 
     color: (isActive || hovered) ? Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.6) : "transparent"
 
+    // Active indicator: left edge stripe
     Rectangle {
         anchors {
+            top: parent.top
             bottom: parent.bottom
             left: parent.left
-            right: parent.right
         }
-        height: 2
+        width: 2
         color: Colours.mauve
         visible: btn.isActive
     }
@@ -38,7 +39,7 @@ Rectangle {
         anchors.centerIn: parent
         text: btn.wsId.toString()
         font.family: Colours.fontFamily
-        font.pixelSize: 18
+        font.pixelSize: 14
         font.weight: Font.Black
         color: btn.isActive ? Colours.mauve : btn.isOccupied ? Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.75) : Qt.rgba(Colours.overlay2.r, Colours.overlay2.g, Colours.overlay2.b, 0.6)
     }

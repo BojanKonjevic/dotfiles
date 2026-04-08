@@ -10,10 +10,10 @@ PanelWindow {
     required property NotificationServer server
 
     anchors {
-        top: true
-        right: true
+        bottom: true
+        left: true
     }
-    margins.top: 28
+    margins.left: 56
 
     implicitWidth: state_.notifPanelOpen ? 400 : 0
     implicitHeight: state_.notifPanelOpen ? 500 : 0
@@ -55,8 +55,8 @@ PanelWindow {
     Rectangle {
         id: content
         anchors {
-            top: parent.top
-            right: parent.right
+            bottom: parent.bottom
+            left: parent.left
         }
         width: 380
         height: root.state_.notifPanelOpen ? innerCol.implicitHeight + 24 : 0

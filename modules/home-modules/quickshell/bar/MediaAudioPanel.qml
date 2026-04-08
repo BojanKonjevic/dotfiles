@@ -12,8 +12,8 @@ PanelWindow {
         top: true
         left: true
     }
-    margins.top: 28
-    margins.left: Math.max(4, Math.min(state_.mediaAudioX - 160, screen.width - 348))
+    margins.left: 56
+    margins.top: Math.max(4, Math.min(state_.mediaAudioY - 32, screen.height - implicitHeight - 4))
     implicitWidth: state_.mediaAudioOpen ? 340 : 0
     implicitHeight: state_.mediaAudioOpen ? content.height + 2 : 0
     color: "transparent"
@@ -220,7 +220,7 @@ PanelWindow {
                 Rectangle {
                     Layout.fillWidth: true
                     height: 3
-                    radius: 2
+                    radius: Colours.radiusSmall
                     color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
 
                     Rectangle {
@@ -432,7 +432,7 @@ PanelWindow {
                         anchors.verticalCenter: inSlider.verticalCenter
                         width: inSlider.width
                         height: 3
-                        radius: 2
+                        radius: Colours.radiusSmall
                         color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
 
                         Rectangle {
@@ -547,7 +547,7 @@ PanelWindow {
                         anchors.verticalCenter: outSlider.verticalCenter
                         width: outSlider.width
                         height: 3
-                        radius: 2
+                        radius: Colours.radiusSmall
                         color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
 
                         Rectangle {
@@ -610,7 +610,6 @@ PanelWindow {
                 Layout.fillWidth: true
                 height: 1
                 color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
-
                 Layout.bottomMargin: 12
                 visible: root.state_.audioData && root.state_.audioData.apps.length > 0
             }
@@ -669,7 +668,7 @@ PanelWindow {
                                 anchors.verticalCenter: appSlider.verticalCenter
                                 width: appSlider.width
                                 height: 3
-                                radius: 2
+                                radius: Colours.radiusSmall
                                 color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
 
                                 Rectangle {

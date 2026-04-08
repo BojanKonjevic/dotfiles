@@ -8,10 +8,10 @@ PanelWindow {
     required property var state_
 
     anchors {
-        top: true
-        right: true
+        bottom: true
+        left: true
     }
-    margins.top: 28
+    margins.left: 56
 
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
@@ -32,8 +32,8 @@ PanelWindow {
     Rectangle {
         id: content
         anchors {
-            top: parent.top
-            right: parent.right
+            bottom: parent.bottom
+            left: parent.left
         }
         width: 200
         height: state_.powerOpen ? column.implicitHeight + 24 : 0

@@ -12,9 +12,9 @@ PanelWindow {
         top: true
         left: true
     }
-    margins.top: 28
+    margins.left: 56
 
-    implicitWidth: 360
+    implicitWidth: state_.dateTimeOpen ? content.width + 2 : 0
     implicitHeight: state_.dateTimeOpen ? content.height + 2 : 0
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
@@ -165,7 +165,6 @@ PanelWindow {
                     Layout.fillWidth: true
                 }
 
-                // right side stats
                 ColumnLayout {
                     spacing: 3
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
@@ -239,7 +238,6 @@ PanelWindow {
                 visible: root.state_.weatherPanel !== null
             }
 
-            // section label
             Text {
                 text: "TODAY"
                 color: Colours.overlay0
@@ -326,7 +324,7 @@ PanelWindow {
                     required property int index
                     Layout.fillWidth: true
                     implicitHeight: forecastRow.implicitHeight + 6
-                    radius: 7
+                    radius: Colours.radiusSmall
                     color: index % 2 === 0 ? Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.35) : "transparent"
 
                     RowLayout {
