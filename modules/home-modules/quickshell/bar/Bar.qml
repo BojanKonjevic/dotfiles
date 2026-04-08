@@ -26,6 +26,7 @@ PanelWindow {
     property int memUsage: 0
     property string netType: ""
     property string activeSubmap: root.state_.activeSubmap
+    property int notifCount: root.state_.notifCount
 
     Timer {
         interval: 1000
@@ -293,6 +294,51 @@ PanelWindow {
                     }
                     width: 1
                     color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
+                }
+            }
+
+            Item {
+                id: notifItem
+                implicitWidth: notifRow.implicitWidth + 16
+                Layout.fillHeight: true
+                visible: root.notifCount > 0
+
+                RowLayout {
+                    id: notifRow
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    Text {
+                        text: "󰂚"
+                        color: Colours.mauve
+                        font.family: Colours.fontFamily
+                        font.pixelSize: 14
+                        font.weight: Font.Black
+                    }
+
+                    Text {
+                        text: root.notifCount.toString()
+                        color: Colours.mauve
+                        font.family: Colours.fontFamily
+                        font.pixelSize: 13
+                        font.weight: Font.Black
+                    }
+                }
+
+                Rectangle {
+                    anchors {
+                        right: parent.right
+                        top: parent.top
+                        bottom: parent.bottom
+                    }
+                    width: 1
+                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.state_.clearNotifs()
                 }
             }
 

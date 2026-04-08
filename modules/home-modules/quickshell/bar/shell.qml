@@ -15,6 +15,13 @@ ShellRoot {
         }
     }
 
+    Connections {
+        target: notifServer
+        function onTrackedNotificationsChanged() {
+            barState.notifCount = notifServer.trackedNotifications.length;
+        }
+    }
+
     QtObject {
         id: barState
         property bool powerOpen: false
@@ -34,6 +41,13 @@ ShellRoot {
         property real mediaLength: 0
         property var audioData: null
         property string activeSubmap: ""
+        property int notifCount: 0
+        property var clearNotifs: function () {
+            var notifs = notifServer.trackedNotifications;
+            for (var i = notifs.length - 1; i >= 0; i--) {
+                notifs[i].tracked = false;
+            }
+        }
     }
 
     Process {
