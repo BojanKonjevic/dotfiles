@@ -4,57 +4,63 @@
     # Single source of truth for all colors. Exposed to every other module via
     # _module.args.theme — works identically to the old extraSpecialArgs approach.
     # *Rgb variants are the decimal R,G,B triplets for use inside rgba(..., alpha).
-    palette = {
-      # ── Base layers ────────────────────────────────────────────────────────────
+    hexToRgb = hex: let
+      r = builtins.fromJSON "0x${builtins.substring 1 2 hex}";
+      g = builtins.fromJSON "0x${builtins.substring 3 2 hex}";
+      b = builtins.fromJSON "0x${builtins.substring 5 2 hex}";
+    in "${toString r}, ${toString g}, ${toString b}";
+
+    palette = rec {
+      # ── Base layers ────────────────────────────────────────────────────────
       base = "#1e1e2e";
       mantle = "#181825";
       crust = "#11111b";
-      crustRgb = "17, 17, 27";
+      crustRgb = hexToRgb crust;
 
-      # ── Surfaces ───────────────────────────────────────────────────────────────
+      # ── Surfaces ───────────────────────────────────────────────────────────
       surface0 = "#313244";
-      surface0Rgb = "49, 50, 68";
+      surface0Rgb = hexToRgb surface0;
       surface1 = "#45475a";
-      surface1Rgb = "69, 71, 90";
+      surface1Rgb = hexToRgb surface1;
       surface2 = "#585b70";
 
-      # ── Overlays ───────────────────────────────────────────────────────────────
+      # ── Overlays ───────────────────────────────────────────────────────────
       overlay0 = "#6c7086";
       overlay1 = "#7f849c";
       overlay2 = "#9399b2";
 
-      # ── Text ───────────────────────────────────────────────────────────────────
+      # ── Text ───────────────────────────────────────────────────────────────
       subtext0 = "#a6adc8";
       subtext1 = "#bac2de";
       text = "#cdd6f4";
 
-      # ── Accent colors ──────────────────────────────────────────────────────────
+      # ── Accent colors ──────────────────────────────────────────────────────
       rosewater = "#f5e0dc";
       flamingo = "#f2cdcd";
       pink = "#f5c2e7";
       mauve = "#cba6f7";
-      mauveRgb = "203, 166, 247";
+      mauveRgb = hexToRgb mauve;
       red = "#f38ba8";
-      redRgb = "243, 139, 168";
+      redRgb = hexToRgb red;
       maroon = "#eba0ac";
       peach = "#fab387";
       yellow = "#f9e2af";
       green = "#a6e3a1";
-      greenRgb = "166, 227, 161";
+      greenRgb = hexToRgb green;
       teal = "#94e2d5";
       sky = "#89dceb";
       sapphire = "#74c7ec";
-      sapphireRgb = "116, 199, 236";
+      sapphireRgb = hexToRgb sapphire;
       blue = "#89b4fa";
       lavender = "#b4befe";
-      lavenderRgb = "180, 190, 254";
+      lavenderRgb = hexToRgb lavender;
 
-      # ── Cursor ─────────────────────────────────────────────────────────────────
+      # ── Cursor ─────────────────────────────────────────────────────────────
       cursorTheme = "catppuccin-mocha-mauve-cursors";
       cursorSize = "20";
       cursorPackage = pkgs.catppuccin-cursors.mochaMauve;
 
-      # ── Font ───────────────────────────────────────────────────────────────────
+      # ── Font ───────────────────────────────────────────────────────────────
       fontName = "JetBrainsMono Nerd Font";
       fontPackage = pkgs.nerd-fonts.jetbrains-mono;
     };
