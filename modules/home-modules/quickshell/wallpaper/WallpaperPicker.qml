@@ -7,9 +7,9 @@ Rectangle {
     id: root
     width: 820
     height: 620
-    radius: 14
-    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.97)
-    border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.45)
+    radius: Colours.radiusPopup
+    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
+    border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
     border.width: 1
 
     MouseArea {
@@ -91,7 +91,7 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             height: 2
-            color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
+            color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
         }
 
         GridView {
@@ -115,7 +115,7 @@ Rectangle {
                         fill: parent
                         margins: 5
                     }
-                    radius: 10
+                    radius: Colours.radiusTile
                     color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
                     border.color: mouseArea.containsMouse ? Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.6) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.3)
                     border.width: 1

@@ -10,8 +10,8 @@ Rectangle {
     // Urgency-based border: critical gets red, normal gets surface1
     property color borderColor: notification.urgency === NotificationUrgency.Critical ? Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.8) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
 
-    radius: 12
-    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.97)
+    radius: Colours.radiusPanel
+    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
     border.color: borderColor
     border.width: 1
     implicitHeight: inner.implicitHeight + 24

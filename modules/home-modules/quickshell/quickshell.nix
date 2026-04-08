@@ -39,6 +39,18 @@
         readonly property color lavender:  "${theme.lavender}"
 
         readonly property string fontFamily: "${theme.fontName}"
+
+        readonly property int    radiusPanel:      ${toString theme.radiusPanel}
+        readonly property int    radiusPopup:      ${toString theme.radiusPopup}
+        readonly property int    radiusTile:       ${toString theme.radiusTile}
+        readonly property int    radiusRow:        ${toString theme.radiusRow}
+        readonly property int    radiusSmall:      ${toString theme.radiusSmall}
+
+        readonly property real   opacityPanel:     ${toString theme.opacityPanel}
+        readonly property real   opacityBar:       ${toString theme.opacityBar}
+        readonly property real   opacityOverlay:   ${toString theme.opacityOverlay}
+        readonly property real   opacityBorder:    ${toString theme.opacityBorder}
+        readonly property real   opacitySeparator: ${toString theme.opacitySeparator}
       }
     '';
 

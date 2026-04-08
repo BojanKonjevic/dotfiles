@@ -11,7 +11,7 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: 40
     implicitWidth: row.implicitWidth + 28
-    radius: 8
+    radius: Colours.radiusRow
     color: "transparent"
 
     property bool hovered: false

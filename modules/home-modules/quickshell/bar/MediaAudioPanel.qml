@@ -94,9 +94,9 @@ PanelWindow {
         }
         width: 320
         height: root.state_.mediaAudioOpen ? innerCol.implicitHeight + 24 : 0
-        radius: 12
-        color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.97)
-        border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.45)
+        radius: Colours.radiusPanel
+        color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
+        border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
         border.width: 1
         clip: true
 
@@ -152,7 +152,7 @@ PanelWindow {
                 Rectangle {
                     width: 64
                     height: 64
-                    radius: 8
+                    radius: Colours.radiusRow
                     color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.8)
                     clip: true
                     Layout.alignment: Qt.AlignVCenter
@@ -381,7 +381,7 @@ PanelWindow {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.4)
+                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 Layout.bottomMargin: 12
             }
 
@@ -495,7 +495,7 @@ PanelWindow {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.4)
+                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 Layout.bottomMargin: 12
             }
 
@@ -610,7 +610,8 @@ PanelWindow {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.4)
+                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
+
                 Layout.bottomMargin: 12
                 visible: root.state_.audioData && root.state_.audioData.apps.length > 0
             }

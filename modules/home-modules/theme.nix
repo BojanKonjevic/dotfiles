@@ -11,6 +11,27 @@
     in "${toString r}, ${toString g}, ${toString b}";
 
     palette = rec {
+      # ── Window layout ─────────────────────────────────────────────────────────
+      rounding = 10;
+      roundingPower = 2;
+      gapsIn = 3;
+      gapsOut = 5;
+      borderSize = 2;
+
+      # ── Border Radius ──────────────────────────────────────────────────────────────────
+      radiusPanel = 12; # floating panels (datetime, audio, power)
+      radiusPopup = 14; # full overlays (launcher, clipboard, wallpaper)
+      radiusTile = 10; # grid tiles
+      radiusRow = 8; # list rows and buttons
+      radiusSmall = 6; # inline action buttons
+
+      # ── Opacity ────────────────────────────────────────────────────────────────
+      opacityPanel = 0.97; # panel/popup background
+      opacityBar = 0.60; # bar background
+      opacityOverlay = 0.45; # screen dimming backdrop
+      opacityBorder = 0.45; # panel border
+      opacitySeparator = 0.30; # divider lines
+
       # ── Base layers ────────────────────────────────────────────────────────
       base = "#1e1e2e";
       mantle = "#181825";

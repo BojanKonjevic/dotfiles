@@ -9,7 +9,7 @@ Rectangle {
     signal clicked
 
     implicitHeight: 44
-    radius: 8
+    radius: Colours.radiusRow
 
     // No Behavior — direct color assignment is instant and avoids
     // per-item animation timers multiplied across every visible row

@@ -16,7 +16,7 @@ PanelWindow {
         right: true
     }
     implicitHeight: 28
-    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.60)
+    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityBar)
 
     property bool hasMedia: root.state_.mediaStatus !== "Stopped" && root.state_.mediaTitle !== ""
 
@@ -153,7 +153,7 @@ PanelWindow {
                         bottom: parent.bottom
                     }
                     width: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
+                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 }
 
                 HoverHandler {
@@ -216,7 +216,7 @@ PanelWindow {
                         bottom: parent.bottom
                     }
                     width: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
+                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 }
 
                 HoverHandler {
@@ -292,7 +292,7 @@ PanelWindow {
                         bottom: parent.bottom
                     }
                     width: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
+                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 }
             }
 
@@ -327,7 +327,7 @@ PanelWindow {
                         bottom: parent.bottom
                     }
                     width: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
+                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 }
             }
 
@@ -358,7 +358,7 @@ PanelWindow {
                         bottom: parent.bottom
                     }
                     width: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
+                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 }
 
                 Text {

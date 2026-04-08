@@ -22,7 +22,7 @@ ShellRoot {
 
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(0, 0, 0, 0.45)
+            color: Qt.rgba(0, 0, 0, Colours.opacityOverlay)
             MouseArea {
                 anchors.fill: parent
                 onClicked: Qt.quit()

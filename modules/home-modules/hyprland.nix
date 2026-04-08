@@ -67,9 +67,9 @@
         };
 
         general = {
-          gaps_in = 3;
-          gaps_out = 5;
-          border_size = 2;
+          gaps_in = theme.gapsIn;
+          gaps_out = theme.gapsOut;
+          border_size = theme.borderSize;
           "col.active_border" = "$mauve $blue 45deg";
           "col.inactive_border" = "$surface1";
           resize_on_border = false;
@@ -78,8 +78,8 @@
         };
 
         decoration = {
-          rounding = 10;
-          rounding_power = 2;
+          rounding = theme.rounding;
+          rounding_power = theme.roundingPower;
           active_opacity = 1.0;
           shadow = {
             enabled = true;

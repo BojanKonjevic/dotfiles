@@ -7,9 +7,9 @@ Rectangle {
 
     width: 640
     height: 480
-    radius: 14
-    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.97)
-    border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.45)
+    radius: Colours.radiusPopup
+    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
+    border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
     border.width: 1
 
     MouseArea {
@@ -163,7 +163,7 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             height: 2
-            color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
+            color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
         }
 
         Flickable {
@@ -186,7 +186,7 @@ Rectangle {
                         required property int index
                         width: clipColumn.width
                         height: 36
-                        radius: 8
+                        radius: Colours.radiusRow
                         color: (index === root.currentIndex || rowHover.containsMouse) ? Qt.rgba(Colours.sapphire.r, Colours.sapphire.g, Colours.sapphire.b, 0.18) : "transparent"
                         border.color: (index === root.currentIndex || rowHover.containsMouse) ? Qt.rgba(Colours.sapphire.r, Colours.sapphire.g, Colours.sapphire.b, 0.55) : "transparent"
                         border.width: 1

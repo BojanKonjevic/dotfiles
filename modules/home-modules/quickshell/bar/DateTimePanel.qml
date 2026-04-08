@@ -80,9 +80,9 @@ PanelWindow {
         }
         width: 340
         height: root.state_.dateTimeOpen ? innerCol.implicitHeight + 28 : 0
-        radius: 12
-        color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.97)
-        border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.45)
+        radius: Colours.radiusPanel
+        color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
+        border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
         border.width: 1
         clip: true
 
@@ -235,7 +235,7 @@ PanelWindow {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.4)
+                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 visible: root.state_.weatherPanel !== null
             }
 
@@ -303,7 +303,7 @@ PanelWindow {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.4)
+                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 visible: root.state_.weatherPanel !== null
             }
 

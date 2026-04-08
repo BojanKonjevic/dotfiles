@@ -37,9 +37,9 @@ PanelWindow {
         }
         width: 200
         height: state_.powerOpen ? column.implicitHeight + 24 : 0
-        radius: 12
-        color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.97)
-        border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.45)
+        radius: Colours.radiusPanel
+        color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
+        border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
         border.width: 1
         clip: true
 
@@ -79,7 +79,7 @@ PanelWindow {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
+                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 Layout.bottomMargin: 2
             }
 
