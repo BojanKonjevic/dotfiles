@@ -33,11 +33,6 @@
     programs.kitty = {
       enable = true;
 
-      font = {
-        name = "theme.fontName";
-        size = 16;
-      };
-
       settings = {
         scrollback_lines = 5000;
         enable_audio_bell = "no";
