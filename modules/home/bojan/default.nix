@@ -26,6 +26,8 @@ in {
           home.username = userConfig.username;
           home.homeDirectory = userConfig.homeDirectory;
           home.stateVersion = userConfig.stateVersion;
+          nix.package = pkgs.nix;
+          nix.settings.warn-dirty = false;
           nixpkgs.config.allowUnfree = true;
           news.display = "silent";
           home.packages = with pkgs; [

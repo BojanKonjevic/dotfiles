@@ -31,7 +31,6 @@
     fsType = "ext4";
   };
   swapDevices = [{device = "/dev/disk/by-uuid/a20a6b48-b4e7-4856-8d6d-5367803c2b57";}];
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   boot.kernelModules = [
     "kvm-intel"
