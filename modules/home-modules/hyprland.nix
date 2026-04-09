@@ -7,6 +7,7 @@
     ...
   }: {
     home.packages = with pkgs; [
+      satty
       grim
       slurp
     ];
@@ -150,6 +151,7 @@
             "$mainMod SHIFT, C, exec, qs -c clip-img"
             "$mainMod, S, exec, grim -g \"$(slurp)\" - | wl-copy"
             "$mainMod SHIFT, S, exec, wl-paste --type image/png > \"${userConfig.screenshotsDir}/shot_$(date +%F_%H-%M-%S).png\""
+            "$mainMod CTRL, S, exec, grim -g \"$(slurp)\" - | satty --filename -"
             "$mainMod, RETURN, exec, $terminal"
             "$mainMod, e, exec, $fileManager"
             "$mainMod, Q, killactive"
