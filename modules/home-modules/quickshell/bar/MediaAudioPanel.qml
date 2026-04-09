@@ -218,16 +218,36 @@ PanelWindow {
                 Layout.bottomMargin: 12
 
                 Rectangle {
+                    id: progressBar
                     Layout.fillWidth: true
                     height: 3
                     radius: Colours.radiusSmall
                     color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.6)
 
+                    property bool dragging: false
+                    property real dragPosition: root.state_.mediaPosition
+
                     Rectangle {
-                        width: root.state_.mediaLength > 0 ? parent.width * (root.state_.mediaPosition / root.state_.mediaLength) : 0
+                        width: root.state_.mediaLength > 0 ? parent.width * ((progressBar.dragging ? progressBar.dragPosition : root.state_.mediaPosition) / root.state_.mediaLength) : 0
                         height: parent.height
                         radius: parent.radius
                         color: Colours.blue
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onPressed: progressBar.dragging = true
+                        onReleased: function (mouse) {
+                            progressBar.dragging = false;
+                            var secs = (mouse.x / progressBar.width) * root.state_.mediaLength;
+                            Quickshell.execDetached(["playerctl", "position", secs.toFixed(1)]);
+                        }
+                        onPositionChanged: function (mouse) {
+                            if (progressBar.dragging) {
+                                progressBar.dragPosition = Math.max(0, Math.min(mouse.x / progressBar.width, 1.0)) * root.state_.mediaLength;
+                            }
+                        }
                     }
                 }
 
