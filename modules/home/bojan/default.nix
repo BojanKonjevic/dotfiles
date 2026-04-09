@@ -29,6 +29,7 @@ in {
           nixpkgs.config.allowUnfree = true;
           news.display = "silent";
           home.packages = with pkgs; [
+            cachix
             python3
             glow
             libnotify

@@ -26,12 +26,22 @@
     i18n.defaultLocale = userConfig.locale;
     system.stateVersion = userConfig.stateVersion;
     nix.registry.nixpkgs.flake = inputs.nixpkgs;
-    nix.settings.download-buffer-size = 134217728;
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
-    nix.settings.experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
+    nix.settings = {
+      download-buffer-size = 134217728;
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      substituters = [
+        "https://cache.nixos.org"
+        "https://bojan-dotfiles.cachix.org"
+      ];
+      trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "bojan-dotfiles.cachix.org-1:35eXWoN9Ob91Tn6cEhgLJ+6a09KMnZfRzKHbkQrPOX0="
+      ];
+    };
     nix.gc = {
       automatic = true;
       dates = "weekly";
