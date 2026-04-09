@@ -1,6 +1,7 @@
 {...}: {
   flake.nixosModules.core = {
     pkgs,
+    lib,
     userConfig,
     inputs,
     ...
@@ -9,11 +10,15 @@
     security.polkit.enable = true;
     services.udisks2.enable = true;
     services.gvfs.enable = true;
+    services.journald.extraConfig = "SystemMaxUse=500M";
     programs.dconf.enable = true;
     networking.networkmanager.enable = true;
+    networking.nameservers = ["1.1.1.1" "8.8.8.8"];
     boot.loader.systemd-boot.enable = true;
     boot.loader.timeout = 1;
     boot.loader.efi.canTouchEfiVariables = true;
+    boot.plymouth.enable = true;
+    boot.kernelParams = ["nvidia-drm.modeset=1" "udev.log_level=0"];
     programs.zsh.enable = true;
     programs.ydotool.enable = true;
     hardware.enableAllFirmware = true;
@@ -25,10 +30,11 @@
     time.timeZone = userConfig.timezone;
     i18n.defaultLocale = userConfig.locale;
     system.stateVersion = userConfig.stateVersion;
-    nix.registry.nixpkgs.flake = inputs.nixpkgs;
+    nix.registry = lib.mkForce {nixpkgs.flake = inputs.nixpkgs;};
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
     nix.settings = {
       download-buffer-size = 134217728;
+      max-jobs = "auto";
       experimental-features = [
         "nix-command"
         "flakes"

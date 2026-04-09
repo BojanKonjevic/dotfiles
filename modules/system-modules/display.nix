@@ -41,6 +41,5 @@
       enable = true;
       enable32Bit = true;
     };
-    boot.kernelParams = ["nvidia-drm.modeset=1"];
   };
 }
