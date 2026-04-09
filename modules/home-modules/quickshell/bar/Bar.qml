@@ -22,12 +22,8 @@ PanelWindow {
 
     property string clockHour: Qt.formatDateTime(new Date(), "hh")
     property string clockMin: Qt.formatDateTime(new Date(), "mm")
-    property int cpuUsage: 0
-    property int memUsage: 0
-    property string netType: ""
     property string activeSubmap: root.state_.activeSubmap
     property int notifCount: root.state_.notifCount
-    property int micMuted: 0
 
     Timer {
         interval: 1000
@@ -37,78 +33,6 @@ PanelWindow {
             root.clockHour = Qt.formatDateTime(new Date(), "hh");
             root.clockMin = Qt.formatDateTime(new Date(), "mm");
         }
-    }
-
-    Process {
-        id: cpuProc
-        command: ["qs-cpu"]
-        stdout: SplitParser {
-            onRead: function (data) {
-                root.cpuUsage = parseInt(data) || 0;
-            }
-        }
-    }
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: if (!cpuProc.running)
-            cpuProc.running = true
-    }
-
-    Process {
-        id: memProc
-        command: ["qs-mem"]
-        stdout: SplitParser {
-            onRead: function (data) {
-                root.memUsage = parseInt(data) || 0;
-            }
-        }
-    }
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: if (!memProc.running)
-            memProc.running = true
-    }
-
-    Process {
-        id: netProc
-        command: ["qs-net"]
-        stdout: SplitParser {
-            onRead: function (data) {
-                root.netType = data.trim();
-            }
-        }
-    }
-    Timer {
-        interval: 5000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: if (!netProc.running)
-            netProc.running = true
-    }
-
-    Process {
-        id: micProc
-        command: ["qs-mic"]
-        stdout: SplitParser {
-            onRead: function (data) {
-                root.micMuted = parseInt(data) || 0;
-            }
-        }
-    }
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: if (!micProc.running)
-            micProc.running = true
     }
 
     Item {
@@ -230,7 +154,7 @@ PanelWindow {
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: "󰍛"
-                        color: Qt.rgba(Colours.peach.r, Colours.peach.g, Colours.peach.b, 0.4 + root.cpuUsage / 100 * 0.6)
+                        color: Qt.rgba(Colours.peach.r, Colours.peach.g, Colours.peach.b, 0.4 + root.state_.cpuUsage / 100 * 0.6)
                         font.family: Colours.fontFamily
                         font.pixelSize: 14
                         font.weight: Font.Black
@@ -244,7 +168,7 @@ PanelWindow {
                         color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
 
                         Rectangle {
-                            width: parent.width * (root.cpuUsage / 100)
+                            width: parent.width * (root.state_.cpuUsage / 100)
                             height: parent.height
                             radius: parent.radius
                             color: Colours.peach
@@ -271,7 +195,7 @@ PanelWindow {
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: "󰾆"
-                        color: Qt.rgba(Colours.blue.r, Colours.blue.g, Colours.blue.b, 0.4 + root.memUsage / 100 * 0.6)
+                        color: Qt.rgba(Colours.blue.r, Colours.blue.g, Colours.blue.b, 0.4 + root.state_.memUsage / 100 * 0.6)
                         font.family: Colours.fontFamily
                         font.pixelSize: 14
                         font.weight: Font.Black
@@ -285,7 +209,7 @@ PanelWindow {
                         color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
 
                         Rectangle {
-                            width: parent.width * (root.memUsage / 100)
+                            width: parent.width * (root.state_.memUsage / 100)
                             height: parent.height
                             radius: parent.radius
                             color: Colours.blue
@@ -422,8 +346,8 @@ PanelWindow {
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.micMuted === 1 ? "󰍭" : "󰍬"
-                    color: root.micMuted === 1 ? Colours.red : Colours.green
+                    text: root.state_.micMuted ? "󰍭" : "󰍬"
+                    color: root.state_.micMuted ? Colours.red : Colours.green
                     font.family: Colours.fontFamily
                     font.pixelSize: 17
                     font.weight: Font.Black
@@ -443,8 +367,8 @@ PanelWindow {
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.netType === "wifi" ? "󰤨" : root.netType === "ethernet" ? "󰈀" : "󰤭"
-                    color: root.netType === "" ? Qt.rgba(Colours.overlay0.r, Colours.overlay0.g, Colours.overlay0.b, 0.5) : Colours.sky
+                    text: root.state_.netType === "wifi" ? "󰤨" : root.state_.netType === "ethernet" ? "󰈀" : "󰤭"
+                    color: root.state_.netType === "" ? Qt.rgba(Colours.overlay0.r, Colours.overlay0.g, Colours.overlay0.b, 0.5) : Colours.sky
                     font.family: Colours.fontFamily
                     font.pixelSize: 17
                     font.weight: Font.Black

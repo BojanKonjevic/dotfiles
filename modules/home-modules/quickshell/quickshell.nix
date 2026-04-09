@@ -54,7 +54,6 @@
       }
     '';
 
-    # ── Script helpers ────────────────────────────────────────────────────────
     mkPure = name: file:
       pkgs.writeShellScriptBin name (builtins.readFile ./qs-scripts/${file});
     mkInterp = name: file: args:
@@ -67,15 +66,15 @@
       pkgs.cliphist
       pkgs.awww
       pkgs.pulseaudio
+      pkgs.pipewire
 
       # ── Bar helpers ──────────────────────────────────────────────────────
       (mkPure "qs-cpu" "qs-cpu.sh")
       (mkPure "qs-mem" "qs-mem.sh")
-      (mkPure "qs-net" "qs-net.sh")
-      (mkPure "qs-mic" "qs-mic.sh")
-      (mkInterp "qs-cava-bar" "qs-cava-bar.sh" {inherit pkgs userConfig;})
-      (mkInterp "qs-audio" "qs-audio.sh" {inherit pkgs;})
       (mkPure "qs-audio-set" "qs-audio-set.sh")
+      (mkInterp "qs-audio-monitor" "qs-audio-monitor.sh" {inherit pkgs;})
+      (mkInterp "qs-net-monitor" "qs-net-monitor.sh" {inherit pkgs;})
+      (mkInterp "qs-cava-bar" "qs-cava-bar.sh" {inherit pkgs userConfig;})
 
       # ── Clipboard helpers ────────────────────────────────────────────────
       (mkPure "qs-clip-copy-text" "qs-clip-copy-text.sh")

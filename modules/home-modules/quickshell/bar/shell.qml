@@ -43,6 +43,10 @@ ShellRoot {
         property var audioData: null
         property string activeSubmap: ""
         property int notifCount: 0
+        property bool micMuted: false
+        property string netType: ""
+        property int cpuUsage: 0
+        property int memUsage: 0
         property var clearNotifs: function () {
             var notifs = notifServer.trackedNotifications.values;
             for (var i = notifs.length - 1; i >= 0; i--) {
@@ -51,32 +55,11 @@ ShellRoot {
         }
     }
 
-    Process {
-        id: audioProc
-        command: ["qs-audio"]
-        stdout: SplitParser {
-            onRead: function (data) {
-                try {
-                    barState.audioData = JSON.parse(data);
-                } catch (_) {}
-            }
-        }
-    }
-
-    Timer {
-        interval: 2000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            if (!audioProc.running)
-                audioProc.running = true;
-        }
-    }
-
+    // ── Media — event-driven via --follow ─────────────────────────────────────
     Process {
         id: mediaProc
-        command: ["playerctl", "metadata", "--format", '{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","art":"{{mpris:artUrl}}","status":"{{status}}","length":"{{mpris:length}}"}']
+        command: ["playerctl", "--follow", "metadata", "--format", '{"title":"{{title}}","artist":"{{artist}}","album":"{{album}}","art":"{{mpris:artUrl}}","status":"{{status}}","length":"{{mpris:length}}"}']
+        running: true
         stdout: SplitParser {
             onRead: function (data) {
                 try {
@@ -91,13 +74,24 @@ ShellRoot {
             }
         }
         onExited: function (code) {
-            if (code !== 0) {
-                barState.mediaTitle = "";
-                barState.mediaStatus = "Stopped";
-            }
+            barState.mediaTitle = "";
+            barState.mediaStatus = "Stopped";
+            // restart after a short delay to handle playerctl having no player
+            mediaRestartTimer.restart();
         }
     }
 
+    Timer {
+        id: mediaRestartTimer
+        interval: 3000
+        repeat: false
+        onTriggered: {
+            if (!mediaProc.running)
+                mediaProc.running = true;
+        }
+    }
+
+    // ── Media position — still polled (playerctl has no follow for position) ──
     Process {
         id: mediaPosProc
         command: ["playerctl", "position"]
@@ -114,13 +108,103 @@ ShellRoot {
         repeat: true
         triggeredOnStart: true
         onTriggered: {
-            if (!mediaProc.running)
-                mediaProc.running = true;
             if (!mediaPosProc.running)
                 mediaPosProc.running = true;
         }
     }
 
+    // ── Audio + Mic — event-driven via qs-audio-monitor ───────────────────────
+    Process {
+        id: audioProc
+        command: ["qs-audio-monitor"]
+        running: true
+        stdout: SplitParser {
+            onRead: function (data) {
+                try {
+                    var parsed = JSON.parse(data);
+                    if (parsed.type === "audio") {
+                        barState.audioData = parsed.data;
+                    } else if (parsed.type === "mic") {
+                        barState.micMuted = parsed.muted;
+                    }
+                } catch (_) {}
+            }
+        }
+        onExited: function () {
+            audioRestartTimer.restart();
+        }
+    }
+
+    Timer {
+        id: audioRestartTimer
+        interval: 2000
+        repeat: false
+        onTriggered: {
+            if (!audioProc.running)
+                audioProc.running = true;
+        }
+    }
+
+    // ── Network — event-driven via nmcli monitor ──────────────────────────────
+    Process {
+        id: netProc
+        command: ["qs-net-monitor"]
+        running: true
+        stdout: SplitParser {
+            onRead: function (data) {
+                barState.netType = data.trim();
+            }
+        }
+        onExited: function () {
+            netRestartTimer.restart();
+        }
+    }
+
+    Timer {
+        id: netRestartTimer
+        interval: 2000
+        repeat: false
+        onTriggered: {
+            if (!netProc.running)
+                netProc.running = true;
+        }
+    }
+
+    // ── CPU + MEM — single shared 2s polling timer ────────────────────────────
+    Process {
+        id: cpuProc
+        command: ["qs-cpu"]
+        stdout: SplitParser {
+            onRead: function (data) {
+                barState.cpuUsage = parseInt(data) || 0;
+            }
+        }
+    }
+
+    Process {
+        id: memProc
+        command: ["qs-mem"]
+        stdout: SplitParser {
+            onRead: function (data) {
+                barState.memUsage = parseInt(data) || 0;
+            }
+        }
+    }
+
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (!cpuProc.running)
+                cpuProc.running = true;
+            if (!memProc.running)
+                memProc.running = true;
+        }
+    }
+
+    // ── Hyprland submap ───────────────────────────────────────────────────────
     Connections {
         target: Hyprland
         function onRawEvent(event) {
@@ -130,6 +214,7 @@ ShellRoot {
         }
     }
 
+    // ── Shell variants ────────────────────────────────────────────────────────
     Variants {
         model: Quickshell.screens
         delegate: Bar {
