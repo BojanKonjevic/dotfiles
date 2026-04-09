@@ -11,7 +11,7 @@ PanelWindow {
         bottom: true
         left: true
     }
-    margins.left: 56
+    margins.left: 48
 
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore

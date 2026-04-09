@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell.Hyprland
 
-Rectangle {
+Item {
     id: btn
     required property int wsId
 
@@ -18,30 +18,65 @@ Rectangle {
 
     visible: wsId <= 5 || isActive || isOccupied
 
-    implicitWidth: 56
-    implicitHeight: 30
+    implicitWidth: 48
+    implicitHeight: 22
 
-    color: (isActive || hovered) ? Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.6) : "transparent"
-
-    // Active indicator: left edge stripe
     Rectangle {
-        anchors {
-            top: parent.top
-            bottom: parent.bottom
-            left: parent.left
-        }
-        width: 2
-        color: Colours.mauve
-        visible: btn.isActive
-    }
-
-    Text {
         anchors.centerIn: parent
-        text: btn.wsId.toString()
-        font.family: Colours.fontFamily
-        font.pixelSize: 14
-        font.weight: Font.Black
-        color: btn.isActive ? Colours.mauve : btn.isOccupied ? Qt.rgba(Colours.lavender.r, Colours.lavender.g, Colours.lavender.b, 0.75) : Qt.rgba(Colours.overlay2.r, Colours.overlay2.g, Colours.overlay2.b, 0.6)
+        width: btn.isActive ? 34 : (btn.hovered ? 30 : 26)
+        height: 20
+        radius: 4
+        color: btn.isActive ? Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.18) : btn.hovered ? Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5) : "transparent"
+
+        Behavior on width {
+            NumberAnimation {
+                duration: 100
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        // Left accent stripe for active
+        Rectangle {
+            anchors {
+                top: parent.top
+                bottom: parent.bottom
+                left: parent.left
+            }
+            width: 2
+            radius: 1
+            color: Colours.mauve
+            visible: btn.isActive
+        }
+
+        Text {
+            anchors.centerIn: parent
+            text: btn.wsId.toString()
+            font.family: Colours.fontFamily
+            font.pixelSize: 11
+            font.weight: btn.isActive ? Font.Black : Font.Medium
+            color: btn.isActive ? Colours.mauve : btn.isOccupied ? Qt.rgba(Colours.text.r, Colours.text.g, Colours.text.b, 0.75) : Qt.rgba(Colours.overlay1.r, Colours.overlay1.g, Colours.overlay1.b, 0.5)
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: 100
+                }
+            }
+        }
+
+        // Occupied dot (when not active)
+        Rectangle {
+            anchors {
+                bottom: parent.bottom
+                horizontalCenter: parent.horizontalCenter
+                bottomMargin: 2
+            }
+            width: 3
+            height: 3
+            radius: 2
+            color: Colours.mauve
+            opacity: 0.6
+            visible: btn.isOccupied && !btn.isActive
+        }
     }
 
     MouseArea {
@@ -50,5 +85,6 @@ Rectangle {
         onEntered: btn.hovered = true
         onExited: btn.hovered = false
         onClicked: Hyprland.dispatch("workspace " + btn.wsId)
+        cursorShape: Qt.PointingHandCursor
     }
 }

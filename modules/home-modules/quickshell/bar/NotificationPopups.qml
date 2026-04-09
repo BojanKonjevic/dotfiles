@@ -12,7 +12,7 @@ PanelWindow {
         bottom: true
         left: true
     }
-    margins.left: 64
+    margins.left: 56
     implicitWidth: 380
     implicitHeight: notifColumn.implicitHeight + 16
     color: "transparent"

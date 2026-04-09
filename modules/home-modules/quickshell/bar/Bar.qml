@@ -15,20 +15,19 @@ PanelWindow {
         left: true
         bottom: true
     }
-    implicitWidth: 56
-    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.85)
+    implicitWidth: 48
+    color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.90)
 
     property bool hasMedia: root.state_.mediaStatus !== "Stopped" && root.state_.mediaTitle !== ""
 
     property string clockHour: Qt.formatDateTime(new Date(), "hh")
     property string clockMin: Qt.formatDateTime(new Date(), "mm")
-    property string clockDate: Qt.formatDateTime(new Date(), "dd MMM")
-    property string weatherText: ""
     property int cpuUsage: 0
     property int memUsage: 0
     property string netType: ""
     property string activeSubmap: root.state_.activeSubmap
     property int notifCount: root.state_.notifCount
+    property int micMuted: 0
 
     Timer {
         interval: 1000
@@ -37,28 +36,7 @@ PanelWindow {
         onTriggered: {
             root.clockHour = Qt.formatDateTime(new Date(), "hh");
             root.clockMin = Qt.formatDateTime(new Date(), "mm");
-            root.clockDate = Qt.formatDateTime(new Date(), "dd MMM");
         }
-    }
-
-    Process {
-        id: weatherProc
-        command: ["weather", "--bar"]
-        stdout: SplitParser {
-            onRead: function (data) {
-                try {
-                    root.weatherText = JSON.parse(data).text || "";
-                } catch (_) {}
-            }
-        }
-    }
-    Timer {
-        interval: 600000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: if (!weatherProc.running)
-            weatherProc.running = true
     }
 
     Process {
@@ -115,10 +93,27 @@ PanelWindow {
             netProc.running = true
     }
 
+    Process {
+        id: micProc
+        command: ["qs-mic"]
+        stdout: SplitParser {
+            onRead: function (data) {
+                root.micMuted = parseInt(data) || 0;
+            }
+        }
+    }
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: if (!micProc.running)
+            micProc.running = true
+    }
+
     Item {
         anchors.fill: parent
 
-        // Right edge separator line
         Rectangle {
             anchors {
                 top: parent.top
@@ -126,67 +121,40 @@ PanelWindow {
                 right: parent.right
             }
             width: 1
-            color: Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.35)
+            color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.8)
         }
 
         ColumnLayout {
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                left: parent.left
-                right: parent.right
-            }
+            anchors.fill: parent
             spacing: 0
 
-            // ── Top section ─────────────────────────────────────────────────
-            // Clock / date
+            // ── Clock ────────────────────────────────────────────────────────
             Item {
-                id: clockItem
                 Layout.fillWidth: true
-                implicitHeight: clockCol.implicitHeight + 20
+                implicitHeight: clockCol.implicitHeight + 22
 
                 ColumnLayout {
                     id: clockCol
                     anchors.centerIn: parent
-                    spacing: -4
+                    spacing: -3
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: root.clockHour
                         color: Colours.mauve
                         font.family: Colours.fontFamily
-                        font.pixelSize: 26
+                        font.pixelSize: 20
                         font.weight: Font.Black
                     }
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: root.clockMin
-                        color: Colours.lavender
+                        color: Colours.blue
                         font.family: Colours.fontFamily
-                        font.pixelSize: 26
+                        font.pixelSize: 20
                         font.weight: Font.Black
                     }
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: root.clockDate
-                        color: Colours.subtext0
-                        font.family: Colours.fontFamily
-                        font.pixelSize: 11
-                        font.weight: Font.Bold
-                        Layout.topMargin: 6
-                    }
-                }
-
-                Rectangle {
-                    anchors {
-                        bottom: parent.bottom
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
                 }
 
                 HoverHandler {
@@ -207,14 +175,150 @@ PanelWindow {
                             root.state_.dateTimeOpen = false;
                     }
                 }
+
+                Rectangle {
+                    anchors {
+                        bottom: parent.bottom
+                        left: parent.left
+                        right: parent.right
+                        leftMargin: 12
+                        rightMargin: 12
+                    }
+                    height: 1
+                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.25)
+                }
             }
 
             // ── Workspaces ───────────────────────────────────────────────────
-            Repeater {
-                model: 10
-                delegate: WorkspaceButton {
-                    required property int index
-                    wsId: index + 1
+            Item {
+                Layout.fillWidth: true
+                implicitHeight: wsCol.implicitHeight + 14
+
+                Column {
+                    id: wsCol
+                    anchors.centerIn: parent
+                    spacing: 2
+
+                    Repeater {
+                        model: 10
+                        delegate: WorkspaceButton {
+                            required property int index
+                            wsId: index + 1
+                        }
+                    }
+                }
+            }
+
+            // ── Divider ──────────────────────────────────────────────────────
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                height: 1
+                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.25)
+            }
+
+            // ── CPU bar ──────────────────────────────────────────────────────
+            Item {
+                Layout.fillWidth: true
+                implicitHeight: 32
+
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    spacing: 5
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "󰍛"
+                        color: Qt.rgba(Colours.peach.r, Colours.peach.g, Colours.peach.b, 0.4 + root.cpuUsage / 100 * 0.6)
+                        font.family: Colours.fontFamily
+                        font.pixelSize: 14
+                        font.weight: Font.Black
+                    }
+
+                    Rectangle {
+                        Layout.alignment: Qt.AlignHCenter
+                        width: 26
+                        height: 2
+                        radius: 1
+                        color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
+
+                        Rectangle {
+                            width: parent.width * (root.cpuUsage / 100)
+                            height: parent.height
+                            radius: parent.radius
+                            color: Colours.peach
+                            Behavior on width {
+                                NumberAnimation {
+                                    duration: 500
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── MEM bar ──────────────────────────────────────────────────────
+            Item {
+                Layout.fillWidth: true
+                implicitHeight: 32
+
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    spacing: 5
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "󰾆"
+                        color: Qt.rgba(Colours.blue.r, Colours.blue.g, Colours.blue.b, 0.4 + root.memUsage / 100 * 0.6)
+                        font.family: Colours.fontFamily
+                        font.pixelSize: 14
+                        font.weight: Font.Black
+                    }
+
+                    Rectangle {
+                        Layout.alignment: Qt.AlignHCenter
+                        width: 26
+                        height: 2
+                        radius: 1
+                        color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
+
+                        Rectangle {
+                            width: parent.width * (root.memUsage / 100)
+                            height: parent.height
+                            radius: parent.radius
+                            color: Colours.blue
+                            Behavior on width {
+                                NumberAnimation {
+                                    duration: 500
+                                    easing.type: Easing.OutCubic
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── Spacer ───────────────────────────────────────────────────────
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
+
+            // ── Submap (only when active) ─────────────────────────────────────
+            Item {
+                Layout.fillWidth: true
+                implicitHeight: 32
+                visible: root.activeSubmap !== ""
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "󰩨"
+                    color: Colours.red
+                    font.family: Colours.fontFamily
+                    font.pixelSize: 16
+                    font.weight: Font.Black
                 }
             }
 
@@ -222,25 +326,21 @@ PanelWindow {
             Item {
                 id: mediaItem
                 Layout.fillWidth: true
-                implicitHeight: 40
-
-                Rectangle {
-                    anchors {
-                        top: parent.top
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
-                }
+                implicitHeight: 34
 
                 Text {
                     anchors.centerIn: parent
                     text: "󰎆"
-                    color: root.hasMedia ? Colours.blue : Colours.overlay0
+                    color: root.hasMedia ? Colours.blue : Qt.rgba(Colours.overlay0.r, Colours.overlay0.g, Colours.overlay0.b, 0.5)
                     font.family: Colours.fontFamily
-                    font.pixelSize: 22
+                    font.pixelSize: 17
                     font.weight: Font.Black
+
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 200
+                        }
+                    }
                 }
 
                 HoverHandler {
@@ -257,64 +357,42 @@ PanelWindow {
                 }
             }
 
-            Item {
+            // ── Divider ──────────────────────────────────────────────────────
+            Rectangle {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                height: 1
+                color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.25)
             }
 
-            // ── Bottom section ───────────────────────────────────────────────
-
-            // Submap indicator
-            Item {
-                id: submapItem
-                Layout.fillWidth: true
-                implicitHeight: 40
-                visible: root.activeSubmap !== ""
-
-                Rectangle {
-                    anchors {
-                        top: parent.top
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "󰩨"
-                    color: Colours.red
-                    font.family: Colours.fontFamily
-                    font.pixelSize: 20
-                    font.weight: Font.Black
-                }
-            }
-
-            // Notifications
+            // ── Notifications ─────────────────────────────────────────────────
             Item {
                 id: notifItem
                 Layout.fillWidth: true
-                implicitHeight: 40
+                implicitHeight: 34
                 visible: root.notifCount > 0
-
-                Rectangle {
-                    anchors {
-                        top: parent.top
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
-                }
 
                 Text {
                     anchors.centerIn: parent
                     text: "󰂚"
-                    color: root.state_.notifPanelOpen ? Colours.mauve : Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.7)
+                    color: root.state_.notifPanelOpen ? Colours.mauve : Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.6)
                     font.family: Colours.fontFamily
-                    font.pixelSize: 20
+                    font.pixelSize: 17
                     font.weight: Font.Black
+                }
+
+                Rectangle {
+                    anchors {
+                        top: parent.top
+                        horizontalCenter: parent.horizontalCenter
+                        horizontalCenterOffset: 7
+                        topMargin: 7
+                    }
+                    width: 5
+                    height: 5
+                    radius: 3
+                    color: Colours.mauve
                 }
 
                 HoverHandler {
@@ -337,106 +415,40 @@ PanelWindow {
                 }
             }
 
-            // CPU
+            // ── Mic ──────────────────────────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: 50
+                implicitHeight: 34
 
-                Rectangle {
-                    anchors {
-                        top: parent.top
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
-                }
-
-                ColumnLayout {
+                Text {
                     anchors.centerIn: parent
-                    spacing: 2
+                    text: root.micMuted === 1 ? "󰍭" : "󰍬"
+                    color: root.micMuted === 1 ? Colours.red : Colours.green
+                    font.family: Colours.fontFamily
+                    font.pixelSize: 17
+                    font.weight: Font.Black
 
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: "󰍛"
-                        color: Colours.peach
-                        font.family: Colours.fontFamily
-                        font.pixelSize: 20
-                        font.weight: Font.Black
-                    }
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: root.cpuUsage + "%"
-                        color: Colours.peach
-                        font.family: Colours.fontFamily
-                        font.pixelSize: 11
-                        font.weight: Font.Bold
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 120
+                        }
                     }
                 }
             }
 
-            // MEM
+            // ── Network ──────────────────────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: 50
-
-                Rectangle {
-                    anchors {
-                        top: parent.top
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
-                }
-
-                ColumnLayout {
-                    anchors.centerIn: parent
-                    spacing: 2
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: "󰾆"
-                        color: Colours.blue
-                        font.family: Colours.fontFamily
-                        font.pixelSize: 20
-                        font.weight: Font.Black
-                    }
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: root.memUsage + "%"
-                        color: Colours.blue
-                        font.family: Colours.fontFamily
-                        font.pixelSize: 11
-                        font.weight: Font.Bold
-                    }
-                }
-            }
-
-            // Network
-            Item {
-                Layout.fillWidth: true
-                implicitHeight: 40
-
-                Rectangle {
-                    anchors {
-                        top: parent.top
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
-                }
+                implicitHeight: 34
 
                 Text {
                     anchors.centerIn: parent
                     text: root.netType === "wifi" ? "󰤨" : root.netType === "ethernet" ? "󰈀" : "󰤭"
-                    color: root.netType === "" ? Colours.overlay0 : Colours.sky
+                    color: root.netType === "" ? Qt.rgba(Colours.overlay0.r, Colours.overlay0.g, Colours.overlay0.b, 0.5) : Colours.sky
                     font.family: Colours.fontFamily
-                    font.pixelSize: 22
+                    font.pixelSize: 17
                     font.weight: Font.Black
+
                     MouseArea {
                         anchors.fill: parent
                         onClicked: Quickshell.execDetached(["nm-connection-editor"])
@@ -444,29 +456,21 @@ PanelWindow {
                 }
             }
 
-            // Power button
+            // ── Power ─────────────────────────────────────────────────────────
             Item {
                 id: powerItem
                 Layout.fillWidth: true
-                implicitHeight: 44
-
-                Rectangle {
-                    anchors {
-                        top: parent.top
-                        left: parent.left
-                        right: parent.right
-                    }
-                    height: 1
-                    color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacitySeparator)
-                }
+                implicitHeight: 38
+                Layout.bottomMargin: 4
 
                 Text {
                     anchors.centerIn: parent
                     text: "⏻"
                     font.family: Colours.fontFamily
-                    font.pixelSize: 22
+                    font.pixelSize: 17
                     font.weight: Font.Black
-                    color: root.state_.powerOpen ? Colours.red : Qt.rgba(Colours.overlay1.r, Colours.overlay1.g, Colours.overlay1.b, 0.8)
+                    color: root.state_.powerOpen ? Colours.red : Qt.rgba(Colours.overlay1.r, Colours.overlay1.g, Colours.overlay1.b, 0.7)
+
                     Behavior on color {
                         ColorAnimation {
                             duration: 100

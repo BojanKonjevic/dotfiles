@@ -12,7 +12,7 @@ PanelWindow {
         top: true
         left: true
     }
-    margins.left: 56
+    margins.left: 48
     margins.top: Math.max(4, Math.min(state_.mediaAudioY - 32, screen.height - implicitHeight - 4))
     implicitWidth: state_.mediaAudioOpen ? 340 : 0
     implicitHeight: state_.mediaAudioOpen ? content.height + 2 : 0

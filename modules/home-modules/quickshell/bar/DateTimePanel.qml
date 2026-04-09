@@ -12,7 +12,7 @@ PanelWindow {
         top: true
         left: true
     }
-    margins.left: 56
+    margins.left: 48
 
     implicitWidth: state_.dateTimeOpen ? content.width + 2 : 0
     implicitHeight: state_.dateTimeOpen ? content.height + 2 : 0

@@ -13,7 +13,7 @@ PanelWindow {
         bottom: true
         left: true
     }
-    margins.left: 56
+    margins.left: 48
 
     implicitWidth: state_.notifPanelOpen ? 400 : 0
     implicitHeight: state_.notifPanelOpen ? 500 : 0
