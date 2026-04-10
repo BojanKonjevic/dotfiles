@@ -1,0 +1,5 @@
+require("trouble").setup()
+vim.keymap.set("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<CR>", { desc = "Diagnostics (project)" })
+vim.keymap.set("n", "<leader>xb", "<cmd>Trouble diagnostics toggle filter.buf=0<CR>", { desc = "Diagnostics (buffer)" })
+vim.keymap.set("n", "<leader>xs", "<cmd>Trouble symbols toggle<CR>", { desc = "Symbols" })
+vim.keymap.set("n", "<leader>xq", "<cmd>Trouble qflist toggle<CR>", { desc = "Quickfix list" })

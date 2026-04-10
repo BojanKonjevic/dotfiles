@@ -3,3 +3,4 @@ require("leetcode").setup({
 	lang = "python3",
 	description = { position = "bottom" },
 })
+require("harpoon"):setup()

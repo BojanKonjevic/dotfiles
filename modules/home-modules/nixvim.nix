@@ -17,6 +17,9 @@
       ];
 
       extraPlugins = with pkgs.vimPlugins; [
+        harpoon2
+        grug-far-nvim
+        vim-illuminate
         diffview-nvim
         undotree
         tiny-inline-diagnostic-nvim
@@ -26,6 +29,8 @@
         leetcode-nvim
         neo-tree-nvim
         neoscroll-nvim
+        oil-nvim
+        trouble-nvim
       ];
 
       plugins = {
@@ -162,6 +167,10 @@
             icons.keys = {};
             spec = [
               {
+                __unkeyed-1 = "<leader>x";
+                name = "[X] Trouble";
+              }
+              {
                 __unkeyed-1 = "<leader>s";
                 name = "[S]earch";
               }
@@ -277,12 +286,112 @@
             ai = {
               n_lines = 500;
             };
+            comment = {};
             surround = {};
             pairs = {};
             move = {};
-            statusline = {
-              use_icons = true;
-              section_location.__raw = "function() return '%2l:%-2v' end";
+          };
+        };
+
+        lualine = {
+          enable = true;
+          settings = {
+            options = {
+              component_separators = {
+                left = "";
+                right = "";
+              };
+              section_separators = {
+                left = "";
+                right = "";
+              };
+              globalstatus = true;
+            };
+            sections = {
+              lualine_a = [
+                {
+                  __unkeyed-1 = "mode";
+                  separator = {
+                    left = "";
+                    right = "";
+                  };
+                }
+              ];
+              lualine_b = [
+                "branch"
+                {
+                  __unkeyed-1 = "diff";
+                  symbols = {
+                    added = " ";
+                    modified = " ";
+                    removed = " ";
+                  };
+                }
+                {
+                  __unkeyed-1 = "diagnostics";
+                  symbols = {
+                    error = " ";
+                    warn = " ";
+                    info = " ";
+                    hint = "󰝶 ";
+                  };
+                }
+              ];
+              lualine_c = [
+                {
+                  __unkeyed-1 = "filename";
+                  path = 1;
+                  symbols = {
+                    modified = "  ";
+                    readonly = " ";
+                    unnamed = " ";
+                  };
+                }
+              ];
+              lualine_x = [
+                {
+                  __unkeyed-1.__raw = ''
+                    function()
+                      local clients = vim.lsp.get_clients({ bufnr = 0 })
+                      if #clients == 0 then return "" end
+                      local names = {}
+                      for _, c in ipairs(clients) do
+                        table.insert(names, c.name)
+                      end
+                      return "󰒋 " .. table.concat(names, ", ")
+                    end
+                  '';
+                  color = {fg = "#cba6f7";};
+                }
+                "encoding"
+                {
+                  __unkeyed-1 = "fileformat";
+                  symbols = {
+                    unix = " ";
+                    dos = " ";
+                    mac = " ";
+                  };
+                }
+                "filetype"
+              ];
+              lualine_y = ["progress"];
+              lualine_z = [
+                {
+                  __unkeyed-1 = "location";
+                  separator = {
+                    left = "";
+                    right = "";
+                  };
+                }
+              ];
+            };
+            inactive_sections = {
+              lualine_a = [];
+              lualine_b = [];
+              lualine_c = ["filename"];
+              lualine_x = ["location"];
+              lualine_y = [];
+              lualine_z = [];
             };
           };
         };
@@ -337,6 +446,73 @@
       };
 
       keymaps = [
+        {
+          mode = "n";
+          key = "<C-a>";
+          action.__raw = "function() require('harpoon'):list():add() end";
+          options.desc = "Harpoon add file";
+        }
+        {
+          mode = "n";
+          key = "<C-e>";
+          action.__raw = "function() local h = require('harpoon') h.ui:toggle_quick_menu(h:list()) end";
+          options.desc = "Harpoon menu";
+        }
+        {
+          mode = "n";
+          key = "<C-1>";
+          action.__raw = "function() require('harpoon'):list():select(1) end";
+          options.desc = "Harpoon file 1";
+        }
+        {
+          mode = "n";
+          key = "<C-2>";
+          action.__raw = "function() require('harpoon'):list():select(2) end";
+          options.desc = "Harpoon file 2";
+        }
+        {
+          mode = "n";
+          key = "<C-3>";
+          action.__raw = "function() require('harpoon'):list():select(3) end";
+          options.desc = "Harpoon file 3";
+        }
+        {
+          mode = "n";
+          key = "<C-4>";
+          action.__raw = "function() require('harpoon'):list():select(4) end";
+          options.desc = "Harpoon file 4";
+        }
+        {
+          mode = "n";
+          key = "<C-p>";
+          action.__raw = "function() require('harpoon'):list():prev() end";
+          options.desc = "Harpoon prev";
+        }
+        {
+          mode = "n";
+          key = "<C-n>";
+          action.__raw = "function() require('harpoon'):list():next() end";
+          options.desc = "Harpoon next";
+        }
+
+        {
+          mode = "n";
+          key = "<leader>fr";
+          action = "<cmd>GrugFar<CR>";
+          options.desc = "[F]ind and [R]eplace";
+        }
+        {
+          mode = "n";
+          key = "<leader>fw";
+          action = "<cmd>lua require('grug-far').open({ prefills = { search = vim.fn.expand('<cword>') } })<CR>";
+          options.desc = "[F]ind and Replace [W]ord";
+        }
+        {
+          mode = "v";
+          key = "<leader>fr";
+          action = "<cmd>lua require('grug-far').with_visual_selection()<CR>";
+          options.desc = "[F]ind and [R]eplace selection";
+        }
         {
           mode = "n";
           key = "<leader>gd";
@@ -487,6 +663,9 @@
       };
 
       extraFiles = {
+        "plugin/oil.lua".source = ./nvim/oil.lua;
+        "plugin/trouble.lua".source = ./nvim/trouble.lua;
+        "plugin/grug-far.lua".source = ./nvim/grug-far.lua;
         "plugin/blink.lua".source = ./nvim/blink.lua;
         "plugin/diffview.lua".source = ./nvim/diffview.lua;
         "plugin/lazygit.lua".source = ./nvim/lazygit.lua;
