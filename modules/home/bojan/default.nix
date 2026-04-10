@@ -31,6 +31,7 @@ in {
           nixpkgs.config.allowUnfree = true;
           news.display = "silent";
           home.packages = with pkgs; [
+            nvd
             cachix
             python3
             glow
