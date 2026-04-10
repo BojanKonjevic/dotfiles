@@ -18,13 +18,13 @@ Item {
 
     visible: wsId <= 5 || isActive || isOccupied
 
-    implicitWidth: 48
-    implicitHeight: 22
+    implicitWidth: Colours.barWidth
+    implicitHeight: Colours.workspaceBtnH
 
     Rectangle {
         anchors.centerIn: parent
-        width: btn.isActive ? 34 : (btn.hovered ? 30 : 26)
-        height: 20
+        width: btn.isActive ? Colours.barWidth - Colours.iconSizeSm : (btn.hovered ? Colours.barWidth - Colours.iconSizeMd : Colours.barWidth - Colours.iconSizeXl)
+        height: Colours.workspaceBtnH - 2
         radius: 4
         color: btn.isActive ? Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.18) : btn.hovered ? Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5) : "transparent"
 
@@ -52,7 +52,7 @@ Item {
             anchors.centerIn: parent
             text: btn.wsId.toString()
             font.family: Colours.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: Colours.fontSizeSm
             font.weight: btn.isActive ? Font.Black : Font.Medium
             color: btn.isActive ? Colours.mauve : btn.isOccupied ? Qt.rgba(Colours.text.r, Colours.text.g, Colours.text.b, 0.75) : Qt.rgba(Colours.overlay1.r, Colours.overlay1.g, Colours.overlay1.b, 0.5)
 
@@ -70,9 +70,9 @@ Item {
                 horizontalCenter: parent.horizontalCenter
                 bottomMargin: 2
             }
-            width: 3
-            height: 3
-            radius: 2
+            width: Colours.spacingXs
+            height: Colours.spacingXs
+            radius: Colours.spacingXs / 2
             color: Colours.mauve
             opacity: 0.6
             visible: btn.isOccupied && !btn.isActive

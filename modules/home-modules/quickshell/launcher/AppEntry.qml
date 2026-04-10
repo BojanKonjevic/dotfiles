@@ -8,11 +8,9 @@ Rectangle {
     property bool selected: false
     signal clicked
 
-    implicitHeight: 44
+    implicitHeight: Colours.spacingXl + Colours.spacingSm
     radius: Colours.radiusRow
 
-    // No Behavior — direct color assignment is instant and avoids
-    // per-item animation timers multiplied across every visible row
     color: (selected || area.containsMouse) ? Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.15) : "transparent"
     border.color: (selected || area.containsMouse) ? Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.4) : "transparent"
     border.width: 1
@@ -25,19 +23,18 @@ Rectangle {
             leftMargin: 10
             rightMargin: 10
         }
-        spacing: 12
+        spacing: Colours.spacingMd
 
         Image {
-            // asynchronous so icon loading never blocks the UI thread
             asynchronous: true
             source: entry.app.icon !== "" ? "image://icon/" + entry.app.icon : ""
-            sourceSize.width: 28
-            sourceSize.height: 28
-            width: 28
-            height: 28
+            sourceSize.width: Colours.iconSizeXl
+            sourceSize.height: Colours.iconSizeXl
+            width: Colours.iconSizeXl
+            height: Colours.iconSizeXl
             Layout.alignment: Qt.AlignVCenter
             visible: entry.app.icon !== ""
-            smooth: false  // nearest-neighbour is faster for small icons
+            smooth: false
             fillMode: Image.PreserveAspectFit
         }
 
@@ -47,10 +44,9 @@ Rectangle {
 
             Text {
                 text: entry.app.name
-                // No Behavior — same reason as above
                 color: (entry.selected || area.containsMouse) ? Colours.mauve : Colours.text
                 font.family: Colours.fontFamily
-                font.pixelSize: 13
+                font.pixelSize: Colours.fontSizeMd
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 Layout.fillWidth: true
@@ -60,11 +56,10 @@ Rectangle {
                 text: entry.app.comment || ""
                 color: Colours.subtext0
                 font.family: Colours.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Colours.fontSizeSm
                 elide: Text.ElideRight
                 Layout.fillWidth: true
                 visible: text !== ""
-                // fixed height avoids re-layout when comment appears/disappears
                 height: visible ? implicitHeight : 0
             }
         }

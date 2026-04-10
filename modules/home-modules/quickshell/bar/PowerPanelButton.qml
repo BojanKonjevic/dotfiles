@@ -9,8 +9,8 @@ Rectangle {
     signal triggered
 
     Layout.fillWidth: true
-    implicitHeight: 40
-    implicitWidth: row.implicitWidth + 28
+    implicitHeight: Colours.powerBtnH
+    implicitWidth: row.implicitWidth + Colours.spacingXl + Colours.spacingXs
     radius: Colours.radiusRow
     color: "transparent"
 
@@ -48,15 +48,15 @@ Rectangle {
             left: parent.left
             right: parent.right
             verticalCenter: parent.verticalCenter
-            leftMargin: 12
-            rightMargin: 12
+            leftMargin: Colours.spacingMd
+            rightMargin: Colours.spacingMd
         }
         spacing: 10
 
         Text {
             text: btn.icon
             font.family: Colours.fontFamily
-            font.pixelSize: 16
+            font.pixelSize: Colours.iconSizeMd
             color: btn.hovered ? Colours.red : Colours.overlay1
             Behavior on color {
                 ColorAnimation {
@@ -68,7 +68,7 @@ Rectangle {
         Text {
             text: btn.label
             font.family: Colours.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: Colours.fontSizeMd
             color: btn.hovered ? Colours.red : Colours.overlay1
             Layout.fillWidth: true
             Behavior on color {

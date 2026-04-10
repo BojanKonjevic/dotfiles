@@ -24,9 +24,9 @@
         "$privateWindow" = "zen-beta --no-remote --private-window";
 
         windowrule = let
-          subtle = "0.95 0.92"; # apps — light transparency
-          medium = "0.93 0.90"; # apps — medium transparency
-          terminal = "0.90 0.87"; # terminal — stronger transparency
+          subtle = "0.95 0.92";
+          medium = "0.93 0.90";
+          terminal = "0.90 0.87";
           opacityRule = opacity: class: "opacity ${opacity} override ${opacity} override, match:class ^(${class})$";
         in [
           (opacityRule subtle "vesktop")

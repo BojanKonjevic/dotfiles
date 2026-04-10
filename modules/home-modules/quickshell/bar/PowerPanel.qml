@@ -11,14 +11,14 @@ PanelWindow {
         bottom: true
         left: true
     }
-    margins.left: 48
+    margins.left: Colours.barWidth
 
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     aboveWindows: true
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    implicitWidth: state_.powerOpen ? 220 : 0
-    implicitHeight: state_.powerOpen ? 200 : 0
+    implicitWidth: state_.powerOpen ? Colours.panelPower + Colours.iconSizeLg : 0
+    implicitHeight: state_.powerOpen ? Colours.spacingXl * 6 : 0
 
     HoverHandler {
         id: panelHover
@@ -35,8 +35,8 @@ PanelWindow {
             bottom: parent.bottom
             left: parent.left
         }
-        width: 200
-        height: state_.powerOpen ? column.implicitHeight + 24 : 0
+        width: Colours.panelPower
+        height: state_.powerOpen ? column.implicitHeight + Colours.spacingXl : 0
         radius: Colours.radiusPanel
         color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
         border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
@@ -63,14 +63,14 @@ PanelWindow {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-                margins: 12
+                margins: Colours.spacingMd
             }
             spacing: 4
 
             Text {
                 text: " Power"
                 font.family: Colours.fontFamily
-                font.pixelSize: 16
+                font.pixelSize: Colours.iconSizeMd
                 font.weight: Font.Bold
                 color: Colours.red
                 Layout.bottomMargin: 4

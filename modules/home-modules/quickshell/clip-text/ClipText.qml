@@ -5,8 +5,8 @@ import Quickshell.Io
 Rectangle {
     id: root
 
-    width: 640
-    height: 480
+    width: Colours.popupClipText
+    height: Colours.popupClipTextH
     radius: Colours.radiusPopup
     color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
     border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
@@ -91,19 +91,19 @@ Rectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: 16
+            margins: Colours.spacingLg
         }
-        spacing: 14
+        spacing: Colours.iconSizeSm
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: Colours.spacingXs + Colours.spacingXs + 2
 
             Text {
                 text: "  Text"
                 color: Colours.sapphire
                 font.family: Colours.fontFamily
-                font.pixelSize: 18
+                font.pixelSize: Colours.fontSizeLg
                 font.weight: Font.Light
             }
 
@@ -112,7 +112,7 @@ Rectangle {
                 Layout.fillWidth: true
                 color: Colours.text
                 font.family: Colours.fontFamily
-                font.pixelSize: 18
+                font.pixelSize: Colours.fontSizeLg
                 font.weight: Font.Light
                 onTextChanged: root.searchText = text
 
@@ -151,7 +151,7 @@ Rectangle {
                 text: "󰆴"
                 color: Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.5)
                 font.family: Colours.fontFamily
-                font.pixelSize: 22
+                font.pixelSize: Colours.iconSizeLg + Colours.spacingSm
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -176,7 +176,7 @@ Rectangle {
             Column {
                 id: clipColumn
                 width: parent.width
-                spacing: 3
+                spacing: Colours.spacingXs
 
                 Repeater {
                     id: clipRepeater
@@ -185,7 +185,7 @@ Rectangle {
                         required property var modelData
                         required property int index
                         width: clipColumn.width
-                        height: 36
+                        height: Colours.spacingXl + Colours.spacingSm
                         radius: Colours.radiusRow
                         color: (index === root.currentIndex || rowHover.containsMouse) ? Qt.rgba(Colours.sapphire.r, Colours.sapphire.g, Colours.sapphire.b, 0.18) : "transparent"
                         border.color: (index === root.currentIndex || rowHover.containsMouse) ? Qt.rgba(Colours.sapphire.r, Colours.sapphire.g, Colours.sapphire.b, 0.55) : "transparent"
@@ -201,13 +201,13 @@ Rectangle {
                                 left: parent.left
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
-                                leftMargin: 12
-                                rightMargin: 12
+                                leftMargin: Colours.spacingMd
+                                rightMargin: Colours.spacingMd
                             }
                             text: modelData.content
                             color: (index === root.currentIndex || rowHover.containsMouse) ? Colours.sapphire : Colours.subtext0
                             font.family: Colours.fontFamily
-                            font.pixelSize: 13
+                            font.pixelSize: Colours.fontSizeMd
                             elide: Text.ElideRight
                             Behavior on color {
                                 ColorAnimation {

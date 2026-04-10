@@ -13,9 +13,9 @@ PanelWindow {
         bottom: true
         left: true
     }
-    margins.left: 48
+    margins.left: Colours.barWidth
 
-    implicitWidth: state_.notifPanelOpen ? 400 : 0
+    implicitWidth: state_.notifPanelOpen ? Colours.panelNotif : 0
     implicitHeight: state_.notifPanelOpen ? 500 : 0
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
@@ -58,8 +58,8 @@ PanelWindow {
             bottom: parent.bottom
             left: parent.left
         }
-        width: 380
-        height: root.state_.notifPanelOpen ? innerCol.implicitHeight + 24 : 0
+        width: Colours.panelNotif - Colours.iconSizeLg
+        height: root.state_.notifPanelOpen ? innerCol.implicitHeight + Colours.spacingXl : 0
         radius: Colours.radiusPanel
         color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
         border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
@@ -86,7 +86,7 @@ PanelWindow {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-                margins: 14
+                margins: Colours.iconSizeSm
             }
             spacing: 0
 
@@ -99,7 +99,7 @@ PanelWindow {
                     text: "󰂚  Notifications"
                     color: Colours.mauve
                     font.family: Colours.fontFamily
-                    font.pixelSize: 14
+                    font.pixelSize: Colours.iconSizeSm
                     font.weight: Font.Bold
                     Layout.fillWidth: true
                 }
@@ -108,7 +108,7 @@ PanelWindow {
                     text: "󰆴"
                     color: Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.6)
                     font.family: Colours.fontFamily
-                    font.pixelSize: 18
+                    font.pixelSize: Colours.iconSizeMd + Colours.spacingXs
                     visible: root.state_.notifCount > 0
                     MouseArea {
                         anchors.fill: parent
@@ -128,7 +128,7 @@ PanelWindow {
             // ── Empty state ───────────────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: 60
+                implicitHeight: Colours.mediaArtSize - Colours.spacingMd
                 visible: root.state_.notifCount === 0
 
                 Text {
@@ -136,7 +136,7 @@ PanelWindow {
                     text: "No notifications"
                     color: Colours.overlay0
                     font.family: Colours.fontFamily
-                    font.pixelSize: 13
+                    font.pixelSize: Colours.fontSizeMd
                 }
             }
 
@@ -151,14 +151,14 @@ PanelWindow {
                 Column {
                     id: notifCol
                     width: parent.width
-                    spacing: 6
+                    spacing: Colours.spacingSm
 
                     Repeater {
                         model: root.notifList
                         delegate: Rectangle {
                             required property var modelData
                             width: notifCol.width
-                            implicitHeight: notifInner.implicitHeight + 20
+                            implicitHeight: notifInner.implicitHeight + Colours.iconSizeLg
                             radius: Colours.radiusRow
                             color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
                             border.color: modelData.urgency === NotificationUrgency.Critical ? Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.5) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.4)
@@ -172,17 +172,17 @@ PanelWindow {
                                     top: parent.top
                                     margins: 10
                                 }
-                                spacing: 3
+                                spacing: Colours.spacingXs
 
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    spacing: 6
+                                    spacing: Colours.spacingSm
 
                                     Image {
                                         source: modelData.appIcon !== "" ? "image://icon/" + modelData.appIcon : ""
                                         visible: modelData.appIcon !== ""
-                                        width: 14
-                                        height: 14
+                                        width: Colours.iconSizeSm
+                                        height: Colours.iconSizeSm
                                         Layout.alignment: Qt.AlignVCenter
                                     }
 
@@ -190,7 +190,7 @@ PanelWindow {
                                         text: modelData.appName
                                         color: Colours.mauve
                                         font.family: Colours.fontFamily
-                                        font.pixelSize: 10
+                                        font.pixelSize: Colours.fontSizeXs
                                         font.weight: Font.Bold
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
@@ -200,7 +200,7 @@ PanelWindow {
                                         text: "✕"
                                         color: Colours.overlay1
                                         font.family: Colours.fontFamily
-                                        font.pixelSize: 11
+                                        font.pixelSize: Colours.fontSizeSm
                                         MouseArea {
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
@@ -213,7 +213,7 @@ PanelWindow {
                                     text: modelData.summary
                                     color: Colours.text
                                     font.family: Colours.fontFamily
-                                    font.pixelSize: 12
+                                    font.pixelSize: Colours.fontSizeXs
                                     font.weight: Font.Bold
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
@@ -224,7 +224,7 @@ PanelWindow {
                                     text: modelData.body
                                     color: Colours.subtext0
                                     font.family: Colours.fontFamily
-                                    font.pixelSize: 11
+                                    font.pixelSize: Colours.fontSizeSm
                                     Layout.fillWidth: true
                                     wrapMode: Text.WordWrap
                                     textFormat: Text.RichText

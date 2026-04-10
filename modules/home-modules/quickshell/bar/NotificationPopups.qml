@@ -12,9 +12,9 @@ PanelWindow {
         bottom: true
         left: true
     }
-    margins.left: 56
-    implicitWidth: 380
-    implicitHeight: notifColumn.implicitHeight + 16
+    margins.left: Colours.notifPopupMargin
+    implicitWidth: Colours.notifPopupW + Colours.spacingMd
+    implicitHeight: notifColumn.implicitHeight + Colours.spacingLg
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     aboveWindows: true
@@ -24,18 +24,18 @@ PanelWindow {
         anchors {
             bottom: parent.bottom
             left: parent.left
-            bottomMargin: 8
-            leftMargin: 8
+            bottomMargin: Colours.spacingXs + Colours.spacingXs + 2
+            leftMargin: Colours.spacingXs + Colours.spacingXs + 2
         }
-        width: 364
-        spacing: 8
+        width: Colours.notifPopupW
+        spacing: Colours.spacingXs + Colours.spacingXs + 2
 
         Repeater {
             model: root.server.trackedNotifications
             delegate: NotificationPopup {
                 required property var modelData
                 notification: modelData
-                width: 364
+                width: Colours.notifPopupW
             }
         }
     }

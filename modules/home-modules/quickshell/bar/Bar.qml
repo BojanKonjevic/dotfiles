@@ -15,7 +15,7 @@ PanelWindow {
         left: true
         bottom: true
     }
-    implicitWidth: 48
+    implicitWidth: Colours.barWidth
     color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, 0.90)
 
     property bool hasMedia: root.state_.mediaStatus !== "Stopped" && root.state_.mediaTitle !== ""
@@ -55,19 +55,19 @@ PanelWindow {
             // ── Clock ────────────────────────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: clockCol.implicitHeight + 22
+                implicitHeight: clockCol.implicitHeight + Colours.spacingXl
 
                 ColumnLayout {
                     id: clockCol
                     anchors.centerIn: parent
-                    spacing: -3
+                    spacing: -Colours.spacingXs
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: root.clockHour
                         color: Colours.mauve
                         font.family: Colours.fontFamily
-                        font.pixelSize: 20
+                        font.pixelSize: Colours.fontSizeXl
                         font.weight: Font.Black
                     }
 
@@ -76,7 +76,7 @@ PanelWindow {
                         text: root.clockMin
                         color: Colours.blue
                         font.family: Colours.fontFamily
-                        font.pixelSize: 20
+                        font.pixelSize: Colours.fontSizeXl
                         font.weight: Font.Black
                     }
                 }
@@ -105,8 +105,8 @@ PanelWindow {
                         bottom: parent.bottom
                         left: parent.left
                         right: parent.right
-                        leftMargin: 12
-                        rightMargin: 12
+                        leftMargin: Colours.spacingMd
+                        rightMargin: Colours.spacingMd
                     }
                     height: 1
                     color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.25)
@@ -116,7 +116,7 @@ PanelWindow {
             // ── Workspaces ───────────────────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: wsCol.implicitHeight + 14
+                implicitHeight: wsCol.implicitHeight + Colours.iconSizeSm
 
                 Column {
                     id: wsCol
@@ -136,8 +136,8 @@ PanelWindow {
             // ── Divider ──────────────────────────────────────────────────────
             Rectangle {
                 Layout.fillWidth: true
-                Layout.leftMargin: 12
-                Layout.rightMargin: 12
+                Layout.leftMargin: Colours.spacingMd
+                Layout.rightMargin: Colours.spacingMd
                 height: 1
                 color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.25)
             }
@@ -145,25 +145,25 @@ PanelWindow {
             // ── CPU bar ──────────────────────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: 32
+                implicitHeight: Colours.spacingXl + Colours.spacingSm
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: 5
+                    spacing: Colours.spacingSm
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: "󰍛"
                         color: Qt.rgba(Colours.peach.r, Colours.peach.g, Colours.peach.b, 0.4 + root.state_.cpuUsage / 100 * 0.6)
                         font.family: Colours.fontFamily
-                        font.pixelSize: 14
+                        font.pixelSize: Colours.iconSizeSm
                         font.weight: Font.Black
                     }
 
                     Rectangle {
                         Layout.alignment: Qt.AlignHCenter
-                        width: 26
-                        height: 2
+                        width: Colours.barWidth - Colours.spacingXl
+                        height: Colours.sliderTrackH
                         radius: 1
                         color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
 
@@ -186,25 +186,25 @@ PanelWindow {
             // ── MEM bar ──────────────────────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: 32
+                implicitHeight: Colours.spacingXl + Colours.spacingSm
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: 5
+                    spacing: Colours.spacingSm
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
                         text: "󰾆"
                         color: Qt.rgba(Colours.blue.r, Colours.blue.g, Colours.blue.b, 0.4 + root.state_.memUsage / 100 * 0.6)
                         font.family: Colours.fontFamily
-                        font.pixelSize: 14
+                        font.pixelSize: Colours.iconSizeSm
                         font.weight: Font.Black
                     }
 
                     Rectangle {
                         Layout.alignment: Qt.AlignHCenter
-                        width: 26
-                        height: 2
+                        width: Colours.barWidth - Colours.spacingXl
+                        height: Colours.sliderTrackH
                         radius: 1
                         color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
 
@@ -233,7 +233,7 @@ PanelWindow {
             // ── Submap (only when active) ─────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: 32
+                implicitHeight: Colours.spacingXl + Colours.spacingSm
                 visible: root.activeSubmap !== ""
 
                 Text {
@@ -241,7 +241,7 @@ PanelWindow {
                     text: "󰩨"
                     color: Colours.red
                     font.family: Colours.fontFamily
-                    font.pixelSize: 16
+                    font.pixelSize: Colours.iconSizeMd
                     font.weight: Font.Black
                 }
             }
@@ -250,14 +250,14 @@ PanelWindow {
             Item {
                 id: mediaItem
                 Layout.fillWidth: true
-                implicitHeight: 34
+                implicitHeight: Colours.spacingXl + Colours.spacingSm
 
                 Text {
                     anchors.centerIn: parent
                     text: "󰎆"
                     color: root.hasMedia ? Colours.blue : Qt.rgba(Colours.overlay0.r, Colours.overlay0.g, Colours.overlay0.b, 0.5)
                     font.family: Colours.fontFamily
-                    font.pixelSize: 17
+                    font.pixelSize: Colours.iconSizeMd
                     font.weight: Font.Black
 
                     Behavior on color {
@@ -284,8 +284,8 @@ PanelWindow {
             // ── Divider ──────────────────────────────────────────────────────
             Rectangle {
                 Layout.fillWidth: true
-                Layout.leftMargin: 12
-                Layout.rightMargin: 12
+                Layout.leftMargin: Colours.spacingMd
+                Layout.rightMargin: Colours.spacingMd
                 height: 1
                 color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.25)
             }
@@ -294,7 +294,7 @@ PanelWindow {
             Item {
                 id: notifItem
                 Layout.fillWidth: true
-                implicitHeight: 34
+                implicitHeight: Colours.spacingXl + Colours.spacingSm
                 visible: root.notifCount > 0
 
                 Text {
@@ -302,7 +302,7 @@ PanelWindow {
                     text: "󰂚"
                     color: root.state_.notifPanelOpen ? Colours.mauve : Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.6)
                     font.family: Colours.fontFamily
-                    font.pixelSize: 17
+                    font.pixelSize: Colours.iconSizeMd
                     font.weight: Font.Black
                 }
 
@@ -310,12 +310,12 @@ PanelWindow {
                     anchors {
                         top: parent.top
                         horizontalCenter: parent.horizontalCenter
-                        horizontalCenterOffset: 7
-                        topMargin: 7
+                        horizontalCenterOffset: Colours.spacingXs + Colours.spacingXs
+                        topMargin: Colours.spacingXs + Colours.spacingXs
                     }
-                    width: 5
-                    height: 5
-                    radius: 3
+                    width: Colours.spacingXs + 2
+                    height: Colours.spacingXs + 2
+                    radius: Colours.spacingXs
                     color: Colours.mauve
                 }
 
@@ -342,14 +342,14 @@ PanelWindow {
             // ── Mic ──────────────────────────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: 34
+                implicitHeight: Colours.spacingXl + Colours.spacingSm
 
                 Text {
                     anchors.centerIn: parent
                     text: root.state_.micMuted ? "󰍭" : "󰍬"
                     color: root.state_.micMuted ? Colours.red : Colours.green
                     font.family: Colours.fontFamily
-                    font.pixelSize: 17
+                    font.pixelSize: Colours.iconSizeMd
                     font.weight: Font.Black
 
                     Behavior on color {
@@ -363,14 +363,14 @@ PanelWindow {
             // ── Network ──────────────────────────────────────────────────────
             Item {
                 Layout.fillWidth: true
-                implicitHeight: 34
+                implicitHeight: Colours.spacingXl + Colours.spacingSm
 
                 Text {
                     anchors.centerIn: parent
                     text: root.state_.netType === "wifi" ? "󰤨" : root.state_.netType === "ethernet" ? "󰈀" : "󰤭"
                     color: root.state_.netType === "" ? Qt.rgba(Colours.overlay0.r, Colours.overlay0.g, Colours.overlay0.b, 0.5) : Colours.sky
                     font.family: Colours.fontFamily
-                    font.pixelSize: 17
+                    font.pixelSize: Colours.iconSizeMd
                     font.weight: Font.Black
 
                     MouseArea {
@@ -384,14 +384,14 @@ PanelWindow {
             Item {
                 id: powerItem
                 Layout.fillWidth: true
-                implicitHeight: 38
+                implicitHeight: Colours.spacingXl + Colours.spacingSm + 4
                 Layout.bottomMargin: 4
 
                 Text {
                     anchors.centerIn: parent
                     text: "⏻"
                     font.family: Colours.fontFamily
-                    font.pixelSize: 17
+                    font.pixelSize: Colours.iconSizeMd
                     font.weight: Font.Black
                     color: root.state_.powerOpen ? Colours.red : Qt.rgba(Colours.overlay1.r, Colours.overlay1.g, Colours.overlay1.b, 0.7)
 

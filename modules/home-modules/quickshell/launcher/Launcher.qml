@@ -5,8 +5,8 @@ import Quickshell
 Rectangle {
     id: root
 
-    width: 580
-    height: 520
+    width: Colours.popupLauncher
+    height: Colours.popupLauncherH
     radius: Colours.radiusPopup
     color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
     border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
@@ -20,12 +20,10 @@ Rectangle {
     property int currentIndex: -1
 
     onSearchTextChanged: {
-        // Reset to first visible item on each keystroke
         root.currentIndex = -1;
         resetTimer.restart();
     }
 
-    // Small delay so the delegates have time to update their visible state
     Timer {
         id: resetTimer
         interval: 16
@@ -55,7 +53,6 @@ Rectangle {
             if (item && item.visible)
                 return i;
         }
-        // wrap
         for (var j = 0; j < from; j++) {
             var item2 = appList.itemAtIndex(j);
             if (item2 && item2.visible)
@@ -70,7 +67,6 @@ Rectangle {
             if (item && item.visible)
                 return i;
         }
-        // wrap
         for (var j = appList.count - 1; j > from; j--) {
             var item2 = appList.itemAtIndex(j);
             if (item2 && item2.visible)
@@ -82,9 +78,9 @@ Rectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: 16
+            margins: Colours.spacingLg
         }
-        spacing: 14
+        spacing: Colours.iconSizeSm
 
         ColumnLayout {
             Layout.fillWidth: true
@@ -92,13 +88,13 @@ Rectangle {
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 8
+                spacing: Colours.spacingXs + Colours.spacingXs + 2
 
                 Text {
                     text: " "
                     color: Colours.mauve
                     font.family: Colours.fontFamily
-                    font.pixelSize: 18
+                    font.pixelSize: Colours.fontSizeLg
                     font.weight: Font.Light
                 }
 
@@ -107,7 +103,7 @@ Rectangle {
                     Layout.fillWidth: true
                     color: Colours.text
                     font.family: Colours.fontFamily
-                    font.pixelSize: 18
+                    font.pixelSize: Colours.fontSizeLg
                     font.weight: Font.Light
 
                     onTextChanged: root.searchText = text.toLowerCase()

@@ -5,8 +5,8 @@ import Quickshell.Io
 Rectangle {
     id: root
 
-    width: 820
-    height: 600
+    width: Colours.popupClipImg
+    height: Colours.popupClipImgH
     radius: Colours.radiusPopup
     color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
     border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
@@ -19,9 +19,9 @@ Rectangle {
     property var images: []
 
     readonly property int cols: 4
-    readonly property real gridWidth: root.width - 32
+    readonly property real gridWidth: root.width - Colours.spacingXl
     readonly property real cellW: Math.floor(gridWidth / cols)
-    readonly property real cellH: 148
+    readonly property real cellH: Colours.mediaArtSize * 2 + Colours.iconSizeLg
 
     function reload() {
         root.images = [];
@@ -58,9 +58,9 @@ Rectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: 16
+            margins: Colours.spacingLg
         }
-        spacing: 14
+        spacing: Colours.iconSizeSm
 
         RowLayout {
             Layout.fillWidth: true
@@ -69,7 +69,7 @@ Rectangle {
                 text: "  Images"
                 color: Colours.green
                 font.family: Colours.fontFamily
-                font.pixelSize: 18
+                font.pixelSize: Colours.fontSizeLg
                 font.weight: Font.Light
                 Layout.fillWidth: true
             }
@@ -78,7 +78,7 @@ Rectangle {
                 text: "󰆴"
                 color: Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.5)
                 font.family: Colours.fontFamily
-                font.pixelSize: 22
+                font.pixelSize: Colours.iconSizeLg + Colours.spacingSm
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -111,7 +111,7 @@ Rectangle {
                 Rectangle {
                     anchors {
                         fill: parent
-                        margins: 5
+                        margins: Colours.spacingXs + 2
                     }
                     radius: Colours.radiusTile
                     color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)

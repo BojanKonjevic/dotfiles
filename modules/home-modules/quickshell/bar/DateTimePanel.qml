@@ -12,7 +12,7 @@ PanelWindow {
         top: true
         left: true
     }
-    margins.left: 48
+    margins.left: Colours.barWidth
 
     implicitWidth: state_.dateTimeOpen ? content.width + 2 : 0
     implicitHeight: state_.dateTimeOpen ? content.height + 2 : 0
@@ -78,8 +78,8 @@ PanelWindow {
             top: parent.top
             left: parent.left
         }
-        width: 340
-        height: root.state_.dateTimeOpen ? innerCol.implicitHeight + 28 : 0
+        width: Colours.panelDateTime
+        height: root.state_.dateTimeOpen ? innerCol.implicitHeight + Colours.spacingXl : 0
         radius: Colours.radiusPanel
         color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
         border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
@@ -106,7 +106,7 @@ PanelWindow {
                 top: parent.top
                 left: parent.left
                 right: parent.right
-                margins: 16
+                margins: Colours.spacingLg
             }
             spacing: 0
 
@@ -115,7 +115,7 @@ PanelWindow {
                 text: root.panelTime
                 color: Colours.mauve
                 font.family: Colours.fontFamily
-                font.pixelSize: 48
+                font.pixelSize: Colours.fontSize3Xl
                 font.weight: Font.Black
                 Layout.topMargin: 4
             }
@@ -124,8 +124,8 @@ PanelWindow {
                 text: root.panelDate
                 color: Colours.overlay1
                 font.family: Colours.fontFamily
-                font.pixelSize: 12
-                Layout.bottomMargin: 14
+                font.pixelSize: Colours.fontSizeXs
+                Layout.bottomMargin: Colours.iconSizeSm
             }
 
             // ── Current conditions ────────────────────────────────────────────
@@ -133,11 +133,11 @@ PanelWindow {
                 Layout.fillWidth: true
                 spacing: 10
                 visible: root.state_.weatherPanel !== null
-                Layout.bottomMargin: 14
+                Layout.bottomMargin: Colours.iconSizeSm
 
                 Text {
                     text: root.state_.weatherPanel ? root.state_.weatherPanel.icon : ""
-                    font.pixelSize: 40
+                    font.pixelSize: Colours.fontSize2Xl + Colours.spacingMd
                     Layout.alignment: Qt.AlignVCenter
                 }
 
@@ -149,7 +149,7 @@ PanelWindow {
                         text: root.state_.weatherPanel ? root.state_.weatherPanel.temp + "°C" : ""
                         color: Colours.text
                         font.family: Colours.fontFamily
-                        font.pixelSize: 28
+                        font.pixelSize: Colours.fontSize2Xl
                         font.weight: Font.Black
                     }
 
@@ -157,7 +157,7 @@ PanelWindow {
                         text: root.state_.weatherPanel ? root.state_.weatherPanel.desc : ""
                         color: Colours.subtext0
                         font.family: Colours.fontFamily
-                        font.pixelSize: 12
+                        font.pixelSize: Colours.fontSizeXs
                     }
                 }
 
@@ -166,7 +166,7 @@ PanelWindow {
                 }
 
                 ColumnLayout {
-                    spacing: 3
+                    spacing: Colours.spacingXs
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
 
                     RowLayout {
@@ -176,13 +176,13 @@ PanelWindow {
                             text: "feels"
                             color: Colours.overlay0
                             font.family: Colours.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Colours.fontSizeSm
                         }
                         Text {
                             text: root.state_.weatherPanel ? root.state_.weatherPanel.feels + "°C" : ""
                             color: Colours.subtext1
                             font.family: Colours.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Colours.fontSizeSm
                             font.weight: Font.Bold
                         }
                     }
@@ -192,13 +192,13 @@ PanelWindow {
                         Layout.alignment: Qt.AlignRight
                         Text {
                             text: "💧"
-                            font.pixelSize: 11
+                            font.pixelSize: Colours.fontSizeSm
                         }
                         Text {
                             text: root.state_.weatherPanel ? root.state_.weatherPanel.humidity + "%" : ""
                             color: Colours.subtext1
                             font.family: Colours.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Colours.fontSizeSm
                             font.weight: Font.Bold
                         }
                     }
@@ -208,13 +208,13 @@ PanelWindow {
                         Layout.alignment: Qt.AlignRight
                         Text {
                             text: "💨"
-                            font.pixelSize: 11
+                            font.pixelSize: Colours.fontSizeSm
                         }
                         Text {
                             text: root.state_.weatherPanel ? root.state_.weatherPanel.wind + " km/h" : ""
                             color: Colours.subtext1
                             font.family: Colours.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: Colours.fontSizeSm
                             font.weight: Font.Bold
                         }
                     }
@@ -225,9 +225,9 @@ PanelWindow {
                 text: "Fetching weather…"
                 color: Colours.overlay0
                 font.family: Colours.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Colours.fontSizeXs
                 visible: root.state_.weatherPanel === null
-                Layout.bottomMargin: 14
+                Layout.bottomMargin: Colours.iconSizeSm
             }
 
             // ── Hourly strip ─────────────────────────────────────────────────
@@ -242,18 +242,18 @@ PanelWindow {
                 text: "TODAY"
                 color: Colours.overlay0
                 font.family: Colours.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: Colours.fontSizeXs
                 font.weight: Font.Bold
                 font.letterSpacing: 1.2
                 Layout.topMargin: 10
-                Layout.bottomMargin: 6
+                Layout.bottomMargin: Colours.spacingSm
                 visible: root.state_.weatherPanel !== null && root.state_.weatherPanel.hourly.length > 0
             }
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 0
                 visible: root.state_.weatherPanel !== null && root.state_.weatherPanel.hourly.length > 0
-                Layout.bottomMargin: 12
+                Layout.bottomMargin: Colours.spacingMd
 
                 Repeater {
                     model: root.state_.weatherPanel ? root.state_.weatherPanel.hourly : []
@@ -271,14 +271,14 @@ PanelWindow {
                                 text: modelData.time
                                 color: Colours.subtext0
                                 font.family: Colours.fontFamily
-                                font.pixelSize: 10
+                                font.pixelSize: Colours.fontSizeXs
                                 Layout.alignment: Qt.AlignHCenter
                                 opacity: modelData.isPast ? 0.45 : 1.0
                             }
 
                             Text {
                                 text: modelData.icon
-                                font.pixelSize: 20
+                                font.pixelSize: Colours.iconSizeLg
                                 Layout.alignment: Qt.AlignHCenter
                                 opacity: modelData.isPast ? 0.4 : 1.0
                             }
@@ -287,7 +287,7 @@ PanelWindow {
                                 text: modelData.temp + "°"
                                 color: modelData.isPast ? Colours.overlay0 : Colours.text
                                 font.family: Colours.fontFamily
-                                font.pixelSize: 13
+                                font.pixelSize: Colours.fontSizeMd
                                 font.weight: Font.Bold
                                 Layout.alignment: Qt.AlignHCenter
                                 opacity: modelData.isPast ? 0.5 : 1.0
@@ -309,11 +309,11 @@ PanelWindow {
                 text: "FORECAST"
                 color: Colours.overlay0
                 font.family: Colours.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: Colours.fontSizeXs
                 font.weight: Font.Bold
                 font.letterSpacing: 1.2
                 Layout.topMargin: 10
-                Layout.bottomMargin: 6
+                Layout.bottomMargin: Colours.spacingSm
                 visible: root.state_.weatherPanel !== null
             }
 
@@ -323,7 +323,7 @@ PanelWindow {
                     required property var modelData
                     required property int index
                     Layout.fillWidth: true
-                    implicitHeight: forecastRow.implicitHeight + 6
+                    implicitHeight: forecastRow.implicitHeight + Colours.spacingSm
                     radius: Colours.radiusSmall
                     color: index % 2 === 0 ? Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.35) : "transparent"
 
@@ -333,8 +333,8 @@ PanelWindow {
                             left: parent.left
                             right: parent.right
                             verticalCenter: parent.verticalCenter
-                            leftMargin: 8
-                            rightMargin: 8
+                            leftMargin: Colours.spacingXs + Colours.spacingXs + 2
+                            rightMargin: Colours.spacingXs + Colours.spacingXs + 2
                         }
                         spacing: 0
 
@@ -342,32 +342,32 @@ PanelWindow {
                             text: modelData.date
                             color: index === 0 ? Colours.text : Colours.subtext0
                             font.family: Colours.fontFamily
-                            font.pixelSize: 12
+                            font.pixelSize: Colours.fontSizeXs
                             font.weight: index === 0 ? Font.Bold : Font.Normal
                             Layout.fillWidth: true
                         }
 
                         Item {
-                            implicitWidth: 36
+                            implicitWidth: Colours.spacingXl + Colours.spacingSm
                             implicitHeight: iconText.implicitHeight
 
                             Text {
                                 id: iconText
                                 anchors.centerIn: parent
                                 text: modelData.icon
-                                font.pixelSize: 14
+                                font.pixelSize: Colours.iconSizeSm
                             }
                         }
 
                         RowLayout {
                             spacing: 4
-                            Layout.minimumWidth: 76
+                            Layout.minimumWidth: Colours.spacingXl * 3 + Colours.spacingSm
 
                             Text {
                                 text: modelData.high + "°"
                                 color: Colours.peach
                                 font.family: Colours.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Colours.fontSizeXs
                                 font.weight: Font.Bold
                                 Layout.fillWidth: true
                                 horizontalAlignment: Text.AlignRight
@@ -377,14 +377,14 @@ PanelWindow {
                                 text: "/"
                                 color: Colours.overlay0
                                 font.family: Colours.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Colours.fontSizeXs
                             }
 
                             Text {
                                 text: modelData.low + "°"
                                 color: Colours.blue
                                 font.family: Colours.fontFamily
-                                font.pixelSize: 12
+                                font.pixelSize: Colours.fontSizeXs
                                 font.weight: Font.Bold
                             }
                         }

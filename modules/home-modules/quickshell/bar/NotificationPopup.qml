@@ -13,10 +13,10 @@ Rectangle {
     color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
     border.color: borderColor
     border.width: 1
-    implicitHeight: inner.implicitHeight + 24
+    implicitHeight: inner.implicitHeight + Colours.spacingXl
 
     opacity: 0
-    x: -20
+    x: -Colours.iconSizeLg
     Component.onCompleted: {
         opacity = 1;
         x = 0;
@@ -49,18 +49,18 @@ Rectangle {
             right: parent.right
             top: parent.top
         }
-        anchors.margins: 12
+        anchors.margins: Colours.spacingMd
         spacing: 4
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: Colours.spacingXs + Colours.spacingXs + 2
 
             Image {
                 source: root.notification.appIcon !== "" ? "image://icon/" + root.notification.appIcon : ""
                 visible: root.notification.appIcon !== ""
-                width: 16
-                height: 16
+                width: Colours.iconSizeMd - Colours.spacingXs
+                height: Colours.iconSizeMd - Colours.spacingXs
                 Layout.alignment: Qt.AlignVCenter
             }
 
@@ -68,7 +68,7 @@ Rectangle {
                 text: root.notification.appName
                 color: Colours.mauve
                 font.family: Colours.fontFamily
-                font.pixelSize: 11
+                font.pixelSize: Colours.fontSizeSm
                 font.weight: Font.Bold
                 Layout.fillWidth: true
                 elide: Text.ElideRight
@@ -78,7 +78,7 @@ Rectangle {
                 text: "✕"
                 color: Colours.overlay1
                 font.family: Colours.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: Colours.fontSizeXs
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -91,7 +91,7 @@ Rectangle {
             text: root.notification.summary
             color: Colours.text
             font.family: Colours.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: Colours.fontSizeMd
             font.weight: Font.Bold
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
@@ -102,7 +102,7 @@ Rectangle {
             text: root.notification.body
             color: Colours.subtext0
             font.family: Colours.fontFamily
-            font.pixelSize: 12
+            font.pixelSize: Colours.fontSizeXs
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             textFormat: Text.RichText
@@ -111,7 +111,7 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 6
+            spacing: Colours.spacingSm
             visible: root.notification.actions.length > 0
 
             Repeater {
@@ -122,8 +122,8 @@ Rectangle {
                     color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.8)
                     border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
                     border.width: 1
-                    implicitWidth: actionLabel.implicitWidth + 16
-                    implicitHeight: 24
+                    implicitWidth: actionLabel.implicitWidth + Colours.spacingLg
+                    implicitHeight: Colours.spacingXl
 
                     Text {
                         id: actionLabel
@@ -131,7 +131,7 @@ Rectangle {
                         text: modelData.text
                         color: Colours.text
                         font.family: Colours.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: Colours.fontSizeSm
                     }
 
                     MouseArea {

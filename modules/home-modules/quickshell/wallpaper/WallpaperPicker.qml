@@ -5,8 +5,8 @@ import Quickshell.Io
 
 Rectangle {
     id: root
-    width: 820
-    height: 620
+    width: Colours.popupWallpaper
+    height: Colours.popupWallpaperH
     radius: Colours.radiusPopup
     color: Qt.rgba(Colours.crust.r, Colours.crust.g, Colours.crust.b, Colours.opacityPanel)
     border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, Colours.opacityBorder)
@@ -28,9 +28,9 @@ Rectangle {
     }
 
     readonly property int cols: 4
-    readonly property real gridWidth: root.width - 32
+    readonly property real gridWidth: root.width - Colours.spacingXl
     readonly property real cellW: Math.floor(gridWidth / cols)
-    readonly property real cellH: 158
+    readonly property real cellH: Colours.mediaArtSize * 2 + Colours.iconSizeLg + Colours.fontSizeMd
 
     Component.onCompleted: {
         searchInput.forceActiveFocus();
@@ -52,19 +52,19 @@ Rectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: 16
+            margins: Colours.spacingLg
         }
-        spacing: 14
+        spacing: Colours.iconSizeSm
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: Colours.spacingXs + Colours.spacingXs + 2
 
             Text {
                 text: " Wallpaper"
                 color: Colours.lavender
                 font.family: Colours.fontFamily
-                font.pixelSize: 18
+                font.pixelSize: Colours.fontSizeLg
                 font.weight: Font.Light
             }
 
@@ -73,7 +73,7 @@ Rectangle {
                 Layout.fillWidth: true
                 color: Colours.text
                 font.family: Colours.fontFamily
-                font.pixelSize: 18
+                font.pixelSize: Colours.fontSizeLg
                 font.weight: Font.Light
                 onTextChanged: root.searchText = text
                 Keys.onEscapePressed: Qt.quit()
@@ -113,7 +113,7 @@ Rectangle {
                     id: tile
                     anchors {
                         fill: parent
-                        margins: 5
+                        margins: Colours.spacingXs + 2
                     }
                     radius: Colours.radiusTile
                     color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
@@ -133,13 +133,13 @@ Rectangle {
                             left: parent.left
                             right: parent.right
                         }
-                        height: parent.height - 22
+                        height: parent.height - Colours.fontSizeLg + Colours.spacingXs
                         source: modelData.path
                         fillMode: Image.PreserveAspectCrop
                         smooth: false
                         asynchronous: true
                         sourceSize.width: root.cellW - 10
-                        sourceSize.height: root.cellH - 32
+                        sourceSize.height: root.cellH - Colours.spacingXl
                     }
 
                     Rectangle {
@@ -155,20 +155,20 @@ Rectangle {
                             left: parent.left
                             right: parent.right
                         }
-                        height: 22
+                        height: Colours.fontSizeLg + Colours.spacingXs
                         color: Qt.rgba(Colours.mantle.r, Colours.mantle.g, Colours.mantle.b, 0.9)
                         Text {
                             anchors {
                                 left: parent.left
                                 right: parent.right
                                 verticalCenter: parent.verticalCenter
-                                leftMargin: 6
-                                rightMargin: 6
+                                leftMargin: Colours.spacingSm
+                                rightMargin: Colours.spacingSm
                             }
                             text: modelData.name
                             color: mouseArea.containsMouse ? Colours.lavender : Colours.subtext0
                             font.family: Colours.fontFamily
-                            font.pixelSize: 10
+                            font.pixelSize: Colours.fontSizeXs
                             elide: Text.ElideRight
                         }
                     }

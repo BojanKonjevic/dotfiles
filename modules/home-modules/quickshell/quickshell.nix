@@ -11,6 +11,7 @@
       import QtQuick
 
       QtObject {
+        // ── Colors ────────────────────────────────────────────────────────────
         readonly property color base:      "${theme.base}"
         readonly property color mantle:    "${theme.mantle}"
         readonly property color crust:     "${theme.crust}"
@@ -38,19 +39,70 @@
         readonly property color blue:      "${theme.blue}"
         readonly property color lavender:  "${theme.lavender}"
 
+        // ── Typography ────────────────────────────────────────────────────────
         readonly property string fontFamily: "${theme.fontName}"
 
-        readonly property int    radiusPanel:      ${toString theme.radiusPanel}
-        readonly property int    radiusPopup:      ${toString theme.radiusPopup}
-        readonly property int    radiusTile:       ${toString theme.radiusTile}
-        readonly property int    radiusRow:        ${toString theme.radiusRow}
-        readonly property int    radiusSmall:      ${toString theme.radiusSmall}
+        // ── Border radii ──────────────────────────────────────────────────────
+        readonly property int radiusPanel:      ${toString theme.radiusPanel}
+        readonly property int radiusPopup:      ${toString theme.radiusPopup}
+        readonly property int radiusTile:       ${toString theme.radiusTile}
+        readonly property int radiusRow:        ${toString theme.radiusRow}
+        readonly property int radiusSmall:      ${toString theme.radiusSmall}
 
-        readonly property real   opacityPanel:     ${toString theme.opacityPanel}
-        readonly property real   opacityBar:       ${toString theme.opacityBar}
-        readonly property real   opacityOverlay:   ${toString theme.opacityOverlay}
-        readonly property real   opacityBorder:    ${toString theme.opacityBorder}
-        readonly property real   opacitySeparator: ${toString theme.opacitySeparator}
+        // ── Opacity ───────────────────────────────────────────────────────────
+        readonly property real opacityPanel:     ${toString theme.opacityPanel}
+        readonly property real opacityBar:       ${toString theme.opacityBar}
+        readonly property real opacityOverlay:   ${toString theme.opacityOverlay}
+        readonly property real opacityBorder:    ${toString theme.opacityBorder}
+        readonly property real opacitySeparator: ${toString theme.opacitySeparator}
+
+        // ── Layout ────────────────────────────────────────────────────────────
+        readonly property int barWidth:         ${toString theme.barWidth}
+        readonly property int panelDateTime:    ${toString theme.panelDateTime}
+        readonly property int panelMediaAudio:  ${toString theme.panelMediaAudio}
+        readonly property int panelNotif:       ${toString theme.panelNotif}
+        readonly property int panelPower:       ${toString theme.panelPower}
+        readonly property int popupLauncher:    ${toString theme.popupLauncher}
+        readonly property int popupLauncherH:   ${toString theme.popupLauncherH}
+        readonly property int popupClipText:    ${toString theme.popupClipText}
+        readonly property int popupClipTextH:   ${toString theme.popupClipTextH}
+        readonly property int popupClipImg:     ${toString theme.popupClipImg}
+        readonly property int popupClipImgH:    ${toString theme.popupClipImgH}
+        readonly property int popupWallpaper:   ${toString theme.popupWallpaper}
+        readonly property int popupWallpaperH:  ${toString theme.popupWallpaperH}
+
+        // ── Font sizes ────────────────────────────────────────────────────────
+        readonly property int fontSizeXs:  ${toString theme.fontSizeXs}
+        readonly property int fontSizeSm:  ${toString theme.fontSizeSm}
+        readonly property int fontSizeMd:  ${toString theme.fontSizeMd}
+        readonly property int fontSizeLg:  ${toString theme.fontSizeLg}
+        readonly property int fontSizeXl:  ${toString theme.fontSizeXl}
+        readonly property int fontSize2Xl: ${toString theme.fontSize2Xl}
+        readonly property int fontSize3Xl: ${toString theme.fontSize3Xl}
+
+        // ── Icon sizes ────────────────────────────────────────────────────────
+        readonly property int iconSizeSm: ${toString theme.iconSizeSm}
+        readonly property int iconSizeMd: ${toString theme.iconSizeMd}
+        readonly property int iconSizeLg: ${toString theme.iconSizeLg}
+        readonly property int iconSizeXl: ${toString theme.iconSizeXl}
+
+        // ── Spacing ───────────────────────────────────────────────────────────
+        readonly property int spacingXs: ${toString theme.spacingXs}
+        readonly property int spacingSm: ${toString theme.spacingSm}
+        readonly property int spacingMd: ${toString theme.spacingMd}
+        readonly property int spacingLg: ${toString theme.spacingLg}
+        readonly property int spacingXl: ${toString theme.spacingXl}
+
+        // ── Misc element sizes ────────────────────────────────────────────────
+        readonly property int workspaceBtnH:    ${toString theme.workspaceBtnH}
+        readonly property int mediaArtSize:     ${toString theme.mediaArtSize}
+        readonly property int sliderThumb:      ${toString theme.sliderThumb}
+        readonly property int sliderTrackH:     ${toString theme.sliderTrackH}
+        readonly property int progressH:        ${toString theme.progressH}
+        readonly property int notifPopupW:      ${toString theme.notifPopupW}
+        readonly property int notifPopupMargin: ${toString theme.notifPopupMargin}
+        readonly property int powerBtnH:        ${toString theme.powerBtnH}
+        readonly property int cavaBars:         ${toString theme.cavaBars}
       }
     '';
 
@@ -74,7 +126,7 @@
       (mkPure "qs-audio-set" "qs-audio-set.sh")
       (mkInterp "qs-audio-monitor" "qs-audio-monitor.sh" {inherit pkgs;})
       (mkInterp "qs-net-monitor" "qs-net-monitor.sh" {inherit pkgs;})
-      (mkInterp "qs-cava-bar" "qs-cava-bar.sh" {inherit pkgs userConfig;})
+      (mkInterp "qs-cava-bar" "qs-cava-bar.sh" {inherit pkgs userConfig theme;})
 
       # ── Clipboard helpers ────────────────────────────────────────────────
       (mkPure "qs-clip-copy-text" "qs-clip-copy-text.sh")
@@ -102,7 +154,7 @@
     xdg.configFile."quickshell/bar/DateTimePanel.qml".source = ./bar/DateTimePanel.qml;
     xdg.configFile."cava/cava-bar.conf".text = ''
       [general]
-      bars = 20
+      bars = ${toString theme.cavaBars}
       sleep_timer = 5
 
       [input]
