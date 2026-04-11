@@ -173,7 +173,6 @@
     xdg.configFile."quickshell/launcher/qmldir".source = ./launcher/qmldir;
     xdg.configFile."quickshell/launcher/shell.qml".source = ./launcher/shell.qml;
     xdg.configFile."quickshell/launcher/Launcher.qml".source = ./launcher/Launcher.qml;
-    xdg.configFile."quickshell/launcher/AppEntry.qml".source = ./launcher/AppEntry.qml;
 
     # ── Clipboard text ────────────────────────────────────────────────────────
     xdg.configFile."quickshell/clip-text/Colours.qml".text = coloursQml;
