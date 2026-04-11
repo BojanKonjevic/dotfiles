@@ -1,4 +1,6 @@
 {userConfig}: ''
+  [[ -z "$1" ]] && exit 0
+  [[ ! -f "$1" ]] && exit 1
   awww img "$1" \
     --transition-type wipe \
     --transition-angle 30 \
