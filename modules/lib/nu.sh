@@ -208,8 +208,8 @@ if ! $SKIP_CACHIX && command -v cachix &>/dev/null; then
   step "pushing to ${CACHIX_CACHE}…"
   T0=$SECONDS
   (
-  cachix push --auth-token "$(cat /run/agenix/cachix-token)" "$CACHIX_CACHE" /run/current-system
-  cachix push --auth-token "$(cat /run/agenix/cachix-token)" "$CACHIX_CACHE" "$HOME/.local/state/nix/profiles/home-manager"
+    CACHIX_AUTH_TOKEN="$(cat /run/agenix/cachix-token)" cachix push "$CACHIX_CACHE" /run/current-system
+    CACHIX_AUTH_TOKEN="$(cat /run/agenix/cachix-token)" cachix push "$CACHIX_CACHE" "$HOME/.local/state/nix/profiles/home-manager"
   ) >"$LOG" 2>&1 &
   CACHE_PID=$!
   spinner $CACHE_PID "pushing store paths…"
