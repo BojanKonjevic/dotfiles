@@ -31,6 +31,7 @@ in {
           nixpkgs.config.allowUnfree = true;
           news.display = "silent";
           home.packages = with pkgs; [
+            inputs.agenix.packages.${system}.default
             nvd
             cachix
             python3

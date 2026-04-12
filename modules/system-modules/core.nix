@@ -1,6 +1,7 @@
 {...}: {
   flake.nixosModules.core = {
     pkgs,
+    config,
     lib,
     userConfig,
     inputs,
@@ -57,8 +58,8 @@
     users.users.${userConfig.username} = {
       shell = pkgs.zsh;
       isNormalUser = true;
+      hashedPasswordFile = config.age.secrets.user-password.file;
       description = userConfig.fullName;
-      initialPassword = "nixos";
       extraGroups = [
         "libvirtd"
         "networkmanager"

@@ -7,6 +7,10 @@
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
     };
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     import-tree = {
       url = "github:vic/import-tree";
     };

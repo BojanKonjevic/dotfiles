@@ -10,8 +10,6 @@ result-*
 *.backup
 *.bak
 
-# Secrets (if you accidentally put any here before setting up agenix/sops)
-secrets/
-*.age
+# Secrets
 *.pem
 *.key
