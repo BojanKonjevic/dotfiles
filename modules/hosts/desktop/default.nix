@@ -10,6 +10,9 @@ in {
     specialArgs = {inherit inputs userConfig self;};
     modules =
       (builtins.attrValues self.nixosModules)
-      ++ [./hardware.nix];
+      ++ [
+        ./hardware.nix
+        inputs.lanzaboote.nixosModules.lanzaboote
+      ];
   };
 }

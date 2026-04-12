@@ -7,6 +7,10 @@
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
     };
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -57,6 +61,7 @@
     flake-parts,
     import-tree,
     treefmt-nix,
+    lanzaboote,
     ...
   }: let
     userConfig = import ./user.nix;
