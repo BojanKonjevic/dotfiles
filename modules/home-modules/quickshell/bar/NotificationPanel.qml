@@ -7,7 +7,11 @@ import Quickshell.Services.Notifications
 PanelWindow {
     id: root
     required property var state_
-    required property NotificationServer server
+
+    // History comes from shell.qml — plain JS array of {id, appName, appIcon, summary, body, time}
+    property var notifHistory: []
+    signal removeNotif(string entryId)
+    signal clearAllNotifs
 
     anchors {
         bottom: true
@@ -21,28 +25,6 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     aboveWindows: true
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-
-    property var notifList: []
-
-    function refreshList() {
-        notifList = root.server.trackedNotifications.values;
-    }
-
-    Connections {
-        target: root.state_
-        function onNotifPanelOpenChanged() {
-            if (root.state_.notifPanelOpen)
-                root.refreshList();
-        }
-    }
-
-    Connections {
-        target: root.state_
-        function onNotifCountChanged() {
-            if (root.state_.notifPanelOpen)
-                root.refreshList();
-        }
-    }
 
     HoverHandler {
         onHoveredChanged: {
@@ -109,11 +91,11 @@ PanelWindow {
                     color: Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.6)
                     font.family: Colours.fontFamily
                     font.pixelSize: Colours.iconSizeMd + Colours.spacingXs
-                    visible: root.state_.notifCount > 0
+                    visible: root.notifHistory.length > 0
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.state_.clearNotifs()
+                        onClicked: root.clearAllNotifs()
                     }
                 }
             }
@@ -129,7 +111,7 @@ PanelWindow {
             Item {
                 Layout.fillWidth: true
                 implicitHeight: Colours.mediaArtSize - Colours.spacingMd
-                visible: root.state_.notifCount === 0
+                visible: root.notifHistory.length === 0
 
                 Text {
                     anchors.centerIn: parent
@@ -146,7 +128,7 @@ PanelWindow {
                 implicitHeight: Math.min(notifCol.implicitHeight, 400)
                 contentHeight: notifCol.implicitHeight
                 clip: true
-                visible: root.state_.notifCount > 0
+                visible: root.notifHistory.length > 0
 
                 Column {
                     id: notifCol
@@ -154,14 +136,15 @@ PanelWindow {
                     spacing: Colours.spacingSm
 
                     Repeater {
-                        model: root.notifList
+                        model: root.notifHistory
                         delegate: Rectangle {
                             required property var modelData
+                            required property int index
                             width: notifCol.width
                             implicitHeight: notifInner.implicitHeight + Colours.iconSizeLg
                             radius: Colours.radiusRow
                             color: Qt.rgba(Colours.surface0.r, Colours.surface0.g, Colours.surface0.b, 0.5)
-                            border.color: modelData.urgency === NotificationUrgency.Critical ? Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.5) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.4)
+                            border.color: Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.4)
                             border.width: 1
 
                             ColumnLayout {
@@ -197,6 +180,13 @@ PanelWindow {
                                     }
 
                                     Text {
+                                        text: modelData.time
+                                        color: Colours.overlay0
+                                        font.family: Colours.fontFamily
+                                        font.pixelSize: Colours.fontSizeXs
+                                    }
+
+                                    Text {
                                         text: "✕"
                                         color: Colours.overlay1
                                         font.family: Colours.fontFamily
@@ -204,7 +194,7 @@ PanelWindow {
                                         MouseArea {
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
-                                            onClicked: modelData.tracked = false
+                                            onClicked: root.removeNotif(modelData.id)
                                         }
                                     }
                                 }

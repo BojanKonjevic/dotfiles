@@ -295,15 +295,19 @@ PanelWindow {
                 id: notifItem
                 Layout.fillWidth: true
                 implicitHeight: Colours.spacingXl + Colours.spacingSm
-                visible: root.notifCount > 0
 
                 Text {
                     anchors.centerIn: parent
-                    text: "󰂚"
-                    color: root.state_.notifPanelOpen ? Colours.mauve : Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.6)
+                    text: root.notifCount > 0 ? "󰂚" : "󰂜"
+                    color: root.notifCount > 0 ? (root.state_.notifPanelOpen ? Colours.mauve : Qt.rgba(Colours.mauve.r, Colours.mauve.g, Colours.mauve.b, 0.6)) : Qt.rgba(Colours.overlay1.r, Colours.overlay1.g, Colours.overlay1.b, 0.4)
                     font.family: Colours.fontFamily
                     font.pixelSize: Colours.iconSizeMd
                     font.weight: Font.Black
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 150
+                        }
+                    }
                 }
 
                 Rectangle {
@@ -317,6 +321,7 @@ PanelWindow {
                     height: Colours.spacingXs + 2
                     radius: Colours.spacingXs
                     color: Colours.mauve
+                    visible: root.notifCount > 0
                 }
 
                 HoverHandler {

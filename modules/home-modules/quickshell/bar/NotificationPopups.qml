@@ -7,6 +7,8 @@ PanelWindow {
     id: root
 
     required property NotificationServer server
+    property var notifIdMap: ({})
+    signal removeNotif(string entryId)
 
     anchors {
         bottom: true
@@ -36,6 +38,10 @@ PanelWindow {
                 required property var modelData
                 notification: modelData
                 width: Colours.notifPopupW
+                historyId: root.notifIdMap[modelData.id] || ""
+                onRemoveNotif: function (entryId) {
+                    root.removeNotif(entryId);
+                }
             }
         }
     }

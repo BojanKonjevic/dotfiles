@@ -7,16 +7,103 @@ import QtQuick
 ShellRoot {
     id: root
 
+    // ── Persistent notification history ───────────────────────────────────────
+    // Written to $XDG_DATA_HOME/quickshell-bar/notifications.json
+    // Each entry: { id, appName, appIcon, summary, body, time }
+
+    property var notifHistory: []
+    readonly property string notifFilePath: {
+        var base = Quickshell.env("XDG_DATA_HOME");
+        if (!base || base === "")
+            base = Quickshell.env("HOME") + "/.local/share";
+        return base + "/quickshell-bar/notifications.json";
+    }
+
+    // Maps notifServer notification id → history entry id
+    // so the popup can call removeNotif with the right history id
+    property var notifIdMap: ({})
+
+    FileView {
+        id: historyFile
+        path: root.notifFilePath
+        onLoaded: {
+            try {
+                var parsed = JSON.parse(historyFile.text());
+                if (Array.isArray(parsed)) {
+                    root.notifHistory = parsed;
+                    barState.notifCount = parsed.length;
+                }
+            } catch (_) {
+                root.notifHistory = [];
+            }
+        }
+        onLoadFailed: {
+            root.notifHistory = [];
+        }
+    }
+
+    Process {
+        id: saveProc
+        property string payload: ""
+        command: ["bash", "-c", "mkdir -p \"$(dirname \"$NOTIF_FILE\")\" && printf '%s' \"$PAYLOAD\" > \"$NOTIF_FILE\""]
+        environment: ({
+                "NOTIF_FILE": root.notifFilePath,
+                "PAYLOAD": saveProc.payload
+            })
+    }
+
+    function saveHistory() {
+        saveProc.payload = JSON.stringify(root.notifHistory);
+        if (!saveProc.running)
+            saveProc.running = true;
+    }
+
+    function addToHistory(notif) {
+        var historyId = Date.now() + "_" + Math.floor(Math.random() * 1000000);
+        var entry = {
+            id: historyId,
+            appName: notif.appName || "",
+            appIcon: notif.appIcon || "",
+            summary: notif.summary || "",
+            body: notif.body || "",
+            time: Qt.formatDateTime(new Date(), "hh:mm")
+        };
+        // Store the mapping so the popup can find this history entry later
+        var map = root.notifIdMap;
+        map[notif.id] = historyId;
+        root.notifIdMap = map;
+
+        var h = [entry].concat(root.notifHistory);
+        if (h.length > 50)
+            h = h.slice(0, 50);
+        root.notifHistory = h;
+        barState.notifCount = root.notifHistory.length;
+        saveHistory();
+        return historyId;
+    }
+
+    function removeFromHistory(entryId) {
+        root.notifHistory = root.notifHistory.filter(function (e) {
+            return e.id !== entryId;
+        });
+        barState.notifCount = root.notifHistory.length;
+        saveHistory();
+    }
+
+    function clearHistory() {
+        root.notifHistory = [];
+        barState.notifCount = 0;
+        saveHistory();
+    }
+
+    Component.onCompleted: historyFile.reload()
+
     NotificationServer {
         id: notifServer
         keepOnReload: true
         onNotification: function (notif) {
             notif.tracked = true;
-            barState.notifCount += 1;
-            notif.trackedChanged.connect(function () {
-                if (!notif.tracked)
-                    barState.notifCount = Math.max(0, barState.notifCount - 1);
-            });
+            root.addToHistory(notif);
         }
     }
 
@@ -47,12 +134,6 @@ ShellRoot {
         property string netType: ""
         property int cpuUsage: 0
         property int memUsage: 0
-        property var clearNotifs: function () {
-            var notifs = notifServer.trackedNotifications.values;
-            for (var i = notifs.length - 1; i >= 0; i--) {
-                notifs[i].tracked = false;
-            }
-        }
     }
 
     // ── Media — event-driven via --follow ─────────────────────────────────────
@@ -76,7 +157,6 @@ ShellRoot {
         onExited: function (code) {
             barState.mediaTitle = "";
             barState.mediaStatus = "Stopped";
-            // restart after a short delay to handle playerctl having no player
             mediaRestartTimer.restart();
         }
     }
@@ -91,7 +171,7 @@ ShellRoot {
         }
     }
 
-    // ── Media position — still polled (playerctl has no follow for position) ──
+    // ── Media position ────────────────────────────────────────────────────────
     Process {
         id: mediaPosProc
         command: ["playerctl", "position"]
@@ -113,7 +193,7 @@ ShellRoot {
         }
     }
 
-    // ── Audio + Mic — event-driven via qs-audio-monitor ───────────────────────
+    // ── Audio + Mic ───────────────────────────────────────────────────────────
     Process {
         id: audioProc
         command: ["qs-audio-monitor"]
@@ -145,7 +225,7 @@ ShellRoot {
         }
     }
 
-    // ── Network — event-driven via nmcli monitor ──────────────────────────────
+    // ── Network ───────────────────────────────────────────────────────────────
     Process {
         id: netProc
         command: ["qs-net-monitor"]
@@ -170,7 +250,7 @@ ShellRoot {
         }
     }
 
-    // ── CPU + MEM — single shared 2s polling timer ────────────────────────────
+    // ── CPU + MEM ─────────────────────────────────────────────────────────────
     Process {
         id: cpuProc
         command: ["qs-cpu"]
@@ -239,6 +319,10 @@ ShellRoot {
             required property var modelData
             screen: modelData
             server: notifServer
+            notifIdMap: root.notifIdMap
+            onRemoveNotif: function (entryId) {
+                root.removeFromHistory(entryId);
+            }
         }
     }
 
@@ -248,7 +332,11 @@ ShellRoot {
             required property var modelData
             screen: modelData
             state_: barState
-            server: notifServer
+            notifHistory: root.notifHistory
+            onRemoveNotif: function (entryId) {
+                root.removeFromHistory(entryId);
+            }
+            onClearAllNotifs: root.clearHistory()
         }
     }
 

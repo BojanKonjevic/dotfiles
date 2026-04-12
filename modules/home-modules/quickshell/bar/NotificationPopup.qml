@@ -6,6 +6,9 @@ Rectangle {
     id: root
 
     required property Notification notification
+    // History entry id passed in from NotificationPopups so X can remove from history
+    property string historyId: ""
+    signal removeNotif(string entryId)
 
     property color borderColor: notification.urgency === NotificationUrgency.Critical ? Qt.rgba(Colours.red.r, Colours.red.g, Colours.red.b, 0.8) : Qt.rgba(Colours.surface1.r, Colours.surface1.g, Colours.surface1.b, 0.5)
 
@@ -14,6 +17,9 @@ Rectangle {
     border.color: borderColor
     border.width: 1
     implicitHeight: inner.implicitHeight + Colours.spacingXl
+
+    property bool dismissed: false
+    visible: !dismissed
 
     opacity: 0
     x: -Colours.iconSizeLg
@@ -33,13 +39,14 @@ Rectangle {
         }
     }
 
+    // Auto-dismiss popup only — history is untouched
     Timer {
         interval: {
             const t = root.notification.expireTimeout;
             return (t > 0) ? t : 5000;
         }
-        running: root.notification.urgency !== NotificationUrgency.Critical
-        onTriggered: root.notification.tracked = false
+        running: root.notification.urgency !== NotificationUrgency.Critical && !root.dismissed
+        onTriggered: root.dismissed = true
     }
 
     ColumnLayout {
@@ -82,7 +89,12 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.notification.tracked = false
+                    onClicked: {
+                        // Remove from history AND dismiss the popup
+                        if (root.historyId !== "")
+                            root.removeNotif(root.historyId);
+                        root.dismissed = true;
+                    }
                 }
             }
         }
@@ -139,7 +151,7 @@ Rectangle {
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
                             modelData.invoke();
-                            root.notification.tracked = false;
+                            root.dismissed = true;
                         }
                     }
                 }
@@ -147,8 +159,9 @@ Rectangle {
         }
     }
 
+    // Clicking popup body just dismisses it, keeps in history
     MouseArea {
         anchors.fill: parent
-        onClicked: root.notification.tracked = false
+        onClicked: root.dismissed = true
     }
 }
