@@ -21,6 +21,7 @@
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
     nix-search-tv = {
       url = "github:3timeslazy/nix-search-tv";
