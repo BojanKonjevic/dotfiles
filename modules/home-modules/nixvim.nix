@@ -19,7 +19,6 @@
       extraPlugins = with pkgs.vimPlugins; [
         harpoon2
         grug-far-nvim
-        vim-illuminate
         diffview-nvim
         undotree
         tiny-inline-diagnostic-nvim
@@ -551,7 +550,7 @@
         }
         {
           mode = "n";
-          key = "\\";
+          key = "-";
           action = "<cmd>Neotree toggle<cr>";
           options = {
             desc = "Toggle File Explorer";
