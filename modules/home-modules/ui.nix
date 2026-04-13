@@ -1,5 +1,9 @@
 {...}: {
-  flake.homeModules.ui = {pkgs, ...}: {
+  flake.homeModules.ui = {
+    pkgs,
+    config,
+    ...
+  }: {
     home.packages = with pkgs; [
       swayimg
       mpv
@@ -127,6 +131,15 @@
           "application/x-bzip2" = ["xarchiver.desktop"];
           "application/x-xz" = ["xarchiver.desktop"];
         };
+      };
+      userDirs = {
+        enable = true;
+        createDirectories = true;
+        download = "${config.home.homeDirectory}/Downloads";
+        documents = "${config.home.homeDirectory}/Documents";
+        pictures = "${config.home.homeDirectory}/Pictures";
+        videos = "${config.home.homeDirectory}/Videos";
+        music = "${config.home.homeDirectory}/Music";
       };
     };
   };
