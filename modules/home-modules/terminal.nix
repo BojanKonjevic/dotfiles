@@ -22,6 +22,20 @@
     programs.bat.enable = true;
     programs.btop.enable = true;
     programs.cava.enable = true;
+    programs.ssh = {
+      enable = true;
+      enableDefaultConfig = false;
+      matchBlocks = {
+        "*" = {
+          addKeysToAgent = "yes";
+        };
+        "github.com" = {
+          hostname = "github.com";
+          user = "git";
+          identityFile = "~/.ssh/id_ed25519";
+        };
+      };
+    };
     programs.git = {
       enable = true;
       settings = {
