@@ -3,4 +3,5 @@ let
 in {
   "user-password.age".publicKeys = [desktop];
   "cachix-token.age".publicKeys = [desktop];
+  "ssh-private-key.age".publicKeys = [desktop];
 }

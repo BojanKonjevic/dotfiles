@@ -18,5 +18,10 @@
       owner = userConfig.username;
       mode = "0400";
     };
+    age.secrets.ssh-private-key = {
+      file = "${self}/secrets/ssh-private-key.age";
+      owner = userConfig.username;
+      mode = "0600";
+    };
   };
 }
