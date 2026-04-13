@@ -16,6 +16,7 @@
       speedtest-go
       eza
       calcurse
+      delta
     ];
     programs.zoxide.enable = true;
     programs.broot.enable = true;
@@ -42,6 +43,17 @@
         user.name = userConfig.fullName;
         user.email = userConfig.email;
         init.defaultBranch = "main";
+        core.pager = "delta";
+        interactive.diffFilter = "delta --color-only";
+        delta = {
+          navigate = true;
+          dark = true;
+          side-by-side = true;
+          line-numbers = true;
+          syntax-theme = "Catppuccin Mocha";
+        };
+        merge.conflictstyle = "diff3";
+        diff.colorMoved = "default";
       };
     };
     home.file.".ssh/id_ed25519" = {
