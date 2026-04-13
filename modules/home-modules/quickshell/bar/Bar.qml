@@ -84,6 +84,7 @@ PanelWindow {
                 HoverHandler {
                     onHoveredChanged: {
                         if (hovered) {
+                            root.state_.closeAllPanels();
                             root.state_.dateTimeOpen = true;
                         } else {
                             dateTimeHideTimer.restart();
@@ -270,6 +271,7 @@ PanelWindow {
                 HoverHandler {
                     onHoveredChanged: {
                         if (hovered) {
+                            root.state_.closeAllPanels();
                             var mapped = mediaItem.mapToGlobal(mediaItem.width, mediaItem.height / 2);
                             root.state_.mediaAudioX = mapped.x;
                             root.state_.mediaAudioY = mapped.y;
@@ -327,6 +329,7 @@ PanelWindow {
                 HoverHandler {
                     onHoveredChanged: {
                         if (hovered) {
+                            root.state_.closeAllPanels();
                             root.state_.notifPanelOpen = true;
                         } else {
                             notifHideTimer.restart();
@@ -410,7 +413,10 @@ PanelWindow {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
-                    onEntered: root.state_.powerOpen = true
+                    onEntered: {
+                        root.state_.closeAllPanels();
+                        root.state_.powerOpen = true;
+                    }
                     onExited: powerHideTimer.restart()
                 }
 

@@ -134,6 +134,12 @@ ShellRoot {
         property string netType: ""
         property int cpuUsage: 0
         property int memUsage: 0
+        function closeAllPanels() {
+            barState.dateTimeOpen = false;
+            barState.mediaAudioOpen = false;
+            barState.notifPanelOpen = false;
+            barState.powerOpen = false;
+        }
     }
 
     // ── Media — event-driven via --follow ─────────────────────────────────────
