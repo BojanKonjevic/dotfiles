@@ -15,7 +15,6 @@
     programs.dconf.enable = true;
     networking.networkmanager.enable = true;
     networking.nameservers = ["1.1.1.1" "8.8.8.8"];
-    boot.loader.systemd-boot.enable = true;
     boot.loader.timeout = 1;
     boot.loader.efi.canTouchEfiVariables = true;
     boot.plymouth.enable = true;

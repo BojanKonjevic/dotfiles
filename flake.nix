@@ -61,7 +61,6 @@
     flake-parts,
     import-tree,
     treefmt-nix,
-    lanzaboote,
     ...
   }: let
     userConfig = import ./user.nix;

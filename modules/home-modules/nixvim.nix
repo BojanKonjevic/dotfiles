@@ -14,6 +14,7 @@
         stylua
         lazygit
         kdePackages.qtdeclarative
+        shfmt
       ];
 
       extraPlugins = with pkgs.vimPlugins; [
@@ -199,6 +200,8 @@
               lua = ["stylua"];
               python = ["ruff_format"];
               qml = ["qmlformat"];
+              bash = ["shfmt"];
+              sh = ["shfmt"];
             };
           };
         };

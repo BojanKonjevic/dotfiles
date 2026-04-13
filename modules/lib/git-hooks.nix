@@ -15,6 +15,15 @@
         language = "system";
         pass_filenames = true;
       };
+      shfmt = {
+        enable = true;
+        name = "shfmt";
+        description = "Format shell scripts with shfmt";
+        entry = "${pkgs.shfmt}/bin/shfmt -i 2 -w";
+        files = "\\.sh$";
+        language = "system";
+        pass_filenames = true;
+      };
     };
 
     devShells.default = pkgs.mkShell {
