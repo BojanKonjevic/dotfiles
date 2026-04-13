@@ -141,8 +141,8 @@
 
       # ── Cursor ────────────────────────────────────────────────────────────────
       cursorTheme = "catppuccin-mocha-mauve-cursors";
-      cursorSize = toString (s 20);
       cursorPackage = pkgs.catppuccin-cursors.mochaMauve;
+      cursorSize = toString (s 20);
 
       # ── Font ──────────────────────────────────────────────────────────────────
       fontName = "JetBrainsMono Nerd Font";

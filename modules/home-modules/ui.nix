@@ -135,10 +135,13 @@
       userDirs = {
         enable = true;
         createDirectories = true;
+        desktop = null;
+        templates = null;
+        publicShare = null;
+        videos = null;
         download = "${config.home.homeDirectory}/Downloads";
         documents = "${config.home.homeDirectory}/Documents";
         pictures = "${config.home.homeDirectory}/Pictures";
-        videos = "${config.home.homeDirectory}/Videos";
         music = "${config.home.homeDirectory}/Music";
       };
     };

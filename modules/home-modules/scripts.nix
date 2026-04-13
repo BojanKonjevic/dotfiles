@@ -3,7 +3,7 @@
     home.packages = [
       (pkgs.stdenv.mkDerivation {
         name = "ingest";
-        src = ./scripts/ingest.py;
+        src = ../lib/scripts/ingest.py;
         dontUnpack = true;
         installPhase = ''
           mkdir -p $out/bin
@@ -15,7 +15,7 @@
 
       (pkgs.stdenv.mkDerivation {
         name = "yttranscript";
-        src = ./scripts/yttranscript.py;
+        src = ../lib/scripts/yttranscript.py;
         dontUnpack = true;
         installPhase = ''
           mkdir -p $out/bin
@@ -26,7 +26,7 @@
       })
 
       (pkgs.writeShellScriptBin "pyproj" ''
-        exec ${pkgs.bash}/bin/bash ${./scripts/new-python-project.sh} "$@"
+        exec ${pkgs.bash}/bin/bash ${../lib/scripts/new-python-project.sh} "$@"
       '')
     ];
   };

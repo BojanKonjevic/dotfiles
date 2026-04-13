@@ -8,7 +8,7 @@
       (pkgs.writeShellScriptBin "nu" ''
         FLAKE="${userConfig.dotfilesDir}"
         CACHIX_CACHE="bojan-dotfiles"
-        ${builtins.readFile ./nu.sh}
+        ${builtins.readFile ../lib/nu.sh}
       '')
     ];
   };
