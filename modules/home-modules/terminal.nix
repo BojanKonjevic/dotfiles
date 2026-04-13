@@ -120,9 +120,9 @@
         l = "eza -alh --icons --group-directories-first";
         br = "br --hidden";
         brd = "br --sizes --sort-by-size";
-        pyproj = "$HOME/scripts/new-python-project.sh";
-        yt = "$HOME/scripts/yttranscript.py";
-        gi = "$HOME/scripts/ingest.py";
+        yt = "yttranscript";
+        gi = "ingest";
+        pyproj = "pyproj";
 
         nr = "nh os switch";
         hm = "nh home switch";
