@@ -17,8 +17,18 @@
     networking.nameservers = ["1.1.1.1" "8.8.8.8"];
     boot.loader.timeout = 1;
     boot.loader.efi.canTouchEfiVariables = true;
-    boot.plymouth.enable = true;
-    boot.kernelParams = ["nvidia-drm.modeset=1" "udev.log_level=0"];
+    boot.plymouth = {
+      enable = true;
+      theme = "catppuccin-mocha";
+      themePackages = [
+        (pkgs.catppuccin-plymouth.override {
+          variant = "mocha";
+        })
+      ];
+    };
+    boot.kernelParams = ["nvidia-drm.modeset=1" "udev.log_level=0" "quiet" "loglevel=3" "rd.systemd.show_status=false"];
+    boot.consoleLogLevel = 0;
+    boot.initrd.verbose = false;
     programs.zsh.enable = true;
     programs.ydotool.enable = true;
     hardware.enableAllFirmware = true;
