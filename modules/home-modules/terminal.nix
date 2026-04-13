@@ -29,6 +29,10 @@
       matchBlocks = {
         "*" = {
           addKeysToAgent = "yes";
+          extraOptions = {
+            ServerAliveInterval = "60";
+            ServerAliveCountMax = "3";
+          };
         };
         "github.com" = {
           hostname = "github.com";
@@ -37,6 +41,7 @@
         };
       };
     };
+    services.ssh-agent.enable = true;
     programs.git = {
       enable = true;
       settings = {
