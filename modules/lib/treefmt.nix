@@ -11,6 +11,11 @@
         options = ["-i"];
         includes = ["*.qml"];
       };
+
+      programs.shfmt = {
+        enable = true;
+        indent_size = 2;
+      };
     };
   };
 }

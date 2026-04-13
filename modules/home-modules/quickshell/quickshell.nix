@@ -1,6 +1,7 @@
 {...}: {
   flake.homeModules.quickshell = {
     quickshell,
+    lib,
     theme,
     pkgs,
     userConfig,
@@ -106,10 +107,13 @@
       }
     '';
 
-    mkPure = name: file:
-      pkgs.writeShellScriptBin name (builtins.readFile ./qs-scripts/${file});
-    mkInterp = name: file: args:
-      pkgs.writeShellScriptBin name (import ./qs-scripts/${file} args);
+    mkScript = name: file: env:
+      pkgs.writeShellScriptBin name (
+        lib.concatStringsSep "\n"
+        (lib.mapAttrsToList (k: v: "export ${k}=${lib.escapeShellArg v}") env)
+        + "\n"
+        + builtins.readFile ./qs-scripts/${file}
+      );
   in {
     home.packages = [
       pkgs.playerctl
@@ -121,23 +125,25 @@
       pkgs.pipewire
 
       # ── Bar helpers ──────────────────────────────────────────────────────
-      (mkPure "qs-cpu" "qs-cpu.sh")
-      (mkPure "qs-mem" "qs-mem.sh")
-      (mkPure "qs-audio-set" "qs-audio-set.sh")
-      (mkInterp "qs-audio-monitor" "qs-audio-monitor.sh" {inherit pkgs;})
-      (mkInterp "qs-net-monitor" "qs-net-monitor.sh" {inherit pkgs;})
-      (mkInterp "qs-cava-bar" "qs-cava-bar.sh" {inherit pkgs userConfig theme;})
-
-      # ── Clipboard helpers ────────────────────────────────────────────────
-      (mkPure "qs-clip-copy-text" "qs-clip-copy-text.sh")
-      (mkPure "qs-clip-copy-img" "qs-clip-copy-img.sh")
-      (mkPure "qs-clip-clear-text" "qs-clip-clear-text.sh")
-      (mkPure "qs-clip-clear-img" "qs-clip-clear-img.sh")
-      (mkPure "qs-clip-images" "qs-clip-images.sh")
-
-      # ── Wallpaper helpers ────────────────────────────────────────────────
-      (mkInterp "qs-wallpapers" "qs-wallpapers.sh" {inherit userConfig;})
-      (mkInterp "qs-setwall" "qs-setwall.sh" {inherit userConfig;})
+      (mkScript "qs-cpu" "qs-cpu.sh" {})
+      (mkScript "qs-mem" "qs-mem.sh" {})
+      (mkScript "qs-audio-set" "qs-audio-set.sh" {})
+      (mkScript "qs-audio-monitor" "qs-audio-monitor.sh" {})
+      (mkScript "qs-net-monitor" "qs-net-monitor.sh" {})
+      (mkScript "qs-clip-copy-text" "qs-clip-copy-text.sh" {})
+      (mkScript "qs-clip-copy-img" "qs-clip-copy-img.sh" {})
+      (mkScript "qs-clip-clear-text" "qs-clip-clear-text.sh" {})
+      (mkScript "qs-clip-clear-img" "qs-clip-clear-img.sh" {})
+      (mkScript "qs-clip-images" "qs-clip-images.sh" {})
+      (mkScript "qs-cava-bar" "qs-cava-bar.sh" {
+        CAVA_CONFIG = "${userConfig.homeDirectory}/.config/cava/cava-bar.conf";
+      })
+      (mkScript "qs-wallpapers" "qs-wallpapers.sh" {
+        WALLPAPER_DIR = userConfig.wallpaperDir;
+      })
+      (mkScript "qs-setwall" "qs-setwall.sh" {
+        WALLPAPER_DIR = userConfig.wallpaperDir;
+      })
     ];
 
     # ── Bar ───────────────────────────────────────────────────────────────────

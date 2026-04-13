@@ -74,8 +74,8 @@ run_build() {
 UPDATE=false
 SKIP_CACHIX=false
 for arg in "$@"; do
-  [[ "$arg" == "-u" || "$arg" == "--update" ]] && UPDATE=true
-  [[ "$arg" == "--no-cache" ]] && SKIP_CACHIX=true
+  [[ $arg == "-u" || $arg == "--update" ]] && UPDATE=true
+  [[ $arg == "--no-cache" ]] && SKIP_CACHIX=true
 done
 
 # ── Header ────────────────────────────────────────────────────────────────────
@@ -206,7 +206,7 @@ printf "  ${SUBTEXT}hm gen      ${BLUE}%s${R}${OVERLAY} → ${BLUE}%s${R}\n\n" "
 
 if command -v nvd &>/dev/null; then
   PREV_PROF="/nix/var/nix/profiles/system-${GEN_BEFORE}-link"
-  if [[ -e "$PREV_PROF" ]]; then
+  if [[ -e $PREV_PROF ]]; then
     step "package diff…"
     nvd diff "$PREV_PROF" /nix/var/nix/profiles/system 2>/dev/null |
       sed "s/^Added/  ${GREEN}Added${R}/;s/^Removed/  ${RED}Removed${R}/" |

@@ -1,7 +1,2 @@
-{
-  pkgs,
-  userConfig,
-  theme,
-}: ''
-  exec ${pkgs.cava}/bin/cava -p ${userConfig.homeDirectory}/.config/cava/cava-bar.conf
-''
+#!/usr/bin/env bash
+exec cava -p "${CAVA_CONFIG}"
