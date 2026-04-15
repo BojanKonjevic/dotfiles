@@ -1,5 +1,3 @@
-#!/usr/bin/env nix-shell
-#! nix-shell -i python3 -p "python3.withPackages (ps: [ ps.gitingest ])" -p python3 -p wl-clipboard
 """
 GitIngest CLI Wrapper (NixOS + Wayland) - Direct to clipboard (Clean)
 

@@ -1,6 +1,3 @@
-#!/usr/bin/env nix-shell
-#! nix-shell -i python3 -p "python3.withPackages (ps: [ ps.youtube-transcript-api ])" -p python3
-
 """
 YouTube Transcript CLI for NixOS (compatible with current 2026 API)
 Usage:

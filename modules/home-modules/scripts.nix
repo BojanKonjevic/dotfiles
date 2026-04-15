@@ -1,30 +1,22 @@
 {...}: {
-  flake.homeModules.scripts = {pkgs, ...}: {
+  flake.homeModules.scripts = {pkgs, ...}: let
+    ingestPython = pkgs.python3.withPackages (ps: [ps.gitingest]);
+    yttranscriptPython = pkgs.python3.withPackages (ps: [ps.youtube-transcript-api]);
+
+    mkPythonScript = name: python: src:
+      pkgs.writeTextFile {
+        inherit name;
+        destination = "/bin/${name}";
+        executable = true;
+        text = ''
+          #!${python}/bin/python3
+          ${builtins.readFile src}
+        '';
+      };
+  in {
     home.packages = [
-      (pkgs.stdenv.mkDerivation {
-        name = "ingest";
-        src = ../lib/scripts/ingest.py;
-        dontUnpack = true;
-        installPhase = ''
-          mkdir -p $out/bin
-          cp $src $out/bin/ingest
-          chmod +x $out/bin/ingest
-          patchShebangs $out/bin/ingest
-        '';
-      })
-
-      (pkgs.stdenv.mkDerivation {
-        name = "yttranscript";
-        src = ../lib/scripts/yttranscript.py;
-        dontUnpack = true;
-        installPhase = ''
-          mkdir -p $out/bin
-          cp $src $out/bin/yttranscript
-          chmod +x $out/bin/yttranscript
-          patchShebangs $out/bin/yttranscript
-        '';
-      })
-
+      (mkPythonScript "ingest" ingestPython ../lib/scripts/ingest.py)
+      (mkPythonScript "yttranscript" yttranscriptPython ../lib/scripts/yttranscript.py)
       (pkgs.writeShellScriptBin "pyproj" ''
         exec ${pkgs.bash}/bin/bash ${../lib/scripts/new-python-project.sh} "$@"
       '')
