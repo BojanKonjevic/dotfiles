@@ -37,4 +37,7 @@
   # Check available disks with: lsblk -d -o NAME,SIZE,MODEL
   # Common values: /dev/sda, /dev/nvme0n1, /dev/vda (VM)
   disk = "/dev/sda";
+
+  # ── Misc ─────────────────────────────────────────────────────────────────────
+  bootstrapMode = false;
 }

@@ -254,6 +254,9 @@
 
             # ── Hardware ─────────────────────────────────────────────────────────────────
             disk = "$DISK";
+
+            # ── Misc ─────────────────────────────────────────────────────────────────────
+            bootstrapMode = true;
           }
           USERNIX
 
@@ -341,10 +344,6 @@
             # Disable the agenix-managed password — use temporary bootstrap password instead.
             users.users.$DETECTED_USER.hashedPasswordFile = lib.mkForce null;
             users.users.$DETECTED_USER.initialHashedPassword = lib.mkForce "$TMP_HASHED_PASSWORD";
-
-            # Remove the three agenix secrets that cannot decrypt on this host.
-            age.secrets.cachix-token   = lib.mkForce { };
-            age.secrets.ssh-private-key = lib.mkForce { };
           }
           OVERRIDE
 

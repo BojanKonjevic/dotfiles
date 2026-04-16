@@ -1,5 +1,6 @@
 {inputs, ...}: {
   flake.nixosModules.secrets = {
+    lib,
     userConfig,
     self,
     ...
@@ -12,16 +13,18 @@
         PermitRootLogin = "no";
       };
     };
-    age.secrets.user-password.file = "${self}/secrets/user-password.age";
-    age.secrets.cachix-token = {
-      file = "${self}/secrets/cachix-token.age";
-      owner = userConfig.username;
-      mode = "0400";
-    };
-    age.secrets.ssh-private-key = {
-      file = "${self}/secrets/ssh-private-key.age";
-      owner = userConfig.username;
-      mode = "0600";
+    age.secrets = lib.mkIf (!userConfig.bootsrapMode or false) {
+      user-password.file = "${self}/secrets/user-password.age";
+      cachix-token = {
+        file = "${self}/secrets/cachix-token.age";
+        owner = userConfig.username;
+        mode = "0400";
+      };
+      ssh-private-key = {
+        file = "${self}/secrets/ssh-private-key.age";
+        owner = userConfig.username;
+        mode = "0600";
+      };
     };
   };
 }
