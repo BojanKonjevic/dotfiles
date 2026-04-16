@@ -343,7 +343,6 @@
             users.users.$DETECTED_USER.initialHashedPassword = lib.mkForce "$TMP_HASHED_PASSWORD";
 
             # Remove the three agenix secrets that cannot decrypt on this host.
-            age.secrets.user-password = lib.mkForce { };
             age.secrets.cachix-token   = lib.mkForce { };
             age.secrets.ssh-private-key = lib.mkForce { };
           }
