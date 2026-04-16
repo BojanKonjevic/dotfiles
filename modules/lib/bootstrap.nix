@@ -400,7 +400,7 @@
             --extra-experimental-features "nix-command flakes" \
             github:nix-community/disko/latest -- \
             --mode destroy,format,mount \
-            --flake "$TMPDIR#$HOSTNAME"
+            "$HOST_DIR/disko.nix"
 
           ok "Disk partitioned, formatted and mounted at /mnt."
 
