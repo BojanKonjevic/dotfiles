@@ -276,7 +276,8 @@
 
             # default.nix — mirrors desktop/default.nix exactly (includes self,
             # lanzaboote, and bootstrap-override while it exists)
-            cat > "$HOST_DIR/default.nix" <<HOSTNIX
+          # In the HOSTNIX heredoc, change to:
+          cat > "$HOST_DIR/default.nix" <<HOSTNIX
           { self, inputs, ... }:
           let
             userConfig = import ../../../user.nix;
@@ -289,6 +290,8 @@
                 (builtins.attrValues self.nixosModules)
                 ++ [
                   ./hardware.nix
+                  ./disko.nix
+                  inputs.disko.nixosModules.disko
                   inputs.lanzaboote.nixosModules.lanzaboote
                 ]
                 ++ (
@@ -301,6 +304,8 @@
 
           ok "Created modules/hosts/$HOSTNAME/default.nix."
           fi
+
+          sed -i 's|inputs.lanzaboote.nixosModules.lanzaboote|inputs.lanzaboote.nixosModules.lanzaboote\n        ./disko.nix\n        inputs.disko.nixosModules.disko|' "$HOST_DIR/default.nix"
 
           # ── Inject bootstrap-override into desktop host too ────────────────
           # For the desktop host we patch default.nix in-place to include the
