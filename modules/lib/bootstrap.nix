@@ -59,17 +59,12 @@
             exit 1
           fi
 
-          if ! command -v git &>/dev/null; then
-            err "git is required. Run first:"
-            err "  nix-shell -p git"
-            exit 1
-          fi
-
-          if ! command -v mkpasswd &>/dev/null; then
-            err "mkpasswd is required. Run first:"
-            err "  nix-shell -p whois"
-            exit 1
-          fi
+          for cmd in git mkpasswd sbctl; do
+            if ! command -v "$cmd" &>/dev/null; then
+              err "$cmd is required but not found. Run: nix-shell -p $cmd"
+              exit 1
+            fi
+          done
 
           # ── Network check ──────────────────────────────────────────────────
           header "Checking network…"
@@ -135,9 +130,9 @@
           # ── Temporary login password ───────────────────────────────────────
           #
           # agenix cannot decrypt user-password.age on a new machine because it
-          # is encrypted to the existing desktop host key. We therefore set a
-          # plain initial password here that lets the user log in on first boot.
-          # Full agenix wiring is restored in a documented post-boot step.
+          # is encrypted to the existing host key. A temporary plain password is
+          # set so the user can log in on first boot. Full agenix is restored in
+          # the documented post-boot steps.
           #
           echo ""
           echo -e "  ''${YELLOW}''${BOLD}Temporary login password''${RESET}"
@@ -215,33 +210,31 @@
           # ── Write user.nix ─────────────────────────────────────────────────
           header "Writing user.nix…"
 
-          # Note: osFlakePath / hmFlakePath are written as absolute paths so
-          # that builtins.getFlake (used by nixd in nixvim) receives a real
-          # path rather than the unexpanded string "$HOME/dotfiles".
+          # osFlakePath / hmFlakePath are written as absolute paths so that
+          # builtins.getFlake (used by nixd in nixvim) receives a real path.
           cat > "$TMPDIR/user.nix" <<USERNIX
           {
-            # ── Identity ─────────────────────────────────────────────────────────────────
+            # ── Identity ─────────────────────────────────────────────────────
             username      = "$DETECTED_USER";
             fullName      = "$FULLNAME";
             email         = "$EMAIL";
             homeDirectory = "/home/$DETECTED_USER";
 
-            # ── Machine ──────────────────────────────────────────────────────────────────
+            # ── Machine ──────────────────────────────────────────────────────
             hostname     = "$HOSTNAME";
             system       = "$DETECTED_SYSTEM";
 
-            # ── Versions ─────────────────────────────────────────────────────────────────
+            # ── Versions ─────────────────────────────────────────────────────
             stateVersion = "$DETECTED_STATE";
 
-            # ── Locale / Time ────────────────────────────────────────────────────────────
+            # ── Locale / Time ────────────────────────────────────────────────
             timezone     = "$DETECTED_TIMEZONE";
             locale       = "$DETECTED_LOCALE";
             kbLayout     = "$DETECTED_KB";
 
-            # ── Paths ────────────────────────────────────────────────────────────────────
-            # Shell variables (\$HOME) are left unexpanded so they resolve at runtime
-            # inside shell scripts. osFlakePath / hmFlakePath are absolute so that
-            # builtins.getFlake receives a real path (nixd LSP requires this).
+            # ── Paths ────────────────────────────────────────────────────────
+            # \$HOME is left unexpanded so it resolves at runtime in shell
+            # scripts. osFlakePath / hmFlakePath are absolute for nixd LSP.
             wallpaperDir   = "\$HOME/Pictures/wallpapers";
             screenshotsDir = "\$HOME/Pictures/Screenshots";
             notesFile      = "\$HOME/Documents/notes.txt";
@@ -249,13 +242,13 @@
             osFlakePath    = "$DOTFILESDIR";
             hmFlakePath    = "$DOTFILESDIR";
 
-            # ── Weather ──────────────────────────────────────────────────────────────────
+            # ── Weather ──────────────────────────────────────────────────────
             weatherCity  = "$WEATHERCITY";
 
-            # ── Hardware ─────────────────────────────────────────────────────────────────
+            # ── Hardware ─────────────────────────────────────────────────────
             disk = "$DISK";
 
-            # ── Misc ─────────────────────────────────────────────────────────────────────
+            # ── Misc ─────────────────────────────────────────────────────────
             bootstrapMode = true;
           }
           USERNIX
@@ -263,29 +256,24 @@
           ok "user.nix written."
 
           # ── Host directory ─────────────────────────────────────────────────
-          header "Setting up host directory…"
+          # Always generate a clean host directory in the tmp clone regardless
+          # of whether the hostname already exists in the repo. The repo copy
+          # is never modified — only the tmp clone used for this install.
+          header "Setting up host directory for '$HOSTNAME'…"
 
           HOST_DIR="$TMPDIR/modules/hosts/$HOSTNAME"
+          mkdir -p "$HOST_DIR"
 
-          if [[ "$HOSTNAME" == "desktop" ]]; then
-            ok "Using existing desktop host directory."
-          elif [[ -d "$HOST_DIR" ]]; then
-            ok "Host directory already exists."
-          else
-            mkdir -p "$HOST_DIR"
+          # Placeholder hardware.nix — replaced after nixos-generate-config.
+          printf '{ ... }: {}\n' > "$HOST_DIR/hardware.nix"
 
-            # placeholder hardware.nix — replaced after nixos-generate-config
-            printf '{ ... }: {}\n' > "$HOST_DIR/hardware.nix"
-
-            # default.nix — mirrors desktop/default.nix exactly (includes self,
-            # lanzaboote, and bootstrap-override while it exists)
-          # In the HOSTNIX heredoc, change to:
+          # default.nix — clean format, no sed patching needed.
+          # disko and bootstrap-override are always included directly.
           cat > "$HOST_DIR/default.nix" <<HOSTNIX
           { self, inputs, ... }:
           let
             userConfig = import ../../../user.nix;
-          in
-          {
+          in {
             flake.nixosConfigurations.\''${userConfig.hostname} = inputs.nixpkgs.lib.nixosSystem {
               system = userConfig.system;
               specialArgs = { inherit inputs userConfig self; };
@@ -299,57 +287,43 @@
                 ]
                 ++ (
                   let p = ./bootstrap-override.nix; in
-                  if builtins.pathExists p then [ p ] else [ ]
+                  if builtins.pathExists p then [ p ] else []
                 );
             };
           }
           HOSTNIX
 
-          ok "Created modules/hosts/$HOSTNAME/default.nix."
-          fi
+          ok "default.nix written."
 
-          sed -i 's|inputs.lanzaboote.nixosModules.lanzaboote|inputs.lanzaboote.nixosModules.lanzaboote\n        ./disko.nix\n        inputs.disko.nixosModules.disko|' "$HOST_DIR/default.nix"
-
-          # ── Inject bootstrap-override into desktop host too ────────────────
-          # For the desktop host we patch default.nix in-place to include the
-          # override while it exists, then restore it after install.
-          if [[ "$HOSTNAME" == "desktop" ]]; then
-            DESKTOP_DEFAULT="$TMPDIR/modules/hosts/desktop/default.nix"
-            cp "$DESKTOP_DEFAULT" "$DESKTOP_DEFAULT.bak"
-            # Insert the conditional override include before the closing ];
-            sed -i 's|inputs\.lanzaboote\.nixosModules\.lanzaboote|inputs.lanzaboote.nixosModules.lanzaboote\n      ] ++ (\n        let p = ./bootstrap-override.nix; in\n        if builtins.pathExists p then [ p ] else [ ]\n      ) ++ [|' \
-              "$DESKTOP_DEFAULT"
-          fi
-
-          # Write bootstrap-override.nix into whichever host dir applies.
-          # This overrides the agenix-managed password with the temporary one
-          # and removes the three secrets that cannot decrypt on this machine.
+          # ── bootstrap-override.nix ─────────────────────────────────────────
+          # Sets a temporary plain password so the user can log in on first
+          # boot. agenix secrets are already gated by bootstrapMode = true in
+          # agenix.nix, so no mkForce null needed.
           cat > "$HOST_DIR/bootstrap-override.nix" <<OVERRIDE
-          # bootstrap-override.nix — AUTO-GENERATED, remove after post-boot agenix setup.
+          # bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.
           #
-          # This file exists because agenix secrets are encrypted to the original host
-          # key and cannot be decrypted on a freshly installed machine.
-          # It gives the system a working login without agenix.
+          # agenix secrets are encrypted to the original host key and cannot be
+          # decrypted on a freshly installed machine. This file provides a
+          # temporary login password until agenix is re-keyed for this host.
           #
           # Post-boot steps to restore full agenix:
-          #   1. On your existing desktop, add the new machine host pubkey to secrets/secrets.nix
-          #      New host pubkey: $(cat /mnt/etc/ssh/ssh_host_ed25519_key.pub 2>/dev/null || echo "<generated during install>")
-          #   2. cd ~/dotfiles && agenix -r -i ~/.ssh/id_ed25519
-          #   3. git add -A && git commit -m "add $HOSTNAME host key" && git push
-          #   4. On this machine: git pull
-          #   5. Delete this file: rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix
-          #   6. Rebuild: nr
-          { lib, ... }:
+          #   On your existing machine:
+          #     1. Add the new host pubkey to secrets/secrets.nix:
+          #          <generated during install>
+          #     2. agenix -r -i ~/.ssh/id_ed25519
+          #     3. git add -A && git commit -m "add $HOSTNAME host key" && git push
+          #   On this machine (after git pull):
+          #     4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix
+          #     5. nr
+          { ... }:
           {
-            # Disable the agenix-managed password — use temporary bootstrap password instead.
-            users.users.$DETECTED_USER.hashedPasswordFile = lib.mkForce null;
-            users.users.$DETECTED_USER.initialHashedPassword = lib.mkForce "$TMP_HASHED_PASSWORD";
+            users.users.$DETECTED_USER.initialHashedPassword = "$TMP_HASHED_PASSWORD";
           }
           OVERRIDE
 
           ok "bootstrap-override.nix written."
 
-          # ── Disko config ───────────────────────────────────────────────────
+          # ── Disko config (btrfs) ───────────────────────────────────────────
           header "Generating disko partition layout…"
 
           SWAP_SIZE="''${SWAP_GB}G"
@@ -382,9 +356,26 @@
                   root = {
                     size = "100%";
                     content = {
-                      type = "filesystem";
-                      format = "ext4";
-                      mountpoint = "/";
+                      type = "btrfs";
+                      extraArgs = [ "-L" "nixos" "-f" ];
+                      subvolumes = {
+                        "@" = {
+                          mountpoint = "/";
+                          mountOptions = [ "compress=zstd" "noatime" ];
+                        };
+                        "@nix" = {
+                          mountpoint = "/nix";
+                          mountOptions = [ "compress=zstd" "noatime" ];
+                        };
+                        "@home" = {
+                          mountpoint = "/home";
+                          mountOptions = [ "compress=zstd" "noatime" ];
+                        };
+                        "@snapshots" = {
+                          mountpoint = "/.snapshots";
+                          mountOptions = [ "compress=zstd" "noatime" ];
+                        };
+                      };
                     };
                   };
                 };
@@ -393,7 +384,7 @@
           }
           DISKO
 
-          ok "disko.nix written."
+          ok "disko.nix written (btrfs: @, @nix, @home, @snapshots)."
 
           # ── Disko — partition, format, mount ───────────────────────────────
           mount -o remount,size=4G /nix/.rw-store 2>/dev/null || true
@@ -407,21 +398,24 @@
 
           ok "Disk partitioned, formatted and mounted at /mnt."
 
-          # ── Generate SSH host key ──────────────────────────────────────────
-          # Generated BEFORE nixos-install so the key is baked into the system.
-          # The pubkey is printed at the end for the agenix re-encryption step.
+          # ── SSH host key ───────────────────────────────────────────────────
+          # Must be generated before nixos-install so agenix can use it.
+          # The pubkey is printed at the end for the re-encryption step.
           header "Generating SSH host key…"
 
           mkdir -p /mnt/etc/ssh
+          chmod 700 /mnt/etc/ssh
           if [[ ! -f /mnt/etc/ssh/ssh_host_ed25519_key ]]; then
             ssh-keygen -t ed25519 -N "" -f /mnt/etc/ssh/ssh_host_ed25519_key
+            chmod 600 /mnt/etc/ssh/ssh_host_ed25519_key
+            chmod 644 /mnt/etc/ssh/ssh_host_ed25519_key.pub
             ok "Host key generated."
           else
-            ok "Host key already exists."
+            ok "Host key already exists, reusing."
           fi
           NEW_HOST_PUBKEY="$(cat /mnt/etc/ssh/ssh_host_ed25519_key.pub)"
 
-          # Now that the key exists, rewrite the comment in bootstrap-override.nix
+          # Inject the real pubkey into the override comment now that we have it.
           sed -i "s|<generated during install>|$NEW_HOST_PUBKEY|g" \
             "$HOST_DIR/bootstrap-override.nix"
 
@@ -430,35 +424,37 @@
 
           nixos-generate-config --root /mnt --no-filesystems
           cp /mnt/etc/nixos/hardware-configuration.nix "$HOST_DIR/hardware.nix"
-          ok "Hardware config written to modules/hosts/$HOSTNAME/hardware.nix."
+          ok "Hardware config written."
 
-          # ── Lanzaboote / Secure Boot ───────────────────────────────────────
+          # ── Secure Boot keys ───────────────────────────────────────────────
+          # sbctl keys must exist before nixos-install so lanzaboote can sign
+          # the boot files during installation. Keys are created on the live
+          # ISO and copied to the installed system's secureboot path.
           header "Setting up Secure Boot keys…"
 
-          # sbctl creates keys and enrolls them into EFI firmware.
-          # lanzaboote reads these keys at nixos-install time to sign the boot
-          # files, so they must exist before nixos-install runs.
-          mkdir -p /mnt/etc/secureboot
-          if sbctl status 2>/dev/null | grep -q "Setup Mode: Enabled"; then
-            info "Firmware is in Setup Mode — enrolling Secure Boot keys."
+          SBCTL_STATUS="$(sbctl status 2>/dev/null || true)"
+
+          if echo "$SBCTL_STATUS" | grep -q "Setup Mode: Enabled"; then
+            info "Firmware is in Setup Mode — creating and enrolling keys."
             sbctl create-keys
             sbctl enroll-keys --microsoft
             ok "Secure Boot keys enrolled."
-          elif sbctl status 2>/dev/null | grep -q "Secure Boot: disabled"; then
-            info "Secure Boot is disabled but not in Setup Mode."
-            info "You may need to enter your firmware and enable Setup Mode first."
-            info "Attempting key creation anyway (enroll manually if needed)."
+          elif echo "$SBCTL_STATUS" | grep -q "Secure Boot: disabled"; then
+            info "Secure Boot is disabled and not in Setup Mode."
+            info "Keys will be created now. To enroll, enter your firmware,"
+            info "enable Setup Mode, then run: sbctl enroll-keys --microsoft"
             sbctl create-keys || true
-            sbctl enroll-keys --microsoft 2>/dev/null || \
-              warn "Could not auto-enroll keys. After install, boot into firmware, enable Setup Mode, and run: sbctl enroll-keys --microsoft"
           else
-            info "Secure Boot status unclear — creating keys, skipping enroll."
+            warn "Secure Boot status unclear — attempting key creation."
             sbctl create-keys || true
           fi
-          # Copy the created keys to the installed system
+
           if [[ -d /etc/secureboot ]]; then
-            cp -r /etc/secureboot /mnt/etc/secureboot
+            mkdir -p /mnt/etc/secureboot
+            cp -r /etc/secureboot/. /mnt/etc/secureboot/
             ok "Secure Boot keys copied to /mnt/etc/secureboot."
+          else
+            warn "No secureboot keys found at /etc/secureboot — skipping copy."
           fi
 
           # ── Install ────────────────────────────────────────────────────────
@@ -474,12 +470,6 @@
 
           ok "NixOS installed."
 
-          # ── Restore desktop default.nix if we patched it ───────────────────
-          if [[ "$HOSTNAME" == "desktop" && -f "$TMPDIR/modules/hosts/desktop/default.nix.bak" ]]; then
-            mv "$TMPDIR/modules/hosts/desktop/default.nix.bak" \
-               "$TMPDIR/modules/hosts/desktop/default.nix"
-          fi
-
           # ── Copy dotfiles to installed system ──────────────────────────────
           header "Copying dotfiles to new system…"
 
@@ -487,9 +477,10 @@
           mkdir -p "$(dirname "$INSTALL_DOTFILES")"
           cp -r "$TMPDIR/." "$INSTALL_DOTFILES/"
 
-          NIXOS_UID="$(grep "^$DETECTED_USER:" /mnt/etc/passwd | cut -d: -f3 || echo 1000)"
-          NIXOS_GID="$(grep "^$DETECTED_USER:" /mnt/etc/passwd | cut -d: -f4 || echo 100)"
-          chown -R "$NIXOS_UID:$NIXOS_GID" "/mnt$DETECTED_HOME"
+          # NixOS users are activated on first boot, so /mnt/etc/passwd won't
+          # have the user yet. UID 1000 / GID 100 is the correct default for a
+          # single-user NixOS system and matches what nixos-install will create.
+          chown -R 1000:100 "/mnt$DETECTED_HOME"
           ok "Dotfiles copied to $INSTALL_DOTFILES."
 
           # ── Done ───────────────────────────────────────────────────────────
@@ -500,16 +491,17 @@
           echo -e "  ''${BOLD}$NEW_HOST_PUBKEY''${RESET}"
           echo ""
           echo -e "  ''${YELLOW}''${BOLD}Post-boot steps to restore full agenix:''${RESET}"
-          echo -e "  ''${DIM}On your existing desktop:''${RESET}"
+          echo -e "  ''${DIM}On your existing machine:''${RESET}"
           echo -e "    1. Add the pubkey above to secrets/secrets.nix"
           echo -e "    2. agenix -r -i ~/.ssh/id_ed25519"
           echo -e "    3. git add -A && git commit -m 'add $HOSTNAME host key' && git push"
           echo -e "  ''${DIM}On this machine (after first boot + git pull):''${RESET}"
           echo -e "    4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix"
-          echo -e "    5. nr"
+          echo -e "    5. Set bootstrapMode = false in user.nix"
+          echo -e "    6. nr"
           echo ""
           echo -e "  ''${YELLOW}''${BOLD}Secure Boot note:''${RESET}"
-          echo -e "  ''${DIM}If Secure Boot could not be auto-enrolled, boot into your firmware,"
+          echo -e "  ''${DIM}If keys could not be auto-enrolled, enter your firmware,"
           echo -e "  enable Setup Mode, then run:''${RESET}"
           echo -e "    sbctl enroll-keys --microsoft"
           echo ""
