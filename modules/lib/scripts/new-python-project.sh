@@ -629,7 +629,22 @@ if __name__ == "__main__":
     main()
 MAIN
 
-  cat >"tests/test_main.py" <<'TESTS'
+  cat >"src/$PKG_NAME/__main__.py" <<MAIN
+from .main import main
+
+main()
+MAIN
+
+  cat >"tests/test_main.py" <<TESTS
+import pytest
+
+from ${PKG_NAME}.main import main
+
+
+def test_main(capsys: pytest.CaptureFixture[str]) -> None:
+    main()
+    captured = capsys.readouterr()
+    assert "Hello from ${NAME}" in captured.out
 TESTS
 
 fi
@@ -640,7 +655,6 @@ cat >.gitignore <<'GITIGNORE'
 result
 result-*
 .direnv
-.envrc
 
 # Python
 __pycache__/
