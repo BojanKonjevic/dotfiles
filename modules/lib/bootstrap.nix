@@ -4,6 +4,7 @@
       type = "app";
       program = toString (
         pkgs.writeShellScript "bootstrap" ''
+          export PATH="${pkgs.git}/bin:${pkgs.home-manager}/bin:${pkgs.sbctl}/bin:${pkgs.mkpasswd}/bin:$PATH"
           set -euo pipefail
 
           # ── Colors ─────────────────────────────────────────────────────────
