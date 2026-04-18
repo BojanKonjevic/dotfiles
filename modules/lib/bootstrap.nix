@@ -59,7 +59,8 @@
             exit 1
           fi
 
-          for cmd in git mkpasswd sbctl; do
+          # sbctl is only required on bare metal — checked after VM detection
+          for cmd in git mkpasswd; do
             if ! command -v "$cmd" &>/dev/null; then
               err "$cmd is required but not found. Run: nix-shell -p $cmd"
               exit 1
@@ -81,8 +82,18 @@
           if [[ -d /sys/firmware/efi ]]; then
             ok "UEFI detected."
           else
-            err "Legacy BIOS detected. This config requires UEFI (lanzaboote / systemd-boot)."
+            err "Legacy BIOS detected. This config requires UEFI."
             exit 1
+          fi
+
+          # ── VM detection ───────────────────────────────────────────────────
+          # systemd-detect-virt exits 0 and prints the virt type when in a VM,
+          # exits non-zero and prints "none" on bare metal.
+          VIRT_TYPE="$(systemd-detect-virt 2>/dev/null || echo 'none')"
+          if [[ "$VIRT_TYPE" != "none" ]]; then
+            IS_VM=true
+          else
+            IS_VM=false
           fi
 
           # ── Auto-detect ────────────────────────────────────────────────────
@@ -110,6 +121,16 @@
           ok "stateVersion → $DETECTED_STATE"
           ok "RAM          → ''${DETECTED_RAM_GB}GB"
 
+          if [[ "$IS_VM" == "true" ]]; then
+            warn "VM detected ($VIRT_TYPE) — lanzaboote skipped, using systemd-boot."
+          else
+            ok "Bare metal detected — lanzaboote + Secure Boot will be configured."
+            if ! command -v sbctl &>/dev/null; then
+              err "sbctl is required on bare metal but not found. Run: nix-shell -p sbctl"
+              exit 1
+            fi
+          fi
+
           echo ""
           info "Available disks:"
           lsblk -d -o NAME,SIZE,MODEL | grep -v loop | sed 's/^/    /'
@@ -117,13 +138,13 @@
           # ── Interactive prompts ────────────────────────────────────────────
           header "A few things I need from you…"
 
-          prompt "Username to configure"           "$DETECTED_USER"          DETECTED_USER
-          DETECTED_HOME="/home/$DETECTED_USER"
+          prompt "Username to configure"           "$DETECTED_USER"          USERNAME
+          HOME_DIR="/home/$USERNAME"
           prompt "Hostname for this machine"       "$DETECTED_HOSTNAME"      HOSTNAME
           prompt "Your full name"                  "Your Name"               FULLNAME
           prompt "Your email"                      "you@example.com"         EMAIL
           prompt "Weather city (e.g. New+York)"    "New+York"                WEATHERCITY
-          prompt "Dotfiles location on new system" "$DETECTED_HOME/dotfiles" DOTFILESDIR
+          prompt "Dotfiles location on new system" "$HOME_DIR/dotfiles"      DOTFILESDIR
           prompt "Disk to install to"              "$DETECTED_DISK"          DISK
           prompt "Swap size in GB (>= RAM for hibernate)" "$DETECTED_RAM_GB" SWAP_GB
 
@@ -141,7 +162,7 @@
           echo -e "  can log in. Change it or switch to agenix post-boot.''${RESET}\n"
 
           while true; do
-            ask "Temporary password for $DETECTED_USER:"
+            ask "Temporary password for $USERNAME:"
             read -rs TMP_PASSWORD
             echo ""
             ask "Confirm password:"
@@ -167,7 +188,7 @@
           # ── Summary ────────────────────────────────────────────────────────
           header "Summary"
           echo ""
-          echo -e "    username      = ''${BOLD}$DETECTED_USER''${RESET}"
+          echo -e "    username      = ''${BOLD}$USERNAME''${RESET}"
           echo -e "    fullName      = ''${BOLD}$FULLNAME''${RESET}"
           echo -e "    email         = ''${BOLD}$EMAIL''${RESET}"
           echo -e "    hostname      = ''${BOLD}$HOSTNAME''${RESET}"
@@ -180,6 +201,11 @@
           echo -e "    dotfilesDir   = ''${BOLD}$DOTFILESDIR''${RESET}"
           echo -e "    disk          = ''${RED}''${BOLD}$DISK  ← WILL BE WIPED''${RESET}"
           echo -e "    swap          = ''${BOLD}''${SWAP_GB}GB''${RESET}"
+          if [[ "$IS_VM" == "true" ]]; then
+            echo -e "    bootloader    = ''${YELLOW}''${BOLD}systemd-boot (VM — lanzaboote skipped)''${RESET}"
+          else
+            echo -e "    bootloader    = ''${BOLD}lanzaboote + Secure Boot''${RESET}"
+          fi
           echo ""
 
           if ! confirm "Confirm — this will erase $DISK and install NixOS. Proceed?"; then
@@ -191,10 +217,10 @@
           header "Configuring nix trusted user…"
 
           if ! grep -q "trusted-users" /etc/nix/nix.conf 2>/dev/null; then
-            echo "trusted-users = root $DETECTED_USER" | \
+            echo "trusted-users = root $USERNAME" | \
               tee -a /etc/nix/nix.conf > /dev/null
             systemctl restart nix-daemon 2>/dev/null || true
-            ok "Added $DETECTED_USER to trusted-users."
+            ok "Added $USERNAME to trusted-users."
           else
             ok "Already configured."
           fi
@@ -215,10 +241,10 @@
           cat > "$TMPDIR/user.nix" <<USERNIX
           {
             # ── Identity ─────────────────────────────────────────────────────
-            username      = "$DETECTED_USER";
+            username      = "$USERNAME";
             fullName      = "$FULLNAME";
             email         = "$EMAIL";
-            homeDirectory = "/home/$DETECTED_USER";
+            homeDirectory = "/home/$USERNAME";
 
             # ── Machine ──────────────────────────────────────────────────────
             hostname     = "$HOSTNAME";
@@ -257,8 +283,8 @@
 
           # ── Host directory ─────────────────────────────────────────────────
           # Always generate a clean host directory in the tmp clone regardless
-          # of whether the hostname already exists in the repo. The repo copy
-          # is never modified — only the tmp clone used for this install.
+          # of whether the hostname already exists in the repo. The repo on disk
+          # is never touched — only this tmp clone is used for the install.
           header "Setting up host directory for '$HOSTNAME'…"
 
           HOST_DIR="$TMPDIR/modules/hosts/$HOSTNAME"
@@ -267,9 +293,35 @@
           # Placeholder hardware.nix — replaced after nixos-generate-config.
           printf '{ ... }: {}\n' > "$HOST_DIR/hardware.nix"
 
-          # default.nix — clean format, no sed patching needed.
-          # disko and bootstrap-override are always included directly.
-          cat > "$HOST_DIR/default.nix" <<HOSTNIX
+          # ── default.nix — VM vs bare metal ────────────────────────────────
+          # On a VM: lanzaboote is omitted entirely; systemd-boot is used via
+          # bootstrap-override.nix. On bare metal: lanzaboote is included and
+          # Secure Boot keys are enrolled before nixos-install runs.
+          if [[ "$IS_VM" == "true" ]]; then
+            cat > "$HOST_DIR/default.nix" <<HOSTNIX
+          { self, inputs, ... }:
+          let
+            userConfig = import ../../../user.nix;
+          in {
+            flake.nixosConfigurations.\''${userConfig.hostname} = inputs.nixpkgs.lib.nixosSystem {
+              system = userConfig.system;
+              specialArgs = { inherit inputs userConfig self; };
+              modules =
+                (builtins.attrValues self.nixosModules)
+                ++ [
+                  ./hardware.nix
+                  ./disko.nix
+                  inputs.disko.nixosModules.disko
+                ]
+                ++ (
+                  let p = ./bootstrap-override.nix; in
+                  if builtins.pathExists p then [ p ] else []
+                );
+            };
+          }
+          HOSTNIX
+          else
+            cat > "$HOST_DIR/default.nix" <<HOSTNIX
           { self, inputs, ... }:
           let
             userConfig = import ../../../user.nix;
@@ -292,14 +344,50 @@
             };
           }
           HOSTNIX
+          fi
 
           ok "default.nix written."
 
           # ── bootstrap-override.nix ─────────────────────────────────────────
-          # Sets a temporary plain password so the user can log in on first
-          # boot. agenix secrets are already gated by bootstrapMode = true in
-          # agenix.nix, so no mkForce null needed.
-          cat > "$HOST_DIR/bootstrap-override.nix" <<OVERRIDE
+          # VM: enables systemd-boot, forces lanzaboote off (lanzaboote.nix in
+          # nixosModules sets boot.lanzaboote.enable = true unconditionally, so
+          # mkForce is needed even though the lanzaboote nixosModules.lanzaboote
+          # input module is not imported in the VM default.nix).
+          # Bare metal: only sets the temporary password.
+          # agenix secrets are already gated by bootstrapMode = true in
+          # agenix.nix so no mkForce null on hashedPasswordFile is needed.
+          if [[ "$IS_VM" == "true" ]]; then
+            cat > "$HOST_DIR/bootstrap-override.nix" <<OVERRIDE
+          # bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.
+          #
+          # Generated for a VM install — uses systemd-boot instead of lanzaboote.
+          # On bare metal reinstall, run bootstrap again; it will detect real hardware
+          # and generate the correct lanzaboote config automatically.
+          #
+          # Post-boot steps to restore full agenix:
+          #   On your existing machine:
+          #     1. Add the new host pubkey to secrets/secrets.nix:
+          #          <generated during install>
+          #     2. agenix -r -i ~/.ssh/id_ed25519
+          #     3. git add -A && git commit -m "add $HOSTNAME host key" && git push
+          #   On this machine (after git pull):
+          #     4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix
+          #     5. Set bootstrapMode = false in user.nix
+          #     6. nr
+          { lib, ... }:
+          {
+            users.users.$USERNAME.initialHashedPassword = "$TMP_HASHED_PASSWORD";
+
+            # lanzaboote.nix (a nixosModule in self.nixosModules) sets
+            # boot.lanzaboote.enable = true, which in turn does mkForce false on
+            # systemd-boot. Override both here so the VM boots correctly.
+            boot.loader.systemd-boot.enable = lib.mkForce true;
+            boot.loader.efi.canTouchEfiVariables = lib.mkForce true;
+            boot.lanzaboote.enable = lib.mkForce false;
+          }
+          OVERRIDE
+          else
+            cat > "$HOST_DIR/bootstrap-override.nix" <<OVERRIDE
           # bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.
           #
           # agenix secrets are encrypted to the original host key and cannot be
@@ -314,12 +402,14 @@
           #     3. git add -A && git commit -m "add $HOSTNAME host key" && git push
           #   On this machine (after git pull):
           #     4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix
-          #     5. nr
+          #     5. Set bootstrapMode = false in user.nix
+          #     6. nr
           { ... }:
           {
-            users.users.$DETECTED_USER.initialHashedPassword = "$TMP_HASHED_PASSWORD";
+            users.users.$USERNAME.initialHashedPassword = "$TMP_HASHED_PASSWORD";
           }
           OVERRIDE
+          fi
 
           ok "bootstrap-override.nix written."
 
@@ -399,7 +489,7 @@
           ok "Disk partitioned, formatted and mounted at /mnt."
 
           # ── SSH host key ───────────────────────────────────────────────────
-          # Must be generated before nixos-install so agenix can use it.
+          # Must be generated before nixos-install so agenix can reference it.
           # The pubkey is printed at the end for the re-encryption step.
           header "Generating SSH host key…"
 
@@ -426,35 +516,42 @@
           cp /mnt/etc/nixos/hardware-configuration.nix "$HOST_DIR/hardware.nix"
           ok "Hardware config written."
 
-          # ── Secure Boot keys ───────────────────────────────────────────────
-          # sbctl keys must exist before nixos-install so lanzaboote can sign
-          # the boot files during installation. Keys are created on the live
-          # ISO and copied to the installed system's secureboot path.
-          header "Setting up Secure Boot keys…"
+          # ── Secure Boot keys (bare metal only) ────────────────────────────
+          if [[ "$IS_VM" == "false" ]]; then
+            # sbctl keys must exist before nixos-install so lanzaboote can sign
+            # the boot files during installation. Keys are created on the live
+            # ISO and copied to the installed system's secureboot path.
+            header "Setting up Secure Boot keys…"
 
-          SBCTL_STATUS="$(sbctl status 2>/dev/null || true)"
+            SBCTL_STATUS="$(sbctl status 2>/dev/null || true)"
 
-          if echo "$SBCTL_STATUS" | grep -q "Setup Mode: Enabled"; then
-            info "Firmware is in Setup Mode — creating and enrolling keys."
-            sbctl create-keys
-            sbctl enroll-keys --microsoft
-            ok "Secure Boot keys enrolled."
-          elif echo "$SBCTL_STATUS" | grep -q "Secure Boot: disabled"; then
-            info "Secure Boot is disabled and not in Setup Mode."
-            info "Keys will be created now. To enroll, enter your firmware,"
-            info "enable Setup Mode, then run: sbctl enroll-keys --microsoft"
-            sbctl create-keys || true
+            if echo "$SBCTL_STATUS" | grep -q "Setup Mode: Enabled"; then
+              info "Firmware is in Setup Mode — creating and enrolling keys."
+              sbctl create-keys
+              sbctl enroll-keys --microsoft
+              ok "Secure Boot keys enrolled."
+            elif echo "$SBCTL_STATUS" | grep -q "Secure Boot: disabled"; then
+              info "Secure Boot disabled, not in Setup Mode."
+              info "Keys will be created now. To enroll after install, enter firmware,"
+              info "enable Setup Mode, then run: sbctl enroll-keys --microsoft"
+              sbctl create-keys
+            else
+              warn "Secure Boot status unclear — attempting key creation."
+              sbctl create-keys || true
+            fi
+
+            if [[ -d /etc/secureboot ]]; then
+              mkdir -p /mnt/etc/secureboot
+              cp -r /etc/secureboot/. /mnt/etc/secureboot/
+              ok "Secure Boot keys copied to /mnt/etc/secureboot."
+            else
+              err "sbctl ran but /etc/secureboot not found — lanzaboote will fail."
+              err "Enter your firmware, enable Setup Mode, then re-run bootstrap."
+              exit 1
+            fi
           else
-            warn "Secure Boot status unclear — attempting key creation."
-            sbctl create-keys || true
-          fi
-
-          if [[ -d /etc/secureboot ]]; then
-            mkdir -p /mnt/etc/secureboot
-            cp -r /etc/secureboot/. /mnt/etc/secureboot/
-            ok "Secure Boot keys copied to /mnt/etc/secureboot."
-          else
-            warn "No secureboot keys found at /etc/secureboot — skipping copy."
+            header "Skipping Secure Boot setup (VM)…"
+            info "systemd-boot will be used instead of lanzaboote."
           fi
 
           # ── Install ────────────────────────────────────────────────────────
@@ -462,6 +559,12 @@
 
           cd "$TMPDIR"
           git add -A
+          # Commit so nixos-install sees a clean tree and emits no dirty warning.
+          git \
+            -c user.email="bootstrap@localhost" \
+            -c user.name="bootstrap" \
+            commit -m "bootstrap: generated config for $HOSTNAME" \
+            --allow-empty --quiet
 
           nixos-install \
             --flake "$TMPDIR#$HOSTNAME" \
@@ -477,10 +580,10 @@
           mkdir -p "$(dirname "$INSTALL_DOTFILES")"
           cp -r "$TMPDIR/." "$INSTALL_DOTFILES/"
 
-          # NixOS users are activated on first boot, so /mnt/etc/passwd won't
+          # NixOS users are activated on first boot so /mnt/etc/passwd won't
           # have the user yet. UID 1000 / GID 100 is the correct default for a
           # single-user NixOS system and matches what nixos-install will create.
-          chown -R 1000:100 "/mnt$DETECTED_HOME"
+          chown -R 1000:100 "/mnt$HOME_DIR"
           ok "Dotfiles copied to $INSTALL_DOTFILES."
 
           # ── Done ───────────────────────────────────────────────────────────
@@ -500,11 +603,13 @@
           echo -e "    5. Set bootstrapMode = false in user.nix"
           echo -e "    6. nr"
           echo ""
-          echo -e "  ''${YELLOW}''${BOLD}Secure Boot note:''${RESET}"
-          echo -e "  ''${DIM}If keys could not be auto-enrolled, enter your firmware,"
-          echo -e "  enable Setup Mode, then run:''${RESET}"
-          echo -e "    sbctl enroll-keys --microsoft"
-          echo ""
+          if [[ "$IS_VM" == "false" ]]; then
+            echo -e "  ''${YELLOW}''${BOLD}Secure Boot note:''${RESET}"
+            echo -e "  ''${DIM}If keys could not be auto-enrolled, enter your firmware,"
+            echo -e "  enable Setup Mode, then run:''${RESET}"
+            echo -e "    sbctl enroll-keys --microsoft"
+            echo ""
+          fi
 
           if confirm "Reboot now?"; then
             reboot
