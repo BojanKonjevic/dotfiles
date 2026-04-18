@@ -17,10 +17,10 @@
     home.packages = [
       pkgs.gitingest
       pkgs.wl-clipboard
-      pkgs.uv
       (mkPythonScript "ingest" ingestPython ../lib/scripts/ingest.py)
       (mkPythonScript "yttranscript" yttranscriptPython ../lib/scripts/yttranscript.py)
       (pkgs.writeShellScriptBin "pyproj" ''
+        export PATH="${pkgs.uv}/bin:$PATH"
         exec ${pkgs.bash}/bin/bash ${../lib/scripts/new-python-project.sh} "$@"
       '')
     ];
