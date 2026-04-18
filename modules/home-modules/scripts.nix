@@ -17,6 +17,7 @@
     home.packages = [
       pkgs.gitingest
       pkgs.wl-clipboard
+      pkgs.uv
       (mkPythonScript "ingest" ingestPython ../lib/scripts/ingest.py)
       (mkPythonScript "yttranscript" yttranscriptPython ../lib/scripts/yttranscript.py)
       (pkgs.writeShellScriptBin "pyproj" ''
