@@ -136,6 +136,7 @@
         enable = true;
         createDirectories = true;
         desktop = null;
+        setSessionVariables = false;
         templates = null;
         publicShare = null;
         videos = null;
