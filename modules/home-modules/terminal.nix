@@ -139,7 +139,7 @@
         brd = "br --sizes --sort-by-size";
         yt = "yttranscript";
         gi = "ingest";
-        pyproj = "pyproj";
+        pyproj = "nix run github:BojanKonjevic/dotfiles#new-python-project";
 
         nr = "nh os switch";
         hm = "nh home switch";
