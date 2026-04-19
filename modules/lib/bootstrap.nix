@@ -362,9 +362,9 @@
             # lanzaboote.nix (a nixosModule in self.nixosModules) sets
             # boot.lanzaboote.enable = true, which in turn does mkForce false on
             # systemd-boot. Override both here so the VM boots correctly.
-            boot.loader.systemd-boot.enable = lib.mkForce true;
-            boot.loader.efi.canTouchEfiVariables = lib.mkForce true;
-            boot.lanzaboote.enable = lib.mkForce false;
+            boot.loader.systemd-boot.enable = lib.mkOverride 0 true;
+            boot.loader.efi.canTouchEfiVariables = lib.mkOverride 0 true;
+            boot.lanzaboote.enable = lib.mkOverride 0 false;
           }
           OVERRIDE
           else
