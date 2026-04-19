@@ -298,31 +298,12 @@
           # On a VM: lanzaboote is omitted entirely; systemd-boot is used via
           # bootstrap-override.nix. On bare metal: lanzaboote is included and
           # Secure Boot keys are enrolled before nixos-install runs.
-          if [[ "$IS_VM" == "true" ]]; then
-            cat > "$HOST_DIR/default.nix" <<HOSTNIX
-          { self, inputs, ... }:
-          let
-            userConfig = import ../../../user.nix;
-          in {
-            flake.nixosConfigurations.\''${userConfig.hostname} = inputs.nixpkgs.lib.nixosSystem {
-              system = userConfig.system;
-              specialArgs = { inherit inputs userConfig self; };
-              modules =
-                (builtins.attrValues self.nixosModules)
-                ++ [
-                  ./hardware.nix
-                  ./disko.nix
-                  inputs.disko.nixosModules.disko
-                ]
-                ++ (
-                  let p = ./bootstrap-override.nix; in
-                  if builtins.pathExists p then [ p ] else []
-                );
-            };
-          }
-          HOSTNIX
-          else
-            cat > "$HOST_DIR/default.nix" <<HOSTNIX
+          # default.nix is identical for VM and bare metal — lanzaboote is
+          # always imported so that boot.lanzaboote.* options exist. The VM
+          # bootstrap-override.nix then sets boot.lanzaboote.enable = mkForce
+          # false and re-enables systemd-boot. On bare metal the override just
+          # sets the password and lanzaboote runs normally.
+          cat > "$HOST_DIR/default.nix" <<HOSTNIX
           { self, inputs, ... }:
           let
             userConfig = import ../../../user.nix;
@@ -345,7 +326,6 @@
             };
           }
           HOSTNIX
-          fi
 
           ok "default.nix written."
 
