@@ -185,7 +185,8 @@ echo -e "    stateVersion  = ${BOLD}$DETECTED_STATE${RESET}"
 echo -e "    weatherCity   = ${BOLD}$WEATHERCITY${RESET}"
 echo -e "    dotfilesDir   = ${BOLD}$DOTFILESDIR${RESET}"
 echo -e "    disk          = ${RED}${BOLD}$DISK  ← WILL BE WIPED${RESET}"
-echo -e "    swap          = ${BOLD}${SWAP_GB}GB${RESET}"
+echo -e "    swap          = ${BOLD}${SWAP_GB}GB swapfile on @swap subvolume${RESET}"
+echo -e "    impermanence  = ${BOLD}/ wiped on every boot via btrfs (@blank snapshot)${RESET}"
 if [[ "$IS_VM" == "true" ]]; then
   echo -e "    bootloader    = ${YELLOW}${BOLD}systemd-boot (VM — lanzaboote skipped)${RESET}"
 else
@@ -283,8 +284,10 @@ in {
       ++ [
         ./hardware.nix
         ./disko.nix
+        ./impermanence.nix
         inputs.disko.nixosModules.disko
         inputs.lanzaboote.nixosModules.lanzaboote
+        inputs.impermanence.nixosModules.impermanence
       ]
       ++ (
         let p = ./bootstrap-override.nix; in
@@ -295,6 +298,92 @@ in {
 HOSTNIX
 
 ok "default.nix written."
+
+# ── impermanence.nix ───────────────────────────────────────────────
+# Generated into the host directory. Home is handled entirely by
+# home-manager and lives on @home (never wiped), so nothing here
+# touches /home. This only covers system-level state.
+header "Writing impermanence.nix…"
+
+cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
+# impermanence.nix — system-level persistence only.
+#
+# / is wiped on every boot by restoring the @blank btrfs snapshot.
+# /home lives on its own @home subvolume and is never wiped.
+# /nix lives on its own @nix subvolume and is never wiped.
+#
+# Everything listed below is bind-mounted from /persist (the @persist
+# subvolume) so it survives reboots despite the root wipe.
+{ ... }:
+{
+  environment.persistence."/persist" = {
+    hideMounts = true;
+
+    directories = [
+      # ── SSH host keys ─────────────────────────────────────────────
+      # Required by agenix. The host key must be stable so that
+      # secrets encrypted to this host can always be decrypted.
+      { directory = "/etc/ssh";             mode = "0755"; }
+
+      # ── Secure Boot PKI (lanzaboote) ──────────────────────────────
+      # sbctl keys must survive reboots or Secure Boot breaks.
+      { directory = "/etc/secureboot";      mode = "0700"; }
+
+      # ── Network connections ────────────────────────────────────────
+      # Saved WiFi/ethernet profiles. Without this you re-enter
+      # credentials on every boot.
+      { directory = "/etc/NetworkManager/system-connections"; mode = "0700"; }
+
+      # ── NixOS UID/GID mappings ────────────────────────────────────
+      # nixos tracks which UIDs/GIDs were allocated to which users.
+      # Without this the IDs can drift between reboots, breaking
+      # file ownership on /home and /persist.
+      { directory = "/var/lib/nixos";       mode = "0755"; }
+
+      # ── systemd state ─────────────────────────────────────────────
+      # Persists timer last-run times, unit runtime files, etc.
+      # Without this all timers fire immediately on every boot.
+      { directory = "/var/lib/systemd";     mode = "0755"; }
+
+      # ── Bluetooth paired devices ──────────────────────────────────
+      { directory = "/var/lib/bluetooth";   mode = "0700"; }
+
+      # ── PostgreSQL data ───────────────────────────────────────────
+      # You have services.postgresql enabled. Without this the DB
+      # is lost on every reboot.
+      { directory = "/var/lib/postgresql";  mode = "0700"; }
+
+      # ── PipeWire state ────────────────────────────────────────────
+      # Persists default sink/source selection and volume levels.
+      { directory = "/var/lib/pipewire";    mode = "0755"; }
+
+      # ── Firmware update metadata ──────────────────────────────────
+      # fwupd caches device metadata here. Without this it
+      # re-downloads everything on every boot.
+      { directory = "/var/lib/fwupd";       mode = "0755"; }
+
+      # ── Persistent journal logs ───────────────────────────────────
+      # Keeps logs across reboots so you can diagnose past failures.
+      { directory = "/var/log/journal";     mode = "2755"; }
+    ];
+
+    files = [
+      # ── Machine ID ────────────────────────────────────────────────
+      # A stable machine-id is required by systemd, dbus, journald,
+      # and various other tools that use it as a unique identifier.
+      # Without this you get a new random ID on every boot.
+      "/etc/machine-id"
+
+      # ── Hardware clock offset ─────────────────────────────────────
+      # Stores the RTC drift correction. Without this the clock
+      # correction is recalculated from scratch on every boot.
+      "/etc/adjtime"
+    ];
+  };
+}
+IMPERMANENCE
+
+ok "impermanence.nix written."
 
 # ── bootstrap-override.nix ─────────────────────────────────────────
 if [[ "$IS_VM" == "true" ]]; then
@@ -349,6 +438,13 @@ header "Generating disko partition layout…"
 
 SWAP_SIZE="${SWAP_GB}G"
 
+# Determine partition suffix for nvme/mmcblk vs plain block devices
+if [[ "$DISK" == *"nvme"* ]] || [[ "$DISK" == *"mmcblk"* ]]; then
+  PART_SEP="p"
+else
+  PART_SEP=""
+fi
+
 cat >"$HOST_DIR/disko.nix" <<DISKO
 {
   disko.devices.disk.main = {
@@ -367,31 +463,42 @@ cat >"$HOST_DIR/disko.nix" <<DISKO
             mountOptions = [ "fmask=0077" "dmask=0077" ];
           };
         };
-        swap = {
-          size = "$SWAP_SIZE";
-          content = {
-            type = "swap";
-            resumeDevice = true;
-          };
-        };
         root = {
           size = "100%";
           content = {
             type = "btrfs";
-            extraArgs = [ "-L" "nixos" "-f" ];
+            # -L root  → label used by the initrd wipe-root service
+            #            (/dev/disk/by-label/root)
+            # -f       → force-format even if a filesystem already exists
+            extraArgs = [ "-L" "root" "-f" ];
             subvolumes = {
+              # Wiped on every boot by the wipe-root initrd service.
+              # @blank is a read-only snapshot of this taken after first format.
               "@" = {
                 mountpoint = "/";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
+              # Nix store — never wiped.
               "@nix" = {
                 mountpoint = "/nix";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
+              # Home — never wiped; home-manager manages its contents.
               "@home" = {
                 mountpoint = "/home";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
+              # Explicit persistent state — bind-mounted by impermanence.nix.
+              "@persist" = {
+                mountpoint = "/persist";
+                mountOptions = [ "compress=zstd" "noatime" ];
+              };
+              # Swapfile lives here; CoW disabled by bootstrap (chattr +C).
+              "@swap" = {
+                mountpoint = "/swap";
+                mountOptions = [ "noatime" ];
+              };
+              # Reserved for future snapshots.
               "@snapshots" = {
                 mountpoint = "/.snapshots";
                 mountOptions = [ "compress=zstd" "noatime" ];
@@ -405,7 +512,7 @@ cat >"$HOST_DIR/disko.nix" <<DISKO
 }
 DISKO
 
-ok "disko.nix written (btrfs: @, @nix, @home, @snapshots)."
+ok "disko.nix written (btrfs: @, @nix, @home, @persist, @swap, @snapshots; labeled 'root')."
 
 # ── Disko — partition, format, mount ───────────────────────────────
 mount -o remount,size=4G /nix/.rw-store 2>/dev/null || true
@@ -419,20 +526,135 @@ nix run \
 
 ok "Disk partitioned, formatted and mounted at /mnt."
 
-# ── SSH host key ───────────────────────────────────────────────────
+# ── @blank snapshot ────────────────────────────────────────────────
+# Take a read-only snapshot of the empty @ subvolume right after
+# formatting. The initrd wipe-root service will restore this snapshot
+# on every subsequent boot, giving us a clean / each time.
+header "Creating @blank snapshot for impermanence…"
+
+# Mount the raw btrfs volume (no subvolume) so we can work with subvols directly.
+BTRFS_MNT="/mnt/btrfs-root"
+mkdir -p "$BTRFS_MNT"
+mount -o subvolid=5 "/dev/disk/by-label/root" "$BTRFS_MNT"
+
+# @ must exist and be empty at this point (disko just created it).
+btrfs subvolume snapshot -r "$BTRFS_MNT/@" "$BTRFS_MNT/@blank"
+ok "@blank read-only snapshot created."
+
+umount "$BTRFS_MNT"
+rmdir "$BTRFS_MNT"
+
+# ── Wipe-root initrd service ───────────────────────────────────────
+# Written into core.nix equivalent via a NixOS module in the host dir.
+# We inject it here as a file that default.nix already imports.
+header "Writing wipe-root initrd module…"
+
+cat >"$HOST_DIR/wipe-root.nix" <<'WIPEROOT'
+# wipe-root.nix — restores the @blank btrfs snapshot on every boot.
+#
+# Runs in the initrd before any services start. It:
+#   1. Mounts the raw btrfs volume (subvolid=5).
+#   2. Deletes the current @ subvolume.
+#   3. Restores @ from the @blank read-only snapshot.
+#   4. Unmounts and continues boot as normal.
+#
+# /nix, /home, /persist, and /swap are on separate subvolumes and are
+# never touched by this script.
+{ lib, config, ... }:
+{
+  boot.initrd.supportedFilesystems = [ "btrfs" ];
+
+  boot.initrd.postDeviceCommands = lib.mkAfter ''
+    mkdir -p /mnt
+
+    # Mount the top-level btrfs volume (bypass any default subvol).
+    mount -o subvolid=5 /dev/disk/by-label/root /mnt
+
+    # Only wipe if @blank exists — safety guard so a failed snapshot
+    # creation during bootstrap doesn't leave the system unbootable.
+    if btrfs subvolume list /mnt | grep -q '@blank'; then
+      btrfs subvolume delete /mnt/@
+      btrfs subvolume snapshot /mnt/@blank /mnt/@
+    else
+      echo "WARNING: @blank not found, skipping root wipe." >&2
+    fi
+
+    umount /mnt
+  '';
+}
+WIPEROOT
+
+# Update default.nix to also import wipe-root.nix
+sed -i 's|./impermanence.nix|./impermanence.nix\n        ./wipe-root.nix|' "$HOST_DIR/default.nix"
+
+ok "wipe-root.nix written and imported."
+
+# ── Swapfile on @swap subvolume ────────────────────────────────────
+header "Creating swapfile…"
+
+# BTRFS swapfiles require CoW to be disabled on the file (not just the
+# subvolume). We set it on the subvolume directory first so new files
+# inherit the flag, then create the swapfile.
+SWAP_DIR="/mnt/swap"
+chattr +C "$SWAP_DIR" 2>/dev/null ||
+  warn "chattr +C on $SWAP_DIR failed — may already be set, continuing."
+
+SWAPFILE="$SWAP_DIR/swapfile"
+fallocate -l "${SWAP_GB}G" "$SWAPFILE" ||
+  dd if=/dev/zero of="$SWAPFILE" bs=1M count=$((SWAP_GB * 1024)) status=progress
+chmod 600 "$SWAPFILE"
+mkswap "$SWAPFILE"
+ok "Swapfile created: ${SWAP_GB}G at $SWAPFILE."
+
+# ── /persist directory structure ───────────────────────────────────
+# Pre-create all directories that impermanence.nix will bind-mount.
+# Without this the bind-mounts fail on first boot.
+header "Preparing /persist…"
+
+mkdir -p /mnt/persist/etc/ssh
+mkdir -p /mnt/persist/etc/secureboot
+mkdir -p /mnt/persist/etc/NetworkManager/system-connections
+mkdir -p /mnt/persist/var/lib/nixos
+mkdir -p /mnt/persist/var/lib/systemd
+mkdir -p /mnt/persist/var/lib/bluetooth
+mkdir -p /mnt/persist/var/lib/postgresql
+mkdir -p /mnt/persist/var/lib/pipewire
+mkdir -p /mnt/persist/var/lib/fwupd
+mkdir -p /mnt/persist/var/log/journal
+
+# Pre-create files that impermanence.nix bind-mounts.
+touch /mnt/persist/etc/machine-id
+touch /mnt/persist/etc/adjtime
+
+# Correct permissions upfront so impermanence bind-mounts start clean.
+chmod 700 /mnt/persist/etc/ssh
+chmod 700 /mnt/persist/etc/secureboot
+chmod 700 /mnt/persist/etc/NetworkManager/system-connections
+chmod 755 /mnt/persist/var/lib/nixos
+chmod 755 /mnt/persist/var/lib/systemd
+chmod 700 /mnt/persist/var/lib/bluetooth
+chmod 700 /mnt/persist/var/lib/postgresql
+chmod 755 /mnt/persist/var/lib/pipewire
+chmod 755 /mnt/persist/var/lib/fwupd
+chmod 2755 /mnt/persist/var/log/journal
+
+ok "/persist directory structure ready."
+
+# ── SSH host key — written into /persist ──────────────────────────
+# Keys live in /persist/etc/ssh and are bind-mounted to /etc/ssh by
+# impermanence on every boot, so the host fingerprint stays stable
+# across wipes.
 header "Generating SSH host key…"
 
-mkdir -p /mnt/etc/ssh
-chmod 700 /mnt/etc/ssh
-if [[ ! -f /mnt/etc/ssh/ssh_host_ed25519_key ]]; then
-  ssh-keygen -t ed25519 -N "" -f /mnt/etc/ssh/ssh_host_ed25519_key
-  chmod 600 /mnt/etc/ssh/ssh_host_ed25519_key
-  chmod 644 /mnt/etc/ssh/ssh_host_ed25519_key.pub
+if [[ ! -f /mnt/persist/etc/ssh/ssh_host_ed25519_key ]]; then
+  ssh-keygen -t ed25519 -N "" -f /mnt/persist/etc/ssh/ssh_host_ed25519_key
+  chmod 600 /mnt/persist/etc/ssh/ssh_host_ed25519_key
+  chmod 644 /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub
   ok "Host key generated."
 else
   ok "Host key already exists, reusing."
 fi
-NEW_HOST_PUBKEY="$(cat /mnt/etc/ssh/ssh_host_ed25519_key.pub)"
+NEW_HOST_PUBKEY="$(cat /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub)"
 
 sed -i "s|<generated during install>|$NEW_HOST_PUBKEY|g" \
   "$HOST_DIR/bootstrap-override.nix"
@@ -465,10 +687,10 @@ if [[ "$IS_VM" == "false" ]]; then
     sbctl create-keys || true
   fi
 
+  # Copy keys into /persist so they survive root wipes.
   if [[ -d /etc/secureboot ]]; then
-    mkdir -p /mnt/etc/secureboot
-    cp -r /etc/secureboot/. /mnt/etc/secureboot/
-    ok "Secure Boot keys copied to /mnt/etc/secureboot."
+    cp -r /etc/secureboot/. /mnt/persist/etc/secureboot/
+    ok "Secure Boot keys copied to /mnt/persist/etc/secureboot."
   else
     err "sbctl ran but /etc/secureboot not found — lanzaboote will fail."
     err "Enter your firmware, enable Setup Mode, then re-run bootstrap."
@@ -487,7 +709,7 @@ git add -A
 git \
   -c user.email="bootstrap@localhost" \
   -c user.name="bootstrap" \
-  commit -m "bootstrap: generated config for $HOSTNAME" \
+  commit -m "bootstrap: generated config for $HOSTNAME with impermanence" \
   --allow-empty --quiet
 
 nixos-install \
@@ -522,6 +744,11 @@ echo -e "  ${DIM}On this machine (after first boot + git pull):${RESET}"
 echo -e "    4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix"
 echo -e "    5. Set bootstrapMode = false in user.nix"
 echo -e "    6. nr"
+echo ""
+echo -e "  ${CYAN}${BOLD}Impermanence:${RESET}"
+echo -e "  ${DIM}/ is wiped on every boot via btrfs @blank snapshot restore."
+echo -e "  /home (@home), /nix (@nix), and /persist (@persist) are never wiped."
+echo -e "  Persistent state is bind-mounted from /persist on each boot.${RESET}"
 echo ""
 if [[ "$IS_VM" == "false" ]]; then
   echo -e "  ${YELLOW}${BOLD}Secure Boot note:${RESET}"
