@@ -143,13 +143,21 @@
 
         nr = "nh os switch";
         hm = "nh home switch";
-        nu = "nh os switch -u && nh home switch -u && cachix push bojan-dotfiles /run/current-system && cachix push bojan-dotfiles $HOME/.local/state/nix/profiles/home-manager";
         gc = "nh clean all --keep 10";
         ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
         hgens = "nix-env --list-generations --profile $HOME/.local/state/nix/profiles/home-manager";
       };
 
       initContent = ''
+        export CACHIX_AUTH_TOKEN="$(cat /run/agenix/cachix-token 2>/dev/null)"
+
+        nu() {
+          nh os switch -u \
+            && nh home switch \
+            && cachix push bojan-dotfiles /run/current-system \
+            && cachix push bojan-dotfiles "$HOME/.local/state/nix/profiles/home-manager"
+        }
+
         zstyle ':completion:*' menu select
         zstyle ':completion:*' matcher-list \
             'm:{a-zA-Z}={A-Za-z}' \
