@@ -349,8 +349,7 @@ cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
       { directory = "/var/lib/bluetooth";   mode = "0700"; }
 
       # ── PostgreSQL data ───────────────────────────────────────────
-      # You have services.postgresql enabled. Without this the DB
-      # is lost on every reboot.
+      # Without this the postgres DB is lost on every reboot.
       { directory = "/var/lib/postgresql";  mode = "0700"; }
 
       # ── PipeWire state ────────────────────────────────────────────
@@ -361,6 +360,10 @@ cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
       # fwupd caches device metadata here. Without this it
       # re-downloads everything on every boot.
       { directory = "/var/lib/fwupd";       mode = "0755"; }
+
+      # ── libvirt VM definitions and storage ────────────────────────
+      # Without this all VM definitions and disk images are lost on every reboot.
+      { directory = "/var/lib/libvirt";     mode = "0755"; }
 
       # ── Persistent journal logs ───────────────────────────────────
       # Keeps logs across reboots so you can diagnose past failures.
@@ -492,6 +495,7 @@ cat >"$HOST_DIR/disko.nix" <<DISKO
               "@persist" = {
                 mountpoint = "/persist";
                 mountOptions = [ "compress=zstd" "noatime" ];
+                mountConfig.neededForBoot = true;
               };
               # Swapfile lives here; CoW disabled by bootstrap (chattr +C).
               "@swap" = {
@@ -551,36 +555,55 @@ header "Writing wipe-root initrd module…"
 
 cat >"$HOST_DIR/wipe-root.nix" <<'WIPEROOT'
 # wipe-root.nix — restores the @blank btrfs snapshot on every boot.
-#
-# Runs in the initrd before any services start. It:
-#   1. Mounts the raw btrfs volume (subvolid=5).
-#   2. Deletes the current @ subvolume.
-#   3. Restores @ from the @blank read-only snapshot.
-#   4. Unmounts and continues boot as normal.
+# The service runs after the block device is available but before any
+# filesystems are mounted, deletes the current @ subvolume, and
+# snapshots @blank back into its place — giving a clean / on every boot.
 #
 # /nix, /home, /persist, and /swap are on separate subvolumes and are
-# never touched by this script.
-{ lib, config, ... }:
+# never touched by this service.
+{ pkgs, ... }:
 {
   boot.initrd.supportedFilesystems = [ "btrfs" ];
 
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
-    mkdir -p /mnt
+  # systemd-based initrd is required for boot.initrd.systemd.services.
+  boot.initrd.systemd.enable = true;
 
-    # Mount the top-level btrfs volume (bypass any default subvol).
-    mount -o subvolid=5 /dev/disk/by-label/root /mnt
+  boot.initrd.systemd.services.wipe-root = {
+    description = "Wipe / by restoring @blank btrfs snapshot";
 
-    # Only wipe if @blank exists — safety guard so a failed snapshot
-    # creation during bootstrap doesn't leave the system unbootable.
-    if btrfs subvolume list /mnt | grep -q '@blank'; then
-      btrfs subvolume delete /mnt/@
-      btrfs subvolume snapshot /mnt/@blank /mnt/@
-    else
-      echo "WARNING: @blank not found, skipping root wipe." >&2
-    fi
+    # Must run after the disk is available but before / is mounted.
+    wantedBy = [ "initrd.target" ];
+    after    = [ "dev-disk-by\\x2dlabel-root.device" ];
+    before   = [ "sysroot.mount" ];
 
-    umount /mnt
-  '';
+    unitConfig.DefaultDependencies = false;
+
+    serviceConfig = {
+      Type      = "oneshot";
+      ExecStart = pkgs.writeShellScript "wipe-root" ''
+        set -euo pipefail
+
+        MNT="$(mktemp -d)"
+
+        # Mount the top-level btrfs volume (bypass the default subvol).
+        mount -o subvolid=5 /dev/disk/by-label/root "$MNT"
+
+        # Safety guard: only wipe if @blank was successfully created
+        # during bootstrap. If it's missing we skip the wipe rather
+        # than leaving the system unbootable.
+        if btrfs subvolume list "$MNT" | grep -q ' @blank$'; then
+          btrfs subvolume delete "$MNT/@"
+          btrfs subvolume snapshot "$MNT/@blank" "$MNT/@"
+          echo "wipe-root: / restored from @blank"
+        else
+          echo "wipe-root: WARNING: @blank not found, skipping root wipe." >&2
+        fi
+
+        umount "$MNT"
+        rmdir  "$MNT"
+      '';
+    };
+  };
 }
 WIPEROOT
 
@@ -620,6 +643,7 @@ mkdir -p /mnt/persist/var/lib/bluetooth
 mkdir -p /mnt/persist/var/lib/postgresql
 mkdir -p /mnt/persist/var/lib/pipewire
 mkdir -p /mnt/persist/var/lib/fwupd
+mkdir -p /mnt/persist/var/lib/libvirt
 mkdir -p /mnt/persist/var/log/journal
 
 # Pre-create files that impermanence.nix bind-mounts.
@@ -636,6 +660,7 @@ chmod 700 /mnt/persist/var/lib/bluetooth
 chmod 700 /mnt/persist/var/lib/postgresql
 chmod 755 /mnt/persist/var/lib/pipewire
 chmod 755 /mnt/persist/var/lib/fwupd
+chmod 755 /mnt/persist/var/lib/libvirt
 chmod 2755 /mnt/persist/var/log/journal
 
 ok "/persist directory structure ready."
@@ -699,6 +724,19 @@ if [[ "$IS_VM" == "false" ]]; then
 else
   header "Skipping Secure Boot setup (VM)…"
   info "systemd-boot will be used instead of lanzaboote."
+fi
+
+# ── flake.nix — add impermanence input ────────────────────────────
+header "Adding impermanence input to flake.nix…"
+
+# Inject impermanence into the inputs block after the disko input.
+# Uses a simple sed approach that works with the existing flake structure.
+if ! grep -q "impermanence" "$TMPDIR/flake.nix"; then
+  sed -i '/disko = {/,/};/{ /};/a\    impermanence = {\n      url = "github:nix-community/impermanence";\n    };' \
+    "$TMPDIR/flake.nix"
+  ok "impermanence input added to flake.nix."
+else
+  ok "impermanence input already present."
 fi
 
 # ── Install ────────────────────────────────────────────────────────
