@@ -660,19 +660,6 @@ else
   info "systemd-boot will be used instead of lanzaboote."
 fi
 
-# ── flake.nix — add impermanence input ────────────────────────────
-header "Adding impermanence input to flake.nix…"
-
-# Inject impermanence into the inputs block after the disko input.
-# Uses a simple sed approach that works with the existing flake structure.
-if ! grep -q "impermanence" "$TMPDIR/flake.nix"; then
-  sed -i '/disko = {/,/};/{ /};/a\    impermanence = {\n      url = "github:nix-community/impermanence";\n    };' \
-    "$TMPDIR/flake.nix"
-  ok "impermanence input added to flake.nix."
-else
-  ok "impermanence input already present."
-fi
-
 # ── Install ────────────────────────────────────────────────────────
 header "Installing NixOS…"
 
