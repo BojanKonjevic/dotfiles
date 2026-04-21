@@ -308,7 +308,10 @@ header "Writing impermanence.nix…"
 cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
 { ... }:
 {
+  # disko doesn't expose neededForBoot on btrfs subvolumes, so set it here.
+  # The impermanence module asserts this is true before setting up bind-mounts.
   fileSystems."/persist".neededForBoot = true;
+
   environment.persistence."/persist" = {
     hideMounts = true;
 
@@ -571,8 +574,11 @@ mkdir -p /mnt/persist/var/lib/fwupd
 mkdir -p /mnt/persist/var/lib/libvirt
 mkdir -p /mnt/persist/var/log/journal
 
-# Pre-create files that impermanence.nix bind-mounts.
-touch /mnt/persist/etc/machine-id
+# machine-id must be a valid 32-char hex string — systemd-boot reads it
+# during nixos-install and crashes with IndexError on an empty file.
+systemd-machine-id-setup --root=/mnt 2>/dev/null ||
+  printf '%s\n' "$(cat /proc/sys/kernel/random/uuid | tr -d '-')" >/mnt/etc/machine-id
+cp /mnt/etc/machine-id /mnt/persist/etc/machine-id
 touch /mnt/persist/etc/adjtime
 
 # Correct permissions upfront so impermanence bind-mounts start clean.
