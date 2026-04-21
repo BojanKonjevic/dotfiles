@@ -285,6 +285,7 @@ in {
         ./hardware.nix
         ./disko.nix
         ./impermanence.nix
+        ./wipe-root.nix
         inputs.disko.nixosModules.disko
         inputs.lanzaboote.nixosModules.lanzaboote
         inputs.impermanence.nixosModules.impermanence
@@ -300,9 +301,6 @@ HOSTNIX
 ok "default.nix written."
 
 # ── impermanence.nix ───────────────────────────────────────────────
-# Generated into the host directory. Home is handled entirely by
-# home-manager and lives on @home (never wiped), so nothing here
-# touches /home. This only covers system-level state.
 header "Writing impermanence.nix…"
 
 cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
@@ -339,10 +337,46 @@ IMPERMANENCE
 
 ok "impermanence.nix written."
 
+# ── wipe-root.nix ─────────────────────────────────────────────────
+header "Writing wipe-root initrd module…"
+
+cat >"$HOST_DIR/wipe-root.nix" <<'WIPEROOT'
+{ pkgs, ... }:
+{
+  boot.initrd.supportedFilesystems = [ "btrfs" ];
+  boot.initrd.systemd.enable = true;
+
+  boot.initrd.systemd.services.wipe-root = {
+    description = "Wipe / by restoring @blank btrfs snapshot";
+    wantedBy = [ "initrd.target" ];
+    after    = [ "dev-disk-by\\x2dlabel-root.device" ];
+    before   = [ "sysroot.mount" ];
+    unitConfig.DefaultDependencies = false;
+    serviceConfig = {
+      Type      = "oneshot";
+      ExecStart = pkgs.writeShellScript "wipe-root" ''
+        set -euo pipefail
+        MNT="$(mktemp -d)"
+        mount -o subvolid=5 /dev/disk/by-label/root "$MNT"
+        if btrfs subvolume list "$MNT" | grep -q ' @blank$'; then
+          btrfs subvolume delete "$MNT/@"
+          btrfs subvolume snapshot "$MNT/@blank" "$MNT/@"
+        else
+          echo "wipe-root: @blank not found, skipping." >&2
+        fi
+        umount "$MNT"
+        rmdir  "$MNT"
+      '';
+    };
+  };
+}
+WIPEROOT
+
+ok "wipe-root.nix written."
+
 # ── bootstrap-override.nix ─────────────────────────────────────────
 # TMP_HASHED_PASSWORD contains $ signs (sha-512 format: $6$salt$hash).
-# A heredoc with an unquoted delimiter would expand them as shell variables.
-# Write the file with printf so the password is never interpreted by the shell.
+# Written with printf so the password is never shell-expanded.
 if [[ "$IS_VM" == "true" ]]; then
   printf '%s\n' \
     '# bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.' \
@@ -393,15 +427,6 @@ ok "bootstrap-override.nix written."
 # ── Disko config ───────────────────────────────────────────────────
 header "Generating disko partition layout…"
 
-SWAP_SIZE="${SWAP_GB}G"
-
-# Determine partition suffix for nvme/mmcblk vs plain block devices
-if [[ "$DISK" == *"nvme"* ]] || [[ "$DISK" == *"mmcblk"* ]]; then
-  PART_SEP="p"
-else
-  PART_SEP=""
-fi
-
 cat >"$HOST_DIR/disko.nix" <<DISKO
 {
   disko.devices.disk.main = {
@@ -425,12 +450,11 @@ cat >"$HOST_DIR/disko.nix" <<DISKO
           content = {
             type = "btrfs";
             # -L root  → label used by the initrd wipe-root service
-            #            (/dev/disk/by-label/root)
             # -f       → force-format even if a filesystem already exists
             extraArgs = [ "-L" "root" "-f" ];
             subvolumes = {
               # Wiped on every boot by the wipe-root initrd service.
-              # @blank is a read-only snapshot of this taken after first format.
+              # @blank is a read-only snapshot taken after first format.
               "@" = {
                 mountpoint = "/";
                 mountOptions = [ "compress=zstd" "noatime" ];
@@ -485,70 +509,24 @@ ok "Disk partitioned, formatted and mounted at /mnt."
 
 # ── @blank snapshot ────────────────────────────────────────────────
 # Take a read-only snapshot of the empty @ subvolume right after
-# formatting. The initrd wipe-root service will restore this snapshot
-# on every subsequent boot, giving us a clean / each time.
+# formatting. The initrd wipe-root service restores this on every boot.
 header "Creating @blank snapshot for impermanence…"
 
-# Mount the raw btrfs volume (no subvolume) so we can work with subvols directly.
 BTRFS_MNT="/mnt/btrfs-root"
 mkdir -p "$BTRFS_MNT"
 mount -o subvolid=5 "/dev/disk/by-label/root" "$BTRFS_MNT"
 
-# @ must exist and be empty at this point (disko just created it).
 btrfs subvolume snapshot -r "$BTRFS_MNT/@" "$BTRFS_MNT/@blank"
 ok "@blank read-only snapshot created."
 
 umount "$BTRFS_MNT"
 rmdir "$BTRFS_MNT"
 
-# ── Wipe-root initrd service ───────────────────────────────────────
-# Written into core.nix equivalent via a NixOS module in the host dir.
-# We inject it here as a file that default.nix already imports.
-header "Writing wipe-root initrd module…"
-
-cat >"$HOST_DIR/wipe-root.nix" <<'WIPEROOT'
-{ pkgs, ... }:
-{
-  boot.initrd.supportedFilesystems = [ "btrfs" ];
-  boot.initrd.systemd.enable = true;
-
-  boot.initrd.systemd.services.wipe-root = {
-    description = "Wipe / by restoring @blank btrfs snapshot";
-    wantedBy = [ "initrd.target" ];
-    after    = [ "dev-disk-by\\x2dlabel-root.device" ];
-    before   = [ "sysroot.mount" ];
-    unitConfig.DefaultDependencies = false;
-    serviceConfig = {
-      Type      = "oneshot";
-      ExecStart = pkgs.writeShellScript "wipe-root" ''
-        set -euo pipefail
-        MNT="$(mktemp -d)"
-        mount -o subvolid=5 /dev/disk/by-label/root "$MNT"
-        if btrfs subvolume list "$MNT" | grep -q ' @blank$'; then
-          btrfs subvolume delete "$MNT/@"
-          btrfs subvolume snapshot "$MNT/@blank" "$MNT/@"
-        else
-          echo "wipe-root: @blank not found, skipping." >&2
-        fi
-        umount "$MNT"
-        rmdir  "$MNT"
-      '';
-    };
-  };
-}
-WIPEROOT
-
-# Update default.nix to also import wipe-root.nix
-sed -i 's|./impermanence.nix|./impermanence.nix\n        ./wipe-root.nix|' "$HOST_DIR/default.nix"
-
-ok "wipe-root.nix written and imported."
-
 # ── Swapfile on @swap subvolume ────────────────────────────────────
 header "Creating swapfile…"
 
-# BTRFS swapfiles require CoW to be disabled on the file (not just the
-# subvolume). We set it on the subvolume directory first so new files
-# inherit the flag, then create the swapfile.
+# BTRFS swapfiles require CoW disabled. Set it on the directory so new
+# files inherit the flag, then create the swapfile.
 SWAP_DIR="/mnt/swap"
 chattr +C "$SWAP_DIR" 2>/dev/null ||
   warn "chattr +C on $SWAP_DIR failed — may already be set, continuing."
@@ -561,8 +539,12 @@ mkswap "$SWAPFILE"
 ok "Swapfile created: ${SWAP_GB}G at $SWAPFILE."
 
 # ── /persist directory structure ───────────────────────────────────
-# Pre-create all directories that impermanence.nix will bind-mount.
-# Without this the bind-mounts fail on first boot.
+# Pre-create everything impermanence.nix will bind-mount.
+# IMPORTANT: /etc/machine-id and /etc/adjtime are managed as impermanence
+# *files* — they must exist only in /persist, never at /mnt/etc/*.
+# nixos-install creates its own machine-id inside the chroot (ephemeral),
+# which is fine — on first real boot, wipe-root wipes @ and impermanence
+# bind-mounts /persist/etc/machine-id into place.
 header "Preparing /persist…"
 
 mkdir -p /mnt/persist/etc/ssh
@@ -577,14 +559,16 @@ mkdir -p /mnt/persist/var/lib/fwupd
 mkdir -p /mnt/persist/var/lib/libvirt
 mkdir -p /mnt/persist/var/log/journal
 
-# machine-id must be a valid 32-char hex string — systemd-boot reads it
-# during nixos-install and crashes with IndexError on an empty file.
-systemd-machine-id-setup --root=/mnt 2>/dev/null ||
-  printf '%s\n' "$(cat /proc/sys/kernel/random/uuid | tr -d '-')" >/mnt/etc/machine-id
-cp /mnt/etc/machine-id /mnt/persist/etc/machine-id
+# Generate a valid 32-char hex machine-id directly into /persist.
+# Do NOT write to /mnt/etc/machine-id — that would conflict with the
+# impermanence bind-mount on first boot ("A file already exists" error).
+# nixos-install handles its own machine-id inside the chroot independently.
+python3 -c "import uuid; print(uuid.uuid4().hex)" >/mnt/persist/etc/machine-id
+chmod 444 /mnt/persist/etc/machine-id
+
+# adjtime is managed by impermanence; create empty file in /persist only.
 touch /mnt/persist/etc/adjtime
 
-# Correct permissions upfront so impermanence bind-mounts start clean.
 chmod 700 /mnt/persist/etc/ssh
 chmod 700 /mnt/persist/etc/secureboot
 chmod 700 /mnt/persist/etc/NetworkManager/system-connections
@@ -601,8 +585,7 @@ ok "/persist directory structure ready."
 
 # ── SSH host key — written into /persist ──────────────────────────
 # Keys live in /persist/etc/ssh and are bind-mounted to /etc/ssh by
-# impermanence on every boot, so the host fingerprint stays stable
-# across wipes.
+# impermanence on every boot, so the host fingerprint stays stable.
 header "Generating SSH host key…"
 
 if [[ ! -f /mnt/persist/etc/ssh/ssh_host_ed25519_key ]]; then
@@ -708,6 +691,11 @@ echo -e "  ${CYAN}${BOLD}Impermanence:${RESET}"
 echo -e "  ${DIM}/ is wiped on every boot via btrfs @blank snapshot restore."
 echo -e "  /home (@home), /nix (@nix), and /persist (@persist) are never wiped."
 echo -e "  Persistent state is bind-mounted from /persist on each boot.${RESET}"
+echo ""
+echo -e "  ${CYAN}${BOLD}Verifying impermanence after first boot:${RESET}"
+echo -e "  ${DIM}  journalctl -b -u wipe-root          # confirm wipe ran"
+echo -e "    findmnt | grep persist              # confirm bind-mounts active"
+echo -e "    touch /test-impermanence && reboot  # file should vanish after reboot${RESET}"
 echo ""
 if [[ "$IS_VM" == "false" ]]; then
   echo -e "  ${YELLOW}${BOLD}Secure Boot note:${RESET}"
