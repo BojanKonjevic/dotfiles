@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -euo pipefail
 
 # ── Colors ─────────────────────────────────────────────────────────
@@ -375,8 +376,6 @@ WIPEROOT
 ok "wipe-root.nix written."
 
 # ── bootstrap-override.nix ─────────────────────────────────────────
-# TMP_HASHED_PASSWORD contains $ signs (sha-512 format: $6$salt$hash).
-# Written with printf so the password is never shell-expanded.
 if [[ "$IS_VM" == "true" ]]; then
   printf '%s\n' \
     '# bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.' \
@@ -449,37 +448,28 @@ cat >"$HOST_DIR/disko.nix" <<DISKO
           size = "100%";
           content = {
             type = "btrfs";
-            # -L root  → label used by the initrd wipe-root service
-            # -f       → force-format even if a filesystem already exists
             extraArgs = [ "-L" "root" "-f" ];
             subvolumes = {
-              # Wiped on every boot by the wipe-root initrd service.
-              # @blank is a read-only snapshot taken after first format.
               "@" = {
                 mountpoint = "/";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
-              # Nix store — never wiped.
               "@nix" = {
                 mountpoint = "/nix";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
-              # Home — never wiped; home-manager manages its contents.
               "@home" = {
                 mountpoint = "/home";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
-              # Explicit persistent state — bind-mounted by impermanence.nix.
               "@persist" = {
                 mountpoint = "/persist";
                 mountOptions = [ "compress=zstd" "noatime" ];
               };
-              # Swapfile lives here; CoW disabled by bootstrap (chattr +C).
               "@swap" = {
                 mountpoint = "/swap";
                 mountOptions = [ "noatime" ];
               };
-              # Reserved for future snapshots.
               "@snapshots" = {
                 mountpoint = "/.snapshots";
                 mountOptions = [ "compress=zstd" "noatime" ];
@@ -508,8 +498,6 @@ nix run \
 ok "Disk partitioned, formatted and mounted at /mnt."
 
 # ── @blank snapshot ────────────────────────────────────────────────
-# Take a read-only snapshot of the empty @ subvolume right after
-# formatting. The initrd wipe-root service restores this on every boot.
 header "Creating @blank snapshot for impermanence…"
 
 BTRFS_MNT="/mnt/btrfs-root"
@@ -525,8 +513,6 @@ rmdir "$BTRFS_MNT"
 # ── Swapfile on @swap subvolume ────────────────────────────────────
 header "Creating swapfile…"
 
-# BTRFS swapfiles require CoW disabled. Set it on the directory so new
-# files inherit the flag, then create the swapfile.
 SWAP_DIR="/mnt/swap"
 chattr +C "$SWAP_DIR" 2>/dev/null ||
   warn "chattr +C on $SWAP_DIR failed — may already be set, continuing."
@@ -539,12 +525,6 @@ mkswap "$SWAPFILE"
 ok "Swapfile created: ${SWAP_GB}G at $SWAPFILE."
 
 # ── /persist directory structure ───────────────────────────────────
-# Pre-create everything impermanence.nix will bind-mount.
-# IMPORTANT: /etc/machine-id and /etc/adjtime are managed as impermanence
-# *files* — they must exist only in /persist, never at /mnt/etc/*.
-# nixos-install creates its own machine-id inside the chroot (ephemeral),
-# which is fine — on first real boot, wipe-root wipes @ and impermanence
-# bind-mounts /persist/etc/machine-id into place.
 header "Preparing /persist…"
 
 mkdir -p /mnt/persist/etc/ssh
@@ -559,17 +539,14 @@ mkdir -p /mnt/persist/var/lib/fwupd
 mkdir -p /mnt/persist/var/lib/libvirt
 mkdir -p /mnt/persist/var/log/journal
 
-# Generate a valid 32-char hex machine-id directly into /persist.
-# Do NOT write to /mnt/etc/machine-id — that would conflict with the
-# impermanence bind-mount on first boot ("A file already exists" error).
-# nixos-install handles its own machine-id inside the chroot independently.
+# Generate a valid machine-id in /persist (this is the persistent one)
 {
   tr -d '-' </proc/sys/kernel/random/uuid
   echo
 } >/mnt/persist/etc/machine-id
 chmod 444 /mnt/persist/etc/machine-id
 
-# adjtime is managed by impermanence; create empty file in /persist only.
+# adjtime is managed by impermanence; create empty file in /persist only
 touch /mnt/persist/etc/adjtime
 
 chmod 700 /mnt/persist/etc/ssh
@@ -586,9 +563,7 @@ chmod 2755 /mnt/persist/var/log/journal
 
 ok "/persist directory structure ready."
 
-# ── SSH host key — written into /persist ──────────────────────────
-# Keys live in /persist/etc/ssh and are bind-mounted to /etc/ssh by
-# impermanence on every boot, so the host fingerprint stays stable.
+# ── SSH host key ───────────────────────────────────────────────────
 header "Generating SSH host key…"
 
 if [[ ! -f /mnt/persist/etc/ssh/ssh_host_ed25519_key ]]; then
@@ -632,7 +607,6 @@ if [[ "$IS_VM" == "false" ]]; then
     sbctl create-keys || true
   fi
 
-  # Copy keys into /persist so they survive root wipes.
   if [[ -d /etc/secureboot ]]; then
     cp -r /etc/secureboot/. /mnt/persist/etc/secureboot/
     ok "Secure Boot keys copied to /mnt/persist/etc/secureboot."
@@ -646,13 +620,21 @@ else
   info "systemd-boot will be used instead of lanzaboote."
 fi
 
+# ── Temporary machine‑id for bootloader installation ───────────────
+header "Creating temporary machine-id for bootloader..."
+
+mkdir -p /mnt/etc
+TMP_MACHINE_ID="$(tr -d '-' </proc/sys/kernel/random/uuid)"
+echo "$TMP_MACHINE_ID" >/mnt/etc/machine-id
+chmod 444 /mnt/etc/machine-id
+ok "Temporary machine-id written."
+
 # ── Install ────────────────────────────────────────────────────────
 header "Installing NixOS…"
 
 cd "$TMPDIR"
 git add -A
-git \
-  -c user.email="bootstrap@localhost" \
+git -c user.email="bootstrap@localhost" \
   -c user.name="bootstrap" \
   commit -m "bootstrap: generated config for $HOSTNAME with impermanence" \
   --allow-empty --quiet
@@ -663,6 +645,29 @@ nixos-install \
   --option download-buffer-size 134217728
 
 ok "NixOS installed."
+
+# ── Remove temporary machine‑id & adjtime ──────────────────────────
+header "Cleaning up temporary files from /etc..."
+
+if [[ -f /mnt/etc/machine-id ]]; then
+  rm -f /mnt/etc/machine-id
+  ok "Removed /mnt/etc/machine-id"
+else
+  warn "/mnt/etc/machine-id not found – already removed?"
+fi
+
+if [[ -f /mnt/etc/adjtime ]]; then
+  rm -f /mnt/etc/adjtime
+  ok "Removed /mnt/etc/adjtime"
+fi
+
+# Verification
+if [[ -e /mnt/etc/machine-id ]] || [[ -e /mnt/etc/adjtime ]]; then
+  err "Failed to remove temporary files from /mnt/etc"
+  exit 1
+fi
+
+ok "Temporary files purged."
 
 # ── Copy dotfiles to installed system ──────────────────────────────
 header "Copying dotfiles to new system…"
