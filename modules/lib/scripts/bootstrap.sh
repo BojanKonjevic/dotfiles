@@ -306,80 +306,28 @@ ok "default.nix written."
 header "Writing impermanence.nix…"
 
 cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
-# impermanence.nix — system-level persistence only.
-#
-# / is wiped on every boot by restoring the @blank btrfs snapshot.
-# /home lives on its own @home subvolume and is never wiped.
-# /nix lives on its own @nix subvolume and is never wiped.
-#
-# Everything listed below is bind-mounted from /persist (the @persist
-# subvolume) so it survives reboots despite the root wipe.
 { ... }:
 {
+  fileSystems."/persist".neededForBoot = true;
   environment.persistence."/persist" = {
     hideMounts = true;
 
     directories = [
-      # ── SSH host keys ─────────────────────────────────────────────
-      # Required by agenix. The host key must be stable so that
-      # secrets encrypted to this host can always be decrypted.
       { directory = "/etc/ssh";             mode = "0755"; }
-
-      # ── Secure Boot PKI (lanzaboote) ──────────────────────────────
-      # sbctl keys must survive reboots or Secure Boot breaks.
       { directory = "/etc/secureboot";      mode = "0700"; }
-
-      # ── Network connections ────────────────────────────────────────
-      # Saved WiFi/ethernet profiles. Without this you re-enter
-      # credentials on every boot.
       { directory = "/etc/NetworkManager/system-connections"; mode = "0700"; }
-
-      # ── NixOS UID/GID mappings ────────────────────────────────────
-      # nixos tracks which UIDs/GIDs were allocated to which users.
-      # Without this the IDs can drift between reboots, breaking
-      # file ownership on /home and /persist.
       { directory = "/var/lib/nixos";       mode = "0755"; }
-
-      # ── systemd state ─────────────────────────────────────────────
-      # Persists timer last-run times, unit runtime files, etc.
-      # Without this all timers fire immediately on every boot.
       { directory = "/var/lib/systemd";     mode = "0755"; }
-
-      # ── Bluetooth paired devices ──────────────────────────────────
       { directory = "/var/lib/bluetooth";   mode = "0700"; }
-
-      # ── PostgreSQL data ───────────────────────────────────────────
-      # Without this the postgres DB is lost on every reboot.
       { directory = "/var/lib/postgresql";  mode = "0700"; }
-
-      # ── PipeWire state ────────────────────────────────────────────
-      # Persists default sink/source selection and volume levels.
       { directory = "/var/lib/pipewire";    mode = "0755"; }
-
-      # ── Firmware update metadata ──────────────────────────────────
-      # fwupd caches device metadata here. Without this it
-      # re-downloads everything on every boot.
       { directory = "/var/lib/fwupd";       mode = "0755"; }
-
-      # ── libvirt VM definitions and storage ────────────────────────
-      # Without this all VM definitions and disk images are lost on every reboot.
       { directory = "/var/lib/libvirt";     mode = "0755"; }
-
-      # ── Persistent journal logs ───────────────────────────────────
-      # Keeps logs across reboots so you can diagnose past failures.
       { directory = "/var/log/journal";     mode = "2755"; }
     ];
 
     files = [
-      # ── Machine ID ────────────────────────────────────────────────
-      # A stable machine-id is required by systemd, dbus, journald,
-      # and various other tools that use it as a unique identifier.
-      # Without this you get a new random ID on every boot.
       "/etc/machine-id"
-
-      # ── Hardware clock offset ─────────────────────────────────────
-      # Stores the RTC drift correction. Without this the clock
-      # correction is recalculated from scratch on every boot.
       "/etc/adjtime"
     ];
   };
@@ -495,7 +443,6 @@ cat >"$HOST_DIR/disko.nix" <<DISKO
               "@persist" = {
                 mountpoint = "/persist";
                 mountOptions = [ "compress=zstd" "noatime" ];
-                mountConfig.neededForBoot = true;
               };
               # Swapfile lives here; CoW disabled by bootstrap (chattr +C).
               "@swap" = {
@@ -554,51 +501,29 @@ rmdir "$BTRFS_MNT"
 header "Writing wipe-root initrd module…"
 
 cat >"$HOST_DIR/wipe-root.nix" <<'WIPEROOT'
-# wipe-root.nix — restores the @blank btrfs snapshot on every boot.
-# The service runs after the block device is available but before any
-# filesystems are mounted, deletes the current @ subvolume, and
-# snapshots @blank back into its place — giving a clean / on every boot.
-#
-# /nix, /home, /persist, and /swap are on separate subvolumes and are
-# never touched by this service.
 { pkgs, ... }:
 {
   boot.initrd.supportedFilesystems = [ "btrfs" ];
-
-  # systemd-based initrd is required for boot.initrd.systemd.services.
   boot.initrd.systemd.enable = true;
 
   boot.initrd.systemd.services.wipe-root = {
     description = "Wipe / by restoring @blank btrfs snapshot";
-
-    # Must run after the disk is available but before / is mounted.
     wantedBy = [ "initrd.target" ];
     after    = [ "dev-disk-by\\x2dlabel-root.device" ];
     before   = [ "sysroot.mount" ];
-
     unitConfig.DefaultDependencies = false;
-
     serviceConfig = {
       Type      = "oneshot";
       ExecStart = pkgs.writeShellScript "wipe-root" ''
         set -euo pipefail
-
         MNT="$(mktemp -d)"
-
-        # Mount the top-level btrfs volume (bypass the default subvol).
         mount -o subvolid=5 /dev/disk/by-label/root "$MNT"
-
-        # Safety guard: only wipe if @blank was successfully created
-        # during bootstrap. If it's missing we skip the wipe rather
-        # than leaving the system unbootable.
         if btrfs subvolume list "$MNT" | grep -q ' @blank$'; then
           btrfs subvolume delete "$MNT/@"
           btrfs subvolume snapshot "$MNT/@blank" "$MNT/@"
-          echo "wipe-root: / restored from @blank"
         else
-          echo "wipe-root: WARNING: @blank not found, skipping root wipe." >&2
+          echo "wipe-root: @blank not found, skipping." >&2
         fi
-
         umount "$MNT"
         rmdir  "$MNT"
       '';
