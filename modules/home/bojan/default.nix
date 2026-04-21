@@ -36,7 +36,6 @@ in {
             cachix
             python3
             glow
-            libnotify
             ripgrep
             fd
             duf
