@@ -340,49 +340,52 @@ IMPERMANENCE
 ok "impermanence.nix written."
 
 # ── bootstrap-override.nix ─────────────────────────────────────────
+# TMP_HASHED_PASSWORD contains $ signs (sha-512 format: $6$salt$hash).
+# A heredoc with an unquoted delimiter would expand them as shell variables.
+# Write the file with printf so the password is never interpreted by the shell.
 if [[ "$IS_VM" == "true" ]]; then
-  cat >"$HOST_DIR/bootstrap-override.nix" <<OVERRIDE
-# bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.
-#
-# Generated for a VM install — uses systemd-boot instead of lanzaboote.
-#
-# Post-boot steps to restore full agenix:
-#   On your existing machine:
-#     1. Add the new host pubkey to secrets/secrets.nix:
-#          <generated during install>
-#     2. agenix -r -i ~/.ssh/id_ed25519
-#     3. git add -A && git commit -m "add $HOSTNAME host key" && git push
-#   On this machine (after git pull):
-#     4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix
-#     5. Set bootstrapMode = false in user.nix
-#     6. nr
-{ lib, ... }:
-{
-  users.users.$USERNAME.initialHashedPassword = "$TMP_HASHED_PASSWORD";
-  boot.loader.systemd-boot.enable = lib.mkOverride 0 true;
-  boot.loader.efi.canTouchEfiVariables = lib.mkOverride 0 true;
-  boot.lanzaboote.enable = lib.mkOverride 0 false;
-}
-OVERRIDE
+  printf '%s\n' \
+    '# bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.' \
+    '#' \
+    '# Generated for a VM install — uses systemd-boot instead of lanzaboote.' \
+    '#' \
+    '# Post-boot steps to restore full agenix:' \
+    '#   On your existing machine:' \
+    '#     1. Add the new host pubkey to secrets/secrets.nix:' \
+    '#          <generated during install>' \
+    '#     2. agenix -r -i ~/.ssh/id_ed25519' \
+    "#     3. git add -A && git commit -m \"add $HOSTNAME host key\" && git push" \
+    '#   On this machine (after git pull):' \
+    "#     4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix" \
+    '#     5. Set bootstrapMode = false in user.nix' \
+    '#     6. nr' \
+    '{ lib, ... }:' \
+    '{' \
+    "  users.users.$USERNAME.initialHashedPassword = \"$TMP_HASHED_PASSWORD\";" \
+    '  boot.loader.systemd-boot.enable = lib.mkOverride 0 true;' \
+    '  boot.loader.efi.canTouchEfiVariables = lib.mkOverride 0 true;' \
+    '  boot.lanzaboote.enable = lib.mkOverride 0 false;' \
+    '}' \
+    >"$HOST_DIR/bootstrap-override.nix"
 else
-  cat >"$HOST_DIR/bootstrap-override.nix" <<OVERRIDE
-# bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.
-#
-# Post-boot steps to restore full agenix:
-#   On your existing machine:
-#     1. Add the new host pubkey to secrets/secrets.nix:
-#          <generated during install>
-#     2. agenix -r -i ~/.ssh/id_ed25519
-#     3. git add -A && git commit -m "add $HOSTNAME host key" && git push
-#   On this machine (after git pull):
-#     4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix
-#     5. Set bootstrapMode = false in user.nix
-#     6. nr
-{ ... }:
-{
-  users.users.$USERNAME.initialHashedPassword = "$TMP_HASHED_PASSWORD";
-}
-OVERRIDE
+  printf '%s\n' \
+    '# bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.' \
+    '#' \
+    '# Post-boot steps to restore full agenix:' \
+    '#   On your existing machine:' \
+    '#     1. Add the new host pubkey to secrets/secrets.nix:' \
+    '#          <generated during install>' \
+    '#     2. agenix -r -i ~/.ssh/id_ed25519' \
+    "#     3. git add -A && git commit -m \"add $HOSTNAME host key\" && git push" \
+    '#   On this machine (after git pull):' \
+    "#     4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix" \
+    '#     5. Set bootstrapMode = false in user.nix' \
+    '#     6. nr' \
+    '{ ... }:' \
+    '{' \
+    "  users.users.$USERNAME.initialHashedPassword = \"$TMP_HASHED_PASSWORD\";" \
+    '}' \
+    >"$HOST_DIR/bootstrap-override.nix"
 fi
 
 ok "bootstrap-override.nix written."
