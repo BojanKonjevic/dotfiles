@@ -563,7 +563,10 @@ mkdir -p /mnt/persist/var/log/journal
 # Do NOT write to /mnt/etc/machine-id — that would conflict with the
 # impermanence bind-mount on first boot ("A file already exists" error).
 # nixos-install handles its own machine-id inside the chroot independently.
-python3 -c "import uuid; print(uuid.uuid4().hex)" >/mnt/persist/etc/machine-id
+{
+  tr -d '-' </proc/sys/kernel/random/uuid
+  echo
+} >/mnt/persist/etc/machine-id
 chmod 444 /mnt/persist/etc/machine-id
 
 # adjtime is managed by impermanence; create empty file in /persist only.
