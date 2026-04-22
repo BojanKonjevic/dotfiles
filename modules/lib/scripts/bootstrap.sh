@@ -342,32 +342,45 @@ ok "impermanence.nix written."
 header "Writing wipe-root initrd module…"
 
 cat >"$HOST_DIR/wipe-root.nix" <<'WIPEROOT'
-{ pkgs, ... }:
-{
+{ pkgs, config, ... }:
+let
+  wipe-root-script = pkgs.writeShellScript "wipe-root" ''
+    set -euo pipefail
+    echo "wipe-root: Starting root wipe..."
+    MNT="$(mktemp -d)"
+    mount -o subvolid=5 /dev/disk/by-label/root "$MNT"
+    
+    if btrfs subvolume list "$MNT" | grep -q ' @blank$'; then
+      echo "wipe-root: Deleting @ subvolume..."
+      btrfs subvolume delete "$MNT/@"
+      echo "wipe-root: Creating snapshot from @blank..."
+      btrfs subvolume snapshot "$MNT/@blank" "$MNT/@"
+      echo "wipe-root: Wipe complete."
+    else
+      echo "wipe-root: @blank not found, skipping wipe." >&2
+    fi
+    
+    umount "$MNT"
+    rmdir "$MNT"
+  '';
+in {
   boot.initrd.supportedFilesystems = [ "btrfs" ];
   boot.initrd.systemd.enable = true;
+  
+  boot.initrd.systemd.contents."/usr/bin/wipe-root" = {
+    source = wipe-root-script;
+    mode = "0755";
+  };
 
   boot.initrd.systemd.services.wipe-root = {
     description = "Wipe / by restoring @blank btrfs snapshot";
     wantedBy = [ "initrd.target" ];
-    after    = [ "dev-disk-by\\x2dlabel-root.device" ];
-    before   = [ "sysroot.mount" ];
+    after = [ "dev-disk-by\\x2dlabel-root.device" ];
+    before = [ "sysroot.mount" "initrd-root-fs.target" ];
     unitConfig.DefaultDependencies = false;
     serviceConfig = {
-      Type      = "oneshot";
-      ExecStart = pkgs.writeShellScript "wipe-root" ''
-        set -euo pipefail
-        MNT="$(mktemp -d)"
-        mount -o subvolid=5 /dev/disk/by-label/root "$MNT"
-        if btrfs subvolume list "$MNT" | grep -q ' @blank$'; then
-          btrfs subvolume delete "$MNT/@"
-          btrfs subvolume snapshot "$MNT/@blank" "$MNT/@"
-        else
-          echo "wipe-root: @blank not found, skipping." >&2
-        fi
-        umount "$MNT"
-        rmdir  "$MNT"
-      '';
+      Type = "oneshot";
+      ExecStart = "/usr/bin/wipe-root";
     };
   };
 }
