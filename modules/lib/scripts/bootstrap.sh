@@ -367,10 +367,7 @@ in {
   boot.initrd.supportedFilesystems = [ "btrfs" ];
   boot.initrd.systemd.enable = true;
   
-  boot.initrd.systemd.contents."/usr/bin/wipe-root" = {
-    source = wipe-root-script;
-    mode = "0755";
-  };
+  boot.initrd.systemd.storePaths = [ wipe-root-script ];
 
   boot.initrd.systemd.services.wipe-root = {
     description = "Wipe / by restoring @blank btrfs snapshot";
@@ -380,7 +377,7 @@ in {
     unitConfig.DefaultDependencies = false;
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "/usr/bin/wipe-root";
+      ExecStart = "${wipe-root-script}";
     };
   };
 }
