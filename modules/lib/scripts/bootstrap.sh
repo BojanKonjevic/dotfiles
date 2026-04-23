@@ -82,11 +82,15 @@ fi
 
 # ── VM detection ───────────────────────────────────────────────────
 VIRT_TYPE="$(systemd-detect-virt 2>/dev/null || echo 'none')"
-if [[ "$VIRT_TYPE" != "none" ]]; then
+VIRT_TYPE="${VIRT_TYPE//[$'\t\r\n']/}"
+case "$VIRT_TYPE" in
+kvm | qemu | vmware | virtualbox | hyperv | xen | lxc | lxc-libvirt | systemd-nspawn)
   IS_VM=true
-else
+  ;;
+*)
   IS_VM=false
-fi
+  ;;
+esac
 
 # ── Auto-detect ────────────────────────────────────────────────────
 header "Auto-detecting system values…"
