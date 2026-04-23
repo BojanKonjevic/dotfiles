@@ -737,8 +737,11 @@ ok "Temporary files purged."
 header "Copying dotfiles to new system…"
 
 INSTALL_DOTFILES="/mnt$DOTFILESDIR"
-mkdir -p "$(dirname "$INSTALL_DOTFILES")"
-cp -r "$TMPDIR/." "$INSTALL_DOTFILES/"
+mkdir -p "/mnt$HOME_DIR"
+chown 1000:100 "/mnt$HOME_DIR"
+chmod 700 "/mnt$HOME_DIR"
+mkdir -p "$INSTALL_DOTFILES"
+cp -r "$TMPDIR/." "$INSTALL_DOTFILES"
 chown -R 1000:100 "/mnt$HOME_DIR"
 ok "Dotfiles copied to $INSTALL_DOTFILES."
 
