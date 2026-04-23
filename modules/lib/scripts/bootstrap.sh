@@ -672,7 +672,7 @@ if [[ "$IS_VM" == "false" ]]; then
   fi
 
   if [[ -d /etc/secureboot ]]; then
-    cp -r /etc/secureboot/. /mnt/persist/etc/secureboot/
+    cp -r /var/lib/sbctl/. /mnt/persist/etc/secureboot/
     ok "Secure Boot keys copied to /mnt/persist/etc/secureboot."
   else
     err "sbctl ran but /etc/secureboot not found — lanzaboote will fail."
