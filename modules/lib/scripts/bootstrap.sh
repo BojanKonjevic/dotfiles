@@ -307,30 +307,30 @@ header "Writing impermanence.nix…"
 cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
 { ... }:
 {
-  # disko doesn't expose neededForBoot on btrfs subvolumes, so set it here.
-  # The impermanence module asserts this is true before setting up bind-mounts.
   fileSystems."/persist".neededForBoot = true;
 
   environment.persistence."/persist" = {
     hideMounts = true;
 
     directories = [
-      { directory = "/etc/ssh";             mode = "0755"; }
-      { directory = "/etc/secureboot";      mode = "0700"; }
+      { directory = "/etc/ssh";                          mode = "0755"; }
+      { directory = "/etc/secureboot";                   mode = "0700"; }
       { directory = "/etc/NetworkManager/system-connections"; mode = "0700"; }
-      { directory = "/var/lib/nixos";       mode = "0755"; }
-      { directory = "/var/lib/systemd";     mode = "0755"; }
-      { directory = "/var/lib/bluetooth";   mode = "0700"; }
-      { directory = "/var/lib/postgresql";  mode = "0700"; }
-      { directory = "/var/lib/pipewire";    mode = "0755"; }
-      { directory = "/var/lib/fwupd";       mode = "0755"; }
-      { directory = "/var/lib/libvirt";     mode = "0755"; }
-      { directory = "/var/log/journal";     mode = "2755"; }
+      { directory = "/var/lib/nixos";                    mode = "0755"; }
+      { directory = "/var/lib/bluetooth";                mode = "0700"; }
+      { directory = "/var/lib/postgresql";               mode = "0700"; }
+      { directory = "/var/lib/pipewire";                 mode = "0755"; }
+      { directory = "/var/lib/fwupd";                    mode = "0755"; }
+      { directory = "/var/lib/libvirt";                  mode = "0755"; }
+      { directory = "/var/lib/sudo";                     mode = "0700"; }
+      { directory = "/var/cache/tuigreet";               mode = "0755"; }
+      { directory = "/var/log/journal";                  mode = "2755"; }
     ];
 
     files = [
       "/etc/machine-id"
       "/etc/adjtime"
+      "/var/lib/systemd/random-seed"
     ];
   };
 }
@@ -586,13 +586,15 @@ mkdir -p /mnt/persist/etc/ssh
 mkdir -p /mnt/persist/etc/secureboot
 mkdir -p /mnt/persist/etc/NetworkManager/system-connections
 mkdir -p /mnt/persist/var/lib/nixos
-mkdir -p /mnt/persist/var/lib/systemd
 mkdir -p /mnt/persist/var/lib/bluetooth
 mkdir -p /mnt/persist/var/lib/postgresql
 mkdir -p /mnt/persist/var/lib/pipewire
 mkdir -p /mnt/persist/var/lib/fwupd
 mkdir -p /mnt/persist/var/lib/libvirt
+mkdir -p /mnt/persist/var/lib/sudo
+mkdir -p /mnt/persist/var/cache/tuigreet
 mkdir -p /mnt/persist/var/log/journal
+mkdir -p /mnt/persist/var/lib/systemd
 
 # Generate a valid machine-id in /persist (this is the persistent one)
 {
@@ -601,20 +603,23 @@ mkdir -p /mnt/persist/var/log/journal
 } >/mnt/persist/etc/machine-id
 chmod 444 /mnt/persist/etc/machine-id
 
-# adjtime is managed by impermanence; create empty file in /persist only
 touch /mnt/persist/etc/adjtime
-
 chmod 700 /mnt/persist/etc/ssh
 chmod 700 /mnt/persist/etc/secureboot
 chmod 700 /mnt/persist/etc/NetworkManager/system-connections
 chmod 755 /mnt/persist/var/lib/nixos
-chmod 755 /mnt/persist/var/lib/systemd
 chmod 700 /mnt/persist/var/lib/bluetooth
 chmod 700 /mnt/persist/var/lib/postgresql
 chmod 755 /mnt/persist/var/lib/pipewire
 chmod 755 /mnt/persist/var/lib/fwupd
 chmod 755 /mnt/persist/var/lib/libvirt
+chmod 700 /mnt/persist/var/lib/sudo
+chmod 755 /mnt/persist/var/cache/tuigreet
 chmod 2755 /mnt/persist/var/log/journal
+chmod 755 /mnt/persist/var/lib/systemd
+
+touch /mnt/persist/var/lib/systemd/random-seed
+chmod 600 /mnt/persist/var/lib/systemd/random-seed
 
 ok "/persist directory structure ready."
 
