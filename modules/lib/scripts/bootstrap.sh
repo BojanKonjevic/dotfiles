@@ -656,7 +656,7 @@ if [[ "$IS_VM" == "false" ]]; then
 
   SBCTL_STATUS="$(sbctl status 2>/dev/null || true)"
 
-  if echo "$SBCTL_STATUS" | grep -q "Setup Mode: Enabled"; then
+  if echo "$SBCTL_STATUS" | grep -q "Setup Mode:"; then
     info "Firmware is in Setup Mode — creating and enrolling keys."
     sbctl create-keys
     sbctl enroll-keys --microsoft
