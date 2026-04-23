@@ -1,7 +1,8 @@
 let
-  me = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBgvB6yyzUZ0GUfyksOZHa6UDlnRGUUzHu0sAnNKDVbV konjevicbojan1@gmail.com";
+  desktop = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAING4ciuYkiTBBwhcgaHao+IoNxy0RxOJAw7aoF4gJ6yV root@desktop";
+  me = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA8WKB45Qb5CqZPlE7LWKjkaCikJbjA87sVQwJWDTAB4 konjevicbojan1@gmail.com";
 in {
-  "user-password.age".publicKeys = [me];
-  "cachix-token.age".publicKeys = [me];
-  "ssh-private-key.age".publicKeys = [me];
+  "user-password.age".publicKeys = [desktop me];
+  "cachix-token.age".publicKeys = [desktop me];
+  "ssh-private-key.age".publicKeys = [desktop me];
 }
