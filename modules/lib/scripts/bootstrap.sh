@@ -735,6 +735,9 @@ fi
 ok "Temporary files purged."
 
 # ── Copy dotfiles to installed system ──────────────────────────────
+header "Clearing old dotfiles from @home..."
+rm -rf "/mnt/home/$USERNAME"
+ok "Old home directory cleared."
 header "Copying dotfiles to new system…"
 
 INSTALL_DOTFILES="/mnt$DOTFILESDIR"
