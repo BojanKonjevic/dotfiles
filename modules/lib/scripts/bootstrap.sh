@@ -671,11 +671,11 @@ if [[ "$IS_VM" == "false" ]]; then
     sbctl create-keys || true
   fi
 
-  if [[ -d /etc/secureboot ]]; then
+  if [[ -d /var/lib/sbctl ]]; then
     cp -r /var/lib/sbctl/. /mnt/persist/etc/secureboot/
     ok "Secure Boot keys copied to /mnt/persist/etc/secureboot."
   else
-    err "sbctl ran but /etc/secureboot not found — lanzaboote will fail."
+    err "sbctl ran but /var/lib/secureboot not found — lanzaboote will fail."
     err "Enter your firmware, enable Setup Mode, then re-run bootstrap."
     exit 1
   fi
