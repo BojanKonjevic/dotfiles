@@ -272,6 +272,7 @@ ok "user.nix written."
 header "Setting up host directory for '$HOSTNAME'…"
 
 HOST_DIR="$TMPDIR/modules/hosts/$HOSTNAME"
+rm -rf "$HOST_DIR"
 mkdir -p "$HOST_DIR"
 
 printf '{ ... }: {}\n' >"$HOST_DIR/hardware.nix"
