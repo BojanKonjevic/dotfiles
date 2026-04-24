@@ -23,7 +23,7 @@ prompt() {
   local label="$1" default="$2" varname="$3"
   ask "$label [${DIM}$default${RESET}]:"
   read -r input
-  if [[ -z "$input" ]]; then
+  if [[ -z $input ]]; then
     printf -v "$varname" "%s" "$default"
   else
     printf -v "$varname" "%s" "$input"
@@ -33,7 +33,7 @@ prompt() {
 confirm() {
   ask "$1 (y/n):"
   read -r ans
-  [[ "${ans,,}" == "y" || "${ans,,}" == "yes" ]]
+  [[ ${ans,,} == "y" || ${ans,,} == "yes" ]]
 }
 
 # ── Header ─────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ ok "keyboard     → $DETECTED_KB"
 ok "stateVersion → $DETECTED_STATE"
 ok "RAM          → ${DETECTED_RAM_GB}GB"
 
-if [[ "$IS_VM" == "true" ]]; then
+if [[ $IS_VM == "true" ]]; then
   warn "VM detected ($VIRT_TYPE) — lanzaboote skipped, using systemd-boot."
 else
   ok "Bare metal detected — lanzaboote + Secure Boot will be configured."
@@ -161,7 +161,7 @@ while true; do
   ask "Confirm password:"
   read -rs PASSWORD2
   echo ""
-  if [[ "$PASSWORD" == "$PASSWORD2" ]]; then
+  if [[ $PASSWORD == "$PASSWORD2" ]]; then
     break
   fi
   echo -e "  ${RED}Passwords do not match, try again.${RESET}"
@@ -194,11 +194,11 @@ echo -e "    weatherCity   = ${BOLD}$WEATHERCITY${RESET}"
 echo -e "    dotfilesDir   = ${BOLD}$DOTFILESDIR${RESET}"
 echo -e "    disk          = ${RED}${BOLD}$DISK  ← WILL BE WIPED${RESET}"
 echo -e "    swap          = ${BOLD}${SWAP_GB}GB swapfile on @swap subvolume${RESET}"
-if [[ -n "$HOME_DISK" ]]; then
+if [[ -n $HOME_DISK ]]; then
   echo -e "    homeDisk      = ${RED}${BOLD}$HOME_DISK  ← WILL BE WIPED${RESET}"
 fi
 echo -e "    impermanence  = ${BOLD}/ wiped on every boot via btrfs (@blank snapshot)${RESET}"
-if [[ "$IS_VM" == "true" ]]; then
+if [[ $IS_VM == "true" ]]; then
   echo -e "    bootloader    = ${YELLOW}${BOLD}systemd-boot (VM — lanzaboote skipped)${RESET}"
 else
   echo -e "    bootloader    = ${BOLD}lanzaboote + Secure Boot${RESET}"
@@ -442,7 +442,7 @@ WIPEROOT
 ok "wipe-root.nix written."
 
 # ── bootstrap-override.nix ─────────────────────────────────────────
-if [[ "$IS_VM" == "true" ]]; then
+if [[ $IS_VM == "true" ]]; then
   printf '%s\n' \
     '{ lib, ... }:' \
     '{' \
@@ -457,7 +457,7 @@ fi
 # ── Disko config ───────────────────────────────────────────────────
 header "Generating disko partition layout…"
 
-if [[ -n "$HOME_DISK" ]]; then
+if [[ -n $HOME_DISK ]]; then
   cat >"$HOST_DIR/disko.nix" <<DISKO
 {
   disko.devices.disk = {
@@ -704,7 +704,7 @@ cp /mnt/etc/nixos/hardware-configuration.nix "$HOST_DIR/hardware.nix"
 ok "Hardware config written."
 
 # ── Secure Boot keys (bare metal only) ────────────────────────────
-if [[ "$IS_VM" == "false" ]]; then
+if [[ $IS_VM == "false" ]]; then
   header "Setting up Secure Boot keys…"
 
   SBCTL_STATUS="$(sbctl status 2>/dev/null || true)"
@@ -813,7 +813,7 @@ echo -e "  ${YELLOW}${BOLD}Post-boot steps to restore full agenix:${RESET}"
 echo -e "    1. Add the pubkey above to secrets/secrets.nix"
 echo -e "    2. agenix -r -i ~/.ssh/id_ed25519"
 echo -e "    3. git add -A && git commit -m 'add $HOSTNAME host key' && git push"
-if [[ "$IS_VM" == "true" ]]; then
+if [[ $IS_VM == "true" ]]; then
   echo -e "    4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix"
   echo -e "    5. Set bootstrapMode = false in user.nix"
   echo -e "    6. nr"
@@ -832,7 +832,7 @@ echo -e "  ${DIM}  journalctl -b -u wipe-root          # confirm wipe ran"
 echo -e "    findmnt | grep persist              # confirm bind-mounts active"
 echo -e "    touch /test-impermanence && reboot  # file should vanish after reboot${RESET}"
 echo ""
-if [[ "$IS_VM" == "false" ]]; then
+if [[ $IS_VM == "false" ]]; then
   echo -e "  ${YELLOW}${BOLD}Secure Boot note:${RESET}"
   echo -e "  ${DIM}If keys could not be auto-enrolled, enter your firmware,"
   echo -e "  enable Setup Mode, then run:${RESET}"
