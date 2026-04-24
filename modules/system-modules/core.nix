@@ -44,6 +44,7 @@
     time.timeZone = userConfig.timezone;
     i18n.defaultLocale = userConfig.locale;
     system.stateVersion = userConfig.stateVersion;
+    swapDevices = [{device = "/swap/swapfile";}];
     nix.registry = lib.mkForce {nixpkgs.flake = inputs.nixpkgs;};
     nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
     nix.settings = {
