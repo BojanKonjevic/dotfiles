@@ -552,6 +552,7 @@ if [[ -n "$HOME_DISK" ]]; then
         partitions = {
           home = {
             size = "100%";
+	    type = "8300";
             content = {
               type = "btrfs";
               extraArgs = [ "-L" "home" "-f" ];
