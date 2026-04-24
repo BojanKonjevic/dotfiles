@@ -142,6 +142,9 @@ prompt "Your email" "you@example.com" EMAIL
 prompt "Weather city (e.g. New+York)" "New+York" WEATHERCITY
 prompt "Dotfiles location on new system" "$HOME_DIR/dotfiles" DOTFILESDIR
 prompt "Disk to install to" "$DETECTED_DISK" DISK
+ask "Separate drive for /home? Leave blank to use subvolume on main disk:"
+read -r HOME_DISK
+HOME_DISK="${HOME_DISK:-}"
 prompt "Swap size in GB (>= RAM for hibernate)" "$DETECTED_RAM_GB" SWAP_GB
 
 # ── Temporary login password ───────────────────────────────────────
@@ -191,6 +194,9 @@ echo -e "    weatherCity   = ${BOLD}$WEATHERCITY${RESET}"
 echo -e "    dotfilesDir   = ${BOLD}$DOTFILESDIR${RESET}"
 echo -e "    disk          = ${RED}${BOLD}$DISK  ← WILL BE WIPED${RESET}"
 echo -e "    swap          = ${BOLD}${SWAP_GB}GB swapfile on @swap subvolume${RESET}"
+if [[ -n "$HOME_DISK" ]]; then
+  echo -e "    homeDisk      = ${RED}${BOLD}$HOME_DISK  ← WILL BE WIPED${RESET}"
+fi
 echo -e "    impermanence  = ${BOLD}/ wiped on every boot via btrfs (@blank snapshot)${RESET}"
 if [[ "$IS_VM" == "true" ]]; then
   echo -e "    bootloader    = ${YELLOW}${BOLD}systemd-boot (VM — lanzaboote skipped)${RESET}"
@@ -486,7 +492,85 @@ ok "bootstrap-override.nix written."
 # ── Disko config ───────────────────────────────────────────────────
 header "Generating disko partition layout…"
 
-cat >"$HOST_DIR/disko.nix" <<DISKO
+if [[ -n "$HOME_DISK" ]]; then
+  cat >"$HOST_DIR/disko.nix" <<DISKO
+{
+  disko.devices.disk = {
+    main = {
+      device = "$DISK";
+      type = "disk";
+      content = {
+        type = "gpt";
+        partitions = {
+          ESP = {
+            size = "512M";
+            type = "EF00";
+            content = {
+              type = "filesystem";
+              format = "vfat";
+              mountpoint = "/boot";
+              mountOptions = [ "fmask=0077" "dmask=0077" ];
+            };
+          };
+          root = {
+            size = "100%";
+            content = {
+              type = "btrfs";
+              extraArgs = [ "-L" "root" "-f" ];
+              subvolumes = {
+                "@" = {
+                  mountpoint = "/";
+                  mountOptions = [ "compress=zstd" "noatime" ];
+                };
+                "@nix" = {
+                  mountpoint = "/nix";
+                  mountOptions = [ "compress=zstd" "noatime" ];
+                };
+                "@persist" = {
+                  mountpoint = "/persist";
+                  mountOptions = [ "compress=zstd" "noatime" ];
+                };
+                "@swap" = {
+                  mountpoint = "/swap";
+                  mountOptions = [ "noatime" ];
+                };
+                "@snapshots" = {
+                  mountpoint = "/.snapshots";
+                  mountOptions = [ "compress=zstd" "noatime" ];
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+    home = {
+      device = "$HOME_DISK";
+      type = "disk";
+      content = {
+        type = "gpt";
+        partitions = {
+          home = {
+            size = "100%";
+            content = {
+              type = "btrfs";
+              extraArgs = [ "-L" "home" "-f" ];
+              subvolumes = {
+                "@home" = {
+                  mountpoint = "/home";
+                  mountOptions = [ "compress=zstd" "noatime" ];
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+}
+DISKO
+else
+  cat >"$HOST_DIR/disko.nix" <<DISKO
 {
   disko.devices.disk.main = {
     device = "$DISK";
@@ -542,7 +626,7 @@ cat >"$HOST_DIR/disko.nix" <<DISKO
   };
 }
 DISKO
-
+fi
 ok "disko.nix written (btrfs: @, @nix, @home, @persist, @swap, @snapshots; labeled 'root')."
 
 # ── Disko — partition, format, mount ───────────────────────────────
@@ -676,7 +760,7 @@ if [[ "$IS_VM" == "false" ]]; then
     cp -r /var/lib/sbctl/. /mnt/persist/etc/secureboot/
     ok "Secure Boot keys copied to /mnt/persist/etc/secureboot."
   else
-    err "sbctl ran but /var/lib/secureboot not found — lanzaboote will fail."
+    err "sbctl ran but /var/lib/sbctl not found — lanzaboote will fail."
     err "Enter your firmware, enable Setup Mode, then re-run bootstrap."
     exit 1
   fi
@@ -690,13 +774,10 @@ header "Creating temporary machine-id for bootloader..."
 
 mkdir -p /mnt/etc
 mkdir -p /mnt/persist/etc
-TMP_MACHINE_ID="$(tr -d '-' </proc/sys/kernel/random/uuid)"
+TMP_MACHINE_ID="$(cat /mnt/persist/etc/machine-id)"
 echo "$TMP_MACHINE_ID" >/mnt/etc/machine-id
-echo "$TMP_MACHINE_ID" >/mnt/persist/etc/machine-id
 chmod 444 /mnt/etc/machine-id
-chmod 444 /mnt/persist/etc/machine-id
-ok "Temporary machine-id written."
-ok "Persistent machine-id written to /persist."
+ok "Temporary machine-id written (reusing persistent ID)."
 
 # ── Install ────────────────────────────────────────────────────────
 header "Installing NixOS…"
