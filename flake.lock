@@ -337,21 +337,6 @@
         "type": "github"
       }
     },
-    "import-tree": {
-      "locked": {
-        "lastModified": 1773693634,
-        "narHash": "sha256-BtZ2dtkBdSUnFPPFc+n0kcMbgaTxzFNPv2iaO326Ffg=",
-        "owner": "vic",
-        "repo": "import-tree",
-        "rev": "c41e7d58045f9057880b0d85e1152d6a4430dbf1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "vic",
-        "repo": "import-tree",
-        "type": "github"
-      }
-    },
     "lanzaboote": {
       "inputs": {
         "crane": "crane",
@@ -517,7 +502,6 @@
         "git-hooks": "git-hooks",
         "home-manager": "home-manager_2",
         "impermanence": "impermanence",
-        "import-tree": "import-tree",
         "lanzaboote": "lanzaboote",
         "nix-search-tv": "nix-search-tv",
         "nixpkgs": "nixpkgs",
@@ -624,11 +608,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1777008980,
-        "narHash": "sha256-pVZgqx3xbyFs0CnVlPLsizHL+S8vK1JcHQ1WVw/X+NI=",
+        "lastModified": 1777058936,
+        "narHash": "sha256-H7XdcjRBA4UROm6KNi+mR+E22LW8vb0jRfoz1GHpPCo=",
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
-        "rev": "269ed2e95863c99ce067672813767661612e402b",
+        "rev": "9027d5218172c3aa2060d43e599d3304c9c13bc0",
         "type": "github"
       },
       "original": {

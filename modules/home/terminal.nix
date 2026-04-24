@@ -1,0 +1,246 @@
+{
+  theme,
+  config,
+  pkgs,
+  inputs,
+  userConfig,
+  ...
+}: let
+  nix-search = inputs.nix-search-tv.packages.${pkgs.stdenv.hostPlatform.system}.default;
+in {
+  home.packages = with pkgs; [
+    nix-search
+    ansifilter
+    nh
+    speedtest-go
+    eza
+    calcurse
+    delta
+  ];
+  programs.zoxide.enable = true;
+  programs.broot.enable = true;
+  programs.bat.enable = true;
+  programs.btop.enable = true;
+  programs.cava.enable = true;
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+    matchBlocks = {
+      "*" = {
+        addKeysToAgent = "yes";
+        extraOptions = {
+          ServerAliveInterval = "60";
+          ServerAliveCountMax = "3";
+        };
+      };
+      "github.com" = {
+        hostname = "github.com";
+        user = "git";
+        identityFile = "~/.ssh/id_ed25519";
+      };
+    };
+  };
+  services.ssh-agent.enable = true;
+  programs.git = {
+    enable = true;
+    settings = {
+      user.name = userConfig.fullName;
+      user.email = userConfig.email;
+      init.defaultBranch = "main";
+      core.pager = "delta";
+      interactive.diffFilter = "delta --color-only";
+      delta = {
+        navigate = true;
+        dark = true;
+        side-by-side = true;
+        line-numbers = true;
+        syntax-theme = "Catppuccin Mocha";
+      };
+      merge.conflictstyle = "diff3";
+      diff.colorMoved = "default";
+    };
+  };
+  home.file.".ssh/id_ed25519" = {
+    source = config.lib.file.mkOutOfStoreSymlink "/run/agenix/ssh-private-key";
+  };
+  home.file.".ssh/id_ed25519.pub".text = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA8WKB45Qb5CqZPlE7LWKjkaCikJbjA87sVQwJWDTAB4 konjevicbojan1@gmail.com";
+  programs.kitty = {
+    enable = true;
+    settings = {
+      scrollback_lines = 5000;
+      enable_audio_bell = "no";
+      open_url_with = "default";
+      url_style = "single";
+      copy_on_select = "yes";
+      confirm_os_window_close = 0;
+      shell_integration = "disabled";
+    };
+    keybindings = {
+      "ctrl+shift+c" = "copy_to_clipboard";
+      "ctrl+shift+v" = "paste_from_clipboard";
+      "ctrl+shift+h" = "show_scrollback";
+    };
+    extraConfig = ''
+      scrollback_pager bash -c "ansifilter | nvim -c 'set ft=sh | $' -"
+      scrollback_pager_history_size 0
+      font_family      family='${theme.fontName}' style=Bold
+      bold_font        family='${theme.fontName}' style=Bold
+      italic_font      family='${theme.fontName}' style='Bold Italic'
+      bold_italic_font family='${theme.fontName}' style='Bold Italic'
+
+      cursor_shape block
+      cursor_blink_interval 0
+
+      window_padding_width 0 10 10 10
+      window_decorations none
+      modify_font underline_position 150%
+      modify_font cell_height 100%
+
+      repaint_delay 5
+      input_delay 0
+      sync_to_monitor yes
+    '';
+  };
+  programs.zsh = {
+    enable = true;
+    dotDir = "${config.xdg.configHome}/zsh";
+    syntaxHighlighting.enable = true;
+    autosuggestion.enable = true;
+    plugins = [
+      {
+        name = "zsh-vi-mode";
+        src = pkgs.zsh-vi-mode;
+        file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
+      }
+    ];
+    shellAliases = {
+      v = "nvim";
+      vf = "nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
+      pg = "psql -d postgres --dbname";
+      dev = "nix develop";
+      cal = "calcurse";
+      hf = "cd ${userConfig.dotfilesDir} && nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
+      leet = "nvim -c 'Leet'";
+      n = "nvim ${userConfig.notesFile}";
+      ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history";
+      f = "thunar .";
+      ls = "eza --icons -l";
+      net = "speedtest-go --server=14476";
+      cat = "bat";
+      l = "eza -alh --icons --group-directories-first";
+      br = "br --hidden";
+      brd = "br --sizes --sort-by-size";
+      yt = "yttranscript";
+      gi = "ingest";
+      pyproj = "nix run github:BojanKonjevic/dotfiles#new-python-project";
+      nr = "nh os switch";
+      hm = "nh home switch";
+      gc = "nh clean all --keep 10";
+      ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
+      hgens = "nix-env --list-generations --profile $HOME/.local/state/nix/profiles/home-manager";
+    };
+    initContent = ''
+      export CACHIX_AUTH_TOKEN="$(cat /run/agenix/cachix-token 2>/dev/null)"
+
+      nu() {
+        nh os switch -u \
+          && nh home switch \
+          && cachix push bojan-dotfiles /run/current-system \
+          && cachix push bojan-dotfiles "$HOME/.local/state/nix/profiles/home-manager"
+      }
+
+      zstyle ':completion:*' menu select
+      zstyle ':completion:*' matcher-list \
+          'm:{a-zA-Z}={A-Za-z}' \
+          'r:|[._-]=* r:|=*'
+
+      setopt HIST_IGNORE_SPACE
+      setopt AUTO_CD
+      setopt AUTO_PUSHD
+      setopt PUSHD_IGNORE_DUPS
+      setopt PUSHD_SILENT
+
+      export NH_OS_FLAKE="${userConfig.osFlakePath}"
+      export NH_HOME_FLAKE="${userConfig.hmFlakePath}"
+      export STARSHIP_VI_MODE=1
+
+      zvm_after_init() {
+        eval "$(fzf --zsh)"
+        if [[ -z "$_direnv_hooked" ]]; then
+          eval "$(direnv hook zsh)"
+          export _direnv_hooked=1
+        fi
+      }
+    '';
+  };
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = false;
+    defaultOptions = [
+      "--height=40%"
+      "--layout=reverse"
+      "--border=rounded"
+      "--preview-window=right:55%:wrap"
+    ];
+  };
+  programs.atuin = {
+    enable = true;
+    enableZshIntegration = true;
+    settings = {
+      style = "compact";
+      search_mode = "fuzzy";
+      filter_mode_shell_up_arrow = "session";
+      show_preview = true;
+      exit_mode = "return-query";
+      secrets_filter = true;
+    };
+  };
+  programs.starship = {
+    enable = true;
+    settings = {
+      add_newline = true;
+      format = ''
+        $directory$nix_shell$python$git_branch$git_status$cmd_duration
+        $character
+      '';
+      directory = {
+        truncation_length = 3;
+      };
+      nix_shell = {
+        symbol = "❄️ ";
+        format = "[$symbol$name]($style) ";
+      };
+      python = {
+        symbol = "🐍";
+        format = "[$symbol $version]($style) ";
+      };
+      package = {
+        format = "📦 $version ";
+        disabled = false;
+      };
+      git_branch = {
+        symbol = " ";
+      };
+      git_status = {
+        format = "([\\[$all_status$ahead_behind\\]]($style)) ";
+      };
+      cmd_duration = {
+        min_time = 1000;
+        format = "󰔚 [$duration]($style) ";
+      };
+      character = {
+        success_symbol = "[❯](green)";
+        error_symbol = "[❯](red)";
+        vimcmd_symbol = "[❮](blue)";
+      };
+    };
+  };
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = false;
+    nix-direnv.enable = true;
+    config = {
+      hide_env_diff = true;
+    };
+  };
+}

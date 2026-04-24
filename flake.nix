@@ -4,9 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-nvidia.url = "github:NixOS/nixpkgs/46db2e09e1d3f113a13c0d7b81e2f221c63b8ce9"; # pinned for pascal
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-    };
+    flake-parts.url = "github:hercules-ci/flake-parts";
     lanzaboote = {
       url = "github:nix-community/lanzaboote";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -14,9 +12,6 @@
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    import-tree = {
-      url = "github:vic/import-tree";
     };
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -61,25 +56,21 @@
     };
   };
 
-  outputs = inputs @ {
-    flake-parts,
-    import-tree,
-    treefmt-nix,
-    ...
-  }: let
-    userConfig = import ./user.nix;
-  in
+  outputs = inputs @ {flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
-      imports =
-        [
-          ./modules/hosts/${userConfig.hostname}/default.nix
-          treefmt-nix.flakeModule
-          inputs.git-hooks.flakeModule
-        ]
-        ++ (import-tree ./modules/system-modules).imports
-        ++ (import-tree ./modules/home-modules).imports
-        ++ (import-tree ./modules/home).imports
-        ++ (import-tree ./modules/lib).imports;
-      systems = [userConfig.system];
+      imports = [
+        inputs.treefmt-nix.flakeModule
+        inputs.git-hooks.flakeModule
+
+        # lib — flake-parts perSystem modules only
+        ./lib/treefmt.nix
+        ./lib/git-hooks.nix
+        ./lib/scripts.nix
+
+        # hosts
+        ./hosts/desktop/default.nix
+        ./hosts/desktop/home.nix
+      ];
+      systems = ["x86_64-linux"];
     };
 }
