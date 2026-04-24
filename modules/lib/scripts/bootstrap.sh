@@ -147,28 +147,28 @@ read -r HOME_DISK
 HOME_DISK="${HOME_DISK:-}"
 prompt "Swap size in GB (>= RAM for hibernate)" "$DETECTED_RAM_GB" SWAP_GB
 
-# ── Temporary login password ───────────────────────────────────────
+# ── Login password ─────────────────────────────────────────────────
 echo ""
-echo -e "  ${YELLOW}${BOLD}Temporary login password${RESET}"
+echo -e "  ${YELLOW}${BOLD}Login password${RESET}"
 echo -e "  ${DIM}agenix secrets are encrypted to your existing host key and cannot"
-echo -e "  be decrypted on a fresh machine. A temporary password is set so you"
-echo -e "  can log in. Change it or switch to agenix post-boot.${RESET}\n"
+echo -e "  be decrypted on a fresh machine. A password is set so you"
+echo -e "  can log in.${RESET}\n"
 
 while true; do
-  ask "Temporary password for $USERNAME:"
-  read -rs TMP_PASSWORD
+  ask "Password for $USERNAME:"
+  read -rs PASSWORD
   echo ""
   ask "Confirm password:"
-  read -rs TMP_PASSWORD2
+  read -rs PASSWORD2
   echo ""
-  if [[ "$TMP_PASSWORD" == "$TMP_PASSWORD2" ]]; then
+  if [[ "$PASSWORD" == "$PASSWORD2" ]]; then
     break
   fi
   echo -e "  ${RED}Passwords do not match, try again.${RESET}"
 done
 
-TMP_HASHED_PASSWORD="$(mkpasswd -m sha-512 "$TMP_PASSWORD")"
-unset TMP_PASSWORD TMP_PASSWORD2
+HASHED_PASSWORD="$(mkpasswd -m sha-512 "$PASSWORD")"
+unset PASSWORD PASSWORD2
 
 # ── Wipe warning ───────────────────────────────────────────────────
 echo ""
@@ -444,50 +444,15 @@ ok "wipe-root.nix written."
 # ── bootstrap-override.nix ─────────────────────────────────────────
 if [[ "$IS_VM" == "true" ]]; then
   printf '%s\n' \
-    '# bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.' \
-    '#' \
-    '# Generated for a VM install — uses systemd-boot instead of lanzaboote.' \
-    '#' \
-    '# Post-boot steps to restore full agenix:' \
-    '#   On your existing machine:' \
-    '#     1. Add the new host pubkey to secrets/secrets.nix:' \
-    '#          <generated during install>' \
-    '#     2. agenix -r -i ~/.ssh/id_ed25519' \
-    "#     3. git add -A && git commit -m \"add $HOSTNAME host key\" && git push" \
-    '#   On this machine (after git pull):' \
-    "#     4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix" \
-    '#     5. Set bootstrapMode = false in user.nix' \
-    '#     6. nr' \
     '{ lib, ... }:' \
     '{' \
-    "  users.users.$USERNAME.initialHashedPassword = \"$TMP_HASHED_PASSWORD\";" \
     '  boot.loader.systemd-boot.enable = lib.mkOverride 0 true;' \
     '  boot.loader.efi.canTouchEfiVariables = lib.mkOverride 0 true;' \
     '  boot.lanzaboote.enable = lib.mkOverride 0 false;' \
     '}' \
     >"$HOST_DIR/bootstrap-override.nix"
-else
-  printf '%s\n' \
-    '# bootstrap-override.nix — AUTO-GENERATED, delete after post-boot agenix setup.' \
-    '#' \
-    '# Post-boot steps to restore full agenix:' \
-    '#   On your existing machine:' \
-    '#     1. Add the new host pubkey to secrets/secrets.nix:' \
-    '#          <generated during install>' \
-    '#     2. agenix -r -i ~/.ssh/id_ed25519' \
-    "#     3. git add -A && git commit -m \"add $HOSTNAME host key\" && git push" \
-    '#   On this machine (after git pull):' \
-    "#     4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix" \
-    '#     5. Set bootstrapMode = false in user.nix' \
-    '#     6. nr' \
-    '{ ... }:' \
-    '{' \
-    "  users.users.$USERNAME.initialHashedPassword = \"$TMP_HASHED_PASSWORD\";" \
-    '}' \
-    >"$HOST_DIR/bootstrap-override.nix"
+  ok "bootstrap-override.nix written."
 fi
-
-ok "bootstrap-override.nix written."
 
 # ── Disko config ───────────────────────────────────────────────────
 header "Generating disko partition layout…"
@@ -726,8 +691,10 @@ else
 fi
 NEW_HOST_PUBKEY="$(cat /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub)"
 
-sed -i "s|<generated during install>|$NEW_HOST_PUBKEY|g" \
-  "$HOST_DIR/bootstrap-override.nix"
+if [[ -f "$HOST_DIR/bootstrap-override.nix" ]]; then
+  sed -i "s|<generated during install>|$NEW_HOST_PUBKEY|g" \
+    "$HOST_DIR/bootstrap-override.nix"
+fi
 
 # ── Hardware config ────────────────────────────────────────────────
 header "Generating hardware configuration…"
@@ -843,14 +810,17 @@ echo -e "  ${CYAN}${BOLD}New host pubkey (add this to secrets/secrets.nix):${RES
 echo -e "  ${BOLD}$NEW_HOST_PUBKEY${RESET}"
 echo ""
 echo -e "  ${YELLOW}${BOLD}Post-boot steps to restore full agenix:${RESET}"
-echo -e "  ${DIM}On your existing machine:${RESET}"
 echo -e "    1. Add the pubkey above to secrets/secrets.nix"
 echo -e "    2. agenix -r -i ~/.ssh/id_ed25519"
 echo -e "    3. git add -A && git commit -m 'add $HOSTNAME host key' && git push"
-echo -e "  ${DIM}On this machine (after first boot + git pull):${RESET}"
-echo -e "    4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix"
-echo -e "    5. Set bootstrapMode = false in user.nix"
-echo -e "    6. nr"
+if [[ "$IS_VM" == "true" ]]; then
+  echo -e "    4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix"
+  echo -e "    5. Set bootstrapMode = false in user.nix"
+  echo -e "    6. nr"
+else
+  echo -e "    4. Set bootstrapMode = false in user.nix"
+  echo -e "    5. nr"
+fi
 echo ""
 echo -e "  ${CYAN}${BOLD}Impermanence:${RESET}"
 echo -e "  ${DIM}/ is wiped on every boot via btrfs @blank snapshot restore."

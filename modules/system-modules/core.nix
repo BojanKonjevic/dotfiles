@@ -72,7 +72,6 @@
     users.users.${userConfig.username} = {
       shell = pkgs.zsh;
       isNormalUser = true;
-      hashedPasswordFile = lib.mkIf (!userConfig.bootstrapMode) config.age.secrets.user-password.path;
       description = userConfig.fullName;
       extraGroups = [
         "libvirtd"
