@@ -1,4 +1,5 @@
-{pkgs, ...}: let
+{ pkgs, config, ... }:
+let
   wipe-root-script = pkgs.writeShellApplication {
     name = "wipe-root";
     runtimeInputs = [
@@ -52,7 +53,7 @@
     '';
   };
 in {
-  boot.initrd.supportedFilesystems = ["btrfs"];
+  boot.initrd.supportedFilesystems = [ "btrfs" ];
   boot.initrd.systemd.enable = true;
 
   boot.initrd.systemd.storePaths = [
@@ -71,9 +72,9 @@ in {
 
   boot.initrd.systemd.services.wipe-root = {
     description = "Wipe / by restoring @blank btrfs snapshot";
-    wantedBy = ["initrd.target"];
-    after = ["dev-disk-by\\x2dlabel-root.device"];
-    before = ["sysroot.mount" "initrd-root-fs.target"];
+    wantedBy = [ "initrd.target" ];
+    after = [ "dev-disk-by\\x2dlabel-root.device" ];
+    before = [ "sysroot.mount" "initrd-root-fs.target" ];
     unitConfig.DefaultDependencies = false;
     serviceConfig = {
       Type = "oneshot";
