@@ -10,7 +10,6 @@
 #     4. rm /home/bojan/dotfiles/modules/hosts/desktop/bootstrap-override.nix
 #     5. Set bootstrapMode = false in user.nix
 #     6. nr
-{ ... }:
-{
+{...}: {
   users.users.bojan.initialHashedPassword = "$6$xEL3OQ10YEW/XJxt$eeNAM/FdiG.h50/2F3xsLY8lax/JrWaHHHTGEgalQ6xk.zQZboGBAetJyBNwZAZQBBQagnsIib9TrPADCjsrX.";
 }
