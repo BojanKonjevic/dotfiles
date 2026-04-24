@@ -32,5 +32,5 @@
   disk = "/dev/sdb";
 
   # ── Misc ─────────────────────────────────────────────────────────
-  bootstrapMode = true;
+  bootstrapMode = false;
 }
