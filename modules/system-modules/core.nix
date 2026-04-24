@@ -17,6 +17,10 @@
     networking.nameservers = ["1.1.1.1" "8.8.8.8"];
     boot.loader.timeout = 1;
     boot.loader.efi.canTouchEfiVariables = true;
+    boot.kernelModules = ["uinput"];
+    services.udev.extraRules = ''
+      KERNEL=="uinput", MODE="0660", GROUP="input"
+    '';
     boot.plymouth = {
       enable = true;
       theme = "catppuccin-mocha";
@@ -33,7 +37,7 @@
     programs.ydotool.enable = true;
     hardware.enableAllFirmware = true;
     nixpkgs.config.allowUnfree = true;
-    virtualisation.libvirtd.enable = true;
+    virtualisation.libvirtd.enable = false;
     programs.virt-manager.enable = true;
     virtualisation.spiceUSBRedirection.enable = true;
     networking.hostName = userConfig.hostname;
