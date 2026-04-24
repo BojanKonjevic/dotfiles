@@ -333,7 +333,7 @@ cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
       { directory = "/var/lib/pipewire";                 mode = "0755"; }
       { directory = "/var/lib/fwupd";                    mode = "0755"; }
       { directory = "/var/lib/libvirt";                  mode = "0755"; }
-      { directory = "/var/lib/sudo";                     mode = "0700"; }
+      { directory = "/var/db/sudo";                      mode = "0700"; }
       { directory = "/var/cache/tuigreet";               mode = "0755"; }
       { directory = "/var/log/journal";                  mode = "2755"; }
     ];
@@ -646,7 +646,7 @@ mkdir -p /mnt/persist/var/lib/postgresql
 mkdir -p /mnt/persist/var/lib/pipewire
 mkdir -p /mnt/persist/var/lib/fwupd
 mkdir -p /mnt/persist/var/lib/libvirt
-mkdir -p /mnt/persist/var/lib/sudo
+mkdir -p /mnt/persist/var/db/sudo
 mkdir -p /mnt/persist/var/cache/tuigreet
 mkdir -p /mnt/persist/var/log/journal
 mkdir -p /mnt/persist/var/lib/systemd
@@ -668,7 +668,7 @@ chmod 700 /mnt/persist/var/lib/postgresql
 chmod 755 /mnt/persist/var/lib/pipewire
 chmod 755 /mnt/persist/var/lib/fwupd
 chmod 755 /mnt/persist/var/lib/libvirt
-chmod 700 /mnt/persist/var/lib/sudo
+chmod 700 /mnt/persist/var/db/sudo
 chmod 755 /mnt/persist/var/cache/tuigreet
 chmod 2755 /mnt/persist/var/log/journal
 chmod 755 /mnt/persist/var/lib/systemd
