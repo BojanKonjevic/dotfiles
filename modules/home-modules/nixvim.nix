@@ -224,31 +224,29 @@
           settings.signs = false;
         };
 
-        # Editing
-
         treesitter = {
           enable = true;
           settings = {
             auto_install = false;
             highlight.enable = true;
             indent.enable = true;
-            ensure_installed = [
-              "bash"
-              "css"
-              "diff"
-              "html"
-              "json"
-              "lua"
-              "luadoc"
-              "markdown"
-              "markdown_inline"
-              "nix"
-              "python"
-              "query"
-              "vim"
-              "vimdoc"
-            ];
           };
+          grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
+            bash
+            css
+            diff
+            html
+            json
+            lua
+            luadoc
+            markdown
+            markdown-inline
+            nix
+            python
+            query
+            vim
+            vimdoc
+          ];
         };
 
         mini = {
