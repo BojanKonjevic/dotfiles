@@ -689,10 +689,14 @@ fi
 header "Creating temporary machine-id for bootloader..."
 
 mkdir -p /mnt/etc
+mkdir -p /mnt/persist/etc
 TMP_MACHINE_ID="$(tr -d '-' </proc/sys/kernel/random/uuid)"
 echo "$TMP_MACHINE_ID" >/mnt/etc/machine-id
+echo "$TMP_MACHINE_ID" >/mnt/persist/etc/machine-id
 chmod 444 /mnt/etc/machine-id
+chmod 444 /mnt/persist/etc/machine-id
 ok "Temporary machine-id written."
+ok "Persistent machine-id written to /persist."
 
 # ── Install ────────────────────────────────────────────────────────
 header "Installing NixOS…"
