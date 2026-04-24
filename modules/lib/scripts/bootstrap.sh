@@ -254,9 +254,9 @@ cat >"$TMPDIR/user.nix" <<USERNIX
   kbLayout     = "$DETECTED_KB";
 
   # ── Paths ────────────────────────────────────────────────────────
-  wallpaperDir   = "\$HOME/Pictures/wallpapers";
-  screenshotsDir = "\$HOME/Pictures/Screenshots";
-  notesFile      = "\$HOME/Documents/notes.txt";
+  wallpaperDir   = "/home/$USERNAME/Pictures/wallpapers";
+  screenshotsDir = "/home/$USERNAME/Pictures/Screenshots";
+  notesFile      = "/home/$USERNAME/Documents/notes.txt";
   dotfilesDir    = "$DOTFILESDIR";
   osFlakePath    = "$DOTFILESDIR";
   hmFlakePath    = "$DOTFILESDIR";

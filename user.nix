@@ -18,9 +18,9 @@
   kbLayout = "us";
 
   # ── Paths ────────────────────────────────────────────────────────
-  wallpaperDir = "$HOME/Pictures/wallpapers";
-  screenshotsDir = "$HOME/Pictures/Screenshots";
-  notesFile = "$HOME/Documents/notes.txt";
+  wallpaperDir = "/home/bojan/Pictures/wallpapers";
+  screenshotsDir = "/home/bojan/Pictures/Screenshots";
+  notesFile = "/home/bojan/Documents/notes.txt";
   dotfilesDir = "/home/bojan/dotfiles";
   osFlakePath = "/home/bojan/dotfiles";
   hmFlakePath = "/home/bojan/dotfiles";
