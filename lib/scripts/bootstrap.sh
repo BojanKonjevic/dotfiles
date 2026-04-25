@@ -230,70 +230,71 @@ rm -rf "$TMPDIR"
 git clone https://github.com/BojanKonjevic/dotfiles "$TMPDIR"
 ok "Cloned to $TMPDIR."
 
-# ── Write user.nix ─────────────────────────────────────────────────
-header "Writing user.nix…"
+# ── Write hosts/<hostname>/config.nix ─────────────────────────────
+header "Writing hosts/$HOSTNAME/config.nix…"
 
-cat >"$TMPDIR/user.nix" <<USERNIX
-{
-  # ── Identity ─────────────────────────────────────────────────────
-  username      = "$USERNAME";
-  fullName      = "$FULLNAME";
-  email         = "$EMAIL";
-  homeDirectory = "/home/$USERNAME";
-
-  # ── Machine ──────────────────────────────────────────────────────
-  hostname     = "$HOSTNAME";
-  system       = "$DETECTED_SYSTEM";
-
-  # ── Versions ─────────────────────────────────────────────────────
-  stateVersion = "$DETECTED_STATE";
-
-  # ── Locale / Time ────────────────────────────────────────────────
-  timezone     = "$DETECTED_TIMEZONE";
-  locale       = "$DETECTED_LOCALE";
-  kbLayout     = "$DETECTED_KB";
-
-  # ── Paths ────────────────────────────────────────────────────────
-  wallpaperDir   = "/home/$USERNAME/Pictures/wallpapers";
-  screenshotsDir = "/home/$USERNAME/Pictures/Screenshots";
-  notesFile      = "/home/$USERNAME/Documents/notes.txt";
-  dotfilesDir    = "$DOTFILESDIR";
-  osFlakePath    = "$DOTFILESDIR";
-  hmFlakePath    = "$DOTFILESDIR";
-
-  # ── Weather ──────────────────────────────────────────────────────
-  weatherCity  = "$WEATHERCITY";
-
-  # ── Hardware ─────────────────────────────────────────────────────
-  disk = "$DISK";
-
-  # ── Misc ─────────────────────────────────────────────────────────
-  bootstrapMode = true;
-}
-USERNIX
-
-ok "user.nix written."
-
-# ── Host directory ─────────────────────────────────────────────────
-header "Setting up host directory for '$HOSTNAME'…"
-
-HOST_DIR="$TMPDIR/modules/hosts/$HOSTNAME"
+HOST_DIR="$TMPDIR/hosts/$HOSTNAME"
 rm -rf "$HOST_DIR"
 mkdir -p "$HOST_DIR"
 
-printf '{ ... }: {}\n' >"$HOST_DIR/hardware.nix"
+cat >"$HOST_DIR/config.nix" <<CONFIGNIX
+# Machine-specific values for the $HOSTNAME host.
+# All fields here are the single source of truth — nothing else should define
+# these per-machine values.
+{
+  # ── Identity ──────────────────────────────────────────────────────────────
+  username = "$USERNAME";
+  fullName = "$FULLNAME";
+  email    = "$EMAIL";
+
+  # ── Machine ───────────────────────────────────────────────────────────────
+  hostname = "$HOSTNAME";
+  system   = "$DETECTED_SYSTEM";
+
+  # ── Paths ─────────────────────────────────────────────────────────────────
+  homeDirectory  = "/home/$USERNAME";
+  dotfilesDir    = "$DOTFILESDIR";
+  wallpaperDir   = "/home/$USERNAME/Pictures/wallpapers";
+  screenshotsDir = "/home/$USERNAME/Pictures/Screenshots";
+  notesFile      = "/home/$USERNAME/Documents/notes.txt";
+
+  # ── nh flake paths (used by NH_OS_FLAKE / NH_HOME_FLAKE env vars) ─────────
+  osFlakePath = "$DOTFILESDIR";
+  hmFlakePath = "$DOTFILESDIR";
+
+  # ── Locale ────────────────────────────────────────────────────────────────
+  timezone    = "$DETECTED_TIMEZONE";
+  locale      = "$DETECTED_LOCALE";
+  kbLayout    = "$DETECTED_KB";
+  weatherCity = "$WEATHERCITY";
+
+  # ── Versions ──────────────────────────────────────────────────────────────
+  stateVersion = "$DETECTED_STATE";
+
+  # ── Bootstrap flag ────────────────────────────────────────────────────────
+  # Disables agenix secrets that aren't available yet.
+  bootstrapMode = true;
+}
+CONFIGNIX
+
+ok "config.nix written."
+
+# ── hosts/<hostname>/default.nix ──────────────────────────────────
+header "Writing hosts/$HOSTNAME/default.nix…"
 
 cat >"$HOST_DIR/default.nix" <<HOSTNIX
-{ self, inputs, ... }:
-let
-  userConfig = import ../../../user.nix;
+{
+  self,
+  inputs,
+  ...
+}: let
+  userConfig = import ./config.nix;
 in {
   flake.nixosConfigurations.\${userConfig.hostname} = inputs.nixpkgs.lib.nixosSystem {
     system = userConfig.system;
-    specialArgs = { inherit inputs userConfig self; };
+    specialArgs = {inherit inputs userConfig self;};
     modules =
-      (builtins.attrValues self.nixosModules)
-      ++ [
+      [
         ./hardware.nix
         ./disko.nix
         ./impermanence.nix
@@ -301,10 +302,20 @@ in {
         inputs.disko.nixosModules.disko
         inputs.lanzaboote.nixosModules.lanzaboote
         inputs.impermanence.nixosModules.impermanence
+
+        # ── Profiles ───────────────────────────────────────────────────────
+        ../../profiles/system/base.nix
+        ../../profiles/system/misc.nix
+        ../../profiles/system/nvidia.nix
+        # ../../profiles/system/virtualisation.nix
       ]
       ++ (
-        let p = ./bootstrap-override.nix; in
-        if builtins.pathExists p then [ p ] else []
+        let
+          p = ./bootstrap-override.nix;
+        in
+          if builtins.pathExists p
+          then [p]
+          else []
       );
   };
 }
@@ -312,30 +323,100 @@ HOSTNIX
 
 ok "default.nix written."
 
+# ── hosts/<hostname>/home.nix ─────────────────────────────────────
+# The home configuration is a separate flake-parts module that
+# lives alongside default.nix in the host directory.
+header "Writing hosts/$HOSTNAME/home.nix…"
+
+cat >"$HOST_DIR/home.nix" <<HOMENIX
+{inputs, ...}: let
+  userConfig = import ./config.nix;
+  system = userConfig.system;
+  pkgs = inputs.nixpkgs.legacyPackages.\${system};
+in {
+  flake.homeConfigurations.\${userConfig.username} = inputs.home-manager.lib.homeManagerConfiguration {
+    inherit pkgs;
+    extraSpecialArgs = {
+      inherit inputs userConfig;
+      quickshell = inputs.quickshell.packages.\${system}.default;
+    };
+    modules = [
+      inputs.catppuccin.homeModules.catppuccin
+
+      # ── Profiles ──────────────────────────────────────────────────────────
+      ../../profiles/home/base.nix
+      ../../profiles/home/desktop-env.nix
+      ../../profiles/home/programming.nix
+      ../../profiles/home/media.nix
+      ../../profiles/home/misc.nix
+
+
+      # ── Base HM config ─────────────────────────────────────────────────────
+      {
+        home.username = userConfig.username;
+        home.homeDirectory = userConfig.homeDirectory;
+        home.stateVersion = userConfig.stateVersion;
+        nix.package = pkgs.nix;
+        nix.settings.warn-dirty = false;
+        nixpkgs.config.allowUnfree = true;
+        news.display = "silent";
+      }
+
+      # ── Misc packages not yet sorted into a profile ────────────────────────
+      {
+        home.packages = with pkgs; [
+          nvd
+          cachix
+          localsend
+          libreoffice
+          gnome-calculator
+          alsa-utils
+          p7zip
+          unzip
+          dejsonlz4
+          file-roller
+          pavucontrol
+          networkmanagerapplet
+          pinta
+          inputs.agenix.packages.\${pkgs.stdenv.hostPlatform.system}.default
+          glow
+          ripgrep
+          fd
+          duf
+          gdu
+          tree
+        ];
+      }
+    ];
+  };
+}
+HOMENIX
+
+ok "home.nix written."
+
 # ── impermanence.nix ───────────────────────────────────────────────
-header "Writing impermanence.nix…"
+header "Writing hosts/$HOSTNAME/impermanence.nix…"
 
 cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
-{ ... }:
-{
+{...}: {
   fileSystems."/persist".neededForBoot = true;
 
   environment.persistence."/persist" = {
     hideMounts = true;
 
     directories = [
-      { directory = "/etc/ssh";                          mode = "0755"; }
-      { directory = "/etc/secureboot";                   mode = "0700"; }
+      { directory = "/etc/ssh";                               mode = "0755"; }
+      { directory = "/etc/secureboot";                        mode = "0700"; }
       { directory = "/etc/NetworkManager/system-connections"; mode = "0700"; }
-      { directory = "/var/lib/nixos";                    mode = "0755"; }
-      { directory = "/var/lib/bluetooth";                mode = "0700"; }
-      { directory = "/var/lib/postgresql";               mode = "0700"; }
-      { directory = "/var/lib/pipewire";                 mode = "0755"; }
-      { directory = "/var/lib/fwupd";                    mode = "0755"; }
-      { directory = "/var/lib/libvirt";                  mode = "0755"; }
-      { directory = "/var/db/sudo";                      mode = "0700"; }
-      { directory = "/var/cache/tuigreet";               mode = "0755"; }
-      { directory = "/var/log/journal";                  mode = "2755"; }
+      { directory = "/var/lib/nixos";                         mode = "0755"; }
+      { directory = "/var/lib/bluetooth";                     mode = "0700"; }
+      { directory = "/var/lib/postgresql";                    mode = "0700"; }
+      { directory = "/var/lib/pipewire";                      mode = "0755"; }
+      { directory = "/var/lib/fwupd";                         mode = "0755"; }
+      { directory = "/var/lib/libvirt";                       mode = "0755"; }
+      { directory = "/var/db/sudo";                           mode = "0700"; }
+      { directory = "/var/cache/tuigreet";                    mode = "0755"; }
+      { directory = "/var/log/journal";                       mode = "2755"; }
     ];
 
     files = [
@@ -350,10 +431,10 @@ IMPERMANENCE
 ok "impermanence.nix written."
 
 # ── wipe-root.nix ─────────────────────────────────────────────────
-header "Writing wipe-root initrd module…"
+header "Writing hosts/$HOSTNAME/wipe-root.nix…"
 
 cat >"$HOST_DIR/wipe-root.nix" <<'WIPEROOT'
-{ pkgs, config, ... }:
+{pkgs, config, ...}:
 let
   wipe-root-script = pkgs.writeShellApplication {
     name = "wipe-root";
@@ -408,7 +489,7 @@ let
     '';
   };
 in {
-  boot.initrd.supportedFilesystems = [ "btrfs" ];
+  boot.initrd.supportedFilesystems = ["btrfs"];
   boot.initrd.systemd.enable = true;
 
   boot.initrd.systemd.storePaths = [
@@ -427,9 +508,9 @@ in {
 
   boot.initrd.systemd.services.wipe-root = {
     description = "Wipe / by restoring @blank btrfs snapshot";
-    wantedBy = [ "initrd.target" ];
-    after = [ "dev-disk-by\\x2dlabel-root.device" ];
-    before = [ "sysroot.mount" "initrd-root-fs.target" ];
+    wantedBy = ["initrd.target"];
+    after = ["dev-disk-by\\x2dlabel-root.device"];
+    before = ["sysroot.mount" "initrd-root-fs.target"];
     unitConfig.DefaultDependencies = false;
     serviceConfig = {
       Type = "oneshot";
@@ -441,8 +522,12 @@ WIPEROOT
 
 ok "wipe-root.nix written."
 
-# ── bootstrap-override.nix ─────────────────────────────────────────
+# ── bootstrap-override.nix (VM only) ──────────────────────────────
+# On VMs, lanzaboote must be disabled
+# This override file is detected at eval time in default.nix via
+# builtins.pathExists and included automatically when present.
 if [[ $IS_VM == "true" ]]; then
+  header "Writing hosts/$HOSTNAME/bootstrap-override.nix (VM)…"
   printf '%s\n' \
     '{ lib, ... }:' \
     '{' \
@@ -454,8 +539,12 @@ if [[ $IS_VM == "true" ]]; then
   ok "bootstrap-override.nix written."
 fi
 
+# ── hardware.nix placeholder ───────────────────────────────────────
+# Replaced later by nixos-generate-config output.
+printf '{ ... }: {}\n' >"$HOST_DIR/hardware.nix"
+
 # ── Disko config ───────────────────────────────────────────────────
-header "Generating disko partition layout…"
+header "Generating hosts/$HOSTNAME/disko.nix…"
 
 if [[ -n $HOME_DISK ]]; then
   cat >"$HOST_DIR/disko.nix" <<DISKO
@@ -474,34 +563,34 @@ if [[ -n $HOME_DISK ]]; then
               type = "filesystem";
               format = "vfat";
               mountpoint = "/boot";
-              mountOptions = [ "fmask=0077" "dmask=0077" ];
+              mountOptions = ["fmask=0077" "dmask=0077"];
             };
           };
           root = {
             size = "100%";
             content = {
               type = "btrfs";
-              extraArgs = [ "-L" "root" "-f" ];
+              extraArgs = ["-L" "root" "-f"];
               subvolumes = {
                 "@" = {
                   mountpoint = "/";
-                  mountOptions = [ "compress=zstd" "noatime" ];
+                  mountOptions = ["compress=zstd" "noatime"];
                 };
                 "@nix" = {
                   mountpoint = "/nix";
-                  mountOptions = [ "compress=zstd" "noatime" ];
+                  mountOptions = ["compress=zstd" "noatime"];
                 };
                 "@persist" = {
                   mountpoint = "/persist";
-                  mountOptions = [ "compress=zstd" "noatime" ];
+                  mountOptions = ["compress=zstd" "noatime"];
                 };
                 "@swap" = {
                   mountpoint = "/swap";
-                  mountOptions = [ "noatime" ];
+                  mountOptions = ["noatime"];
                 };
                 "@snapshots" = {
                   mountpoint = "/.snapshots";
-                  mountOptions = [ "compress=zstd" "noatime" ];
+                  mountOptions = ["compress=zstd" "noatime"];
                 };
               };
             };
@@ -517,14 +606,14 @@ if [[ -n $HOME_DISK ]]; then
         partitions = {
           home = {
             size = "100%";
-	    type = "8300";
+            type = "8300";
             content = {
               type = "btrfs";
-              extraArgs = [ "-L" "home" "-f" ];
+              extraArgs = ["-L" "home" "-f"];
               subvolumes = {
                 "@home" = {
                   mountpoint = "/home";
-                  mountOptions = [ "compress=zstd" "noatime" ];
+                  mountOptions = ["compress=zstd" "noatime"];
                 };
               };
             };
@@ -551,38 +640,38 @@ else
             type = "filesystem";
             format = "vfat";
             mountpoint = "/boot";
-            mountOptions = [ "fmask=0077" "dmask=0077" ];
+            mountOptions = ["fmask=0077" "dmask=0077"];
           };
         };
         root = {
           size = "100%";
           content = {
             type = "btrfs";
-            extraArgs = [ "-L" "root" "-f" ];
+            extraArgs = ["-L" "root" "-f"];
             subvolumes = {
               "@" = {
                 mountpoint = "/";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = ["compress=zstd" "noatime"];
               };
               "@nix" = {
                 mountpoint = "/nix";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = ["compress=zstd" "noatime"];
               };
               "@home" = {
                 mountpoint = "/home";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = ["compress=zstd" "noatime"];
               };
               "@persist" = {
                 mountpoint = "/persist";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = ["compress=zstd" "noatime"];
               };
               "@swap" = {
                 mountpoint = "/swap";
-                mountOptions = [ "noatime" ];
+                mountOptions = ["noatime"];
               };
               "@snapshots" = {
                 mountpoint = "/.snapshots";
-                mountOptions = [ "compress=zstd" "noatime" ];
+                mountOptions = ["compress=zstd" "noatime"];
               };
             };
           };
@@ -594,6 +683,32 @@ else
 DISKO
 fi
 ok "disko.nix written (btrfs: @, @nix, @home, @persist, @swap, @snapshots; labeled 'root')."
+
+# ── Register the new host in flake.nix ────────────────────────────
+header "Registering $HOSTNAME in flake.nix…"
+
+FLAKE="$TMPDIR/flake.nix"
+
+# Guard: only patch once (idempotent for re-runs).
+if grep -q "hosts/${HOSTNAME}/default.nix" "$FLAKE"; then
+  ok "flake.nix already contains $HOSTNAME — skipping patch."
+else
+  # Insert after the last existing "hosts/*/default.nix" line.
+  awk -v hostname="$HOSTNAME" '
+    /hosts\/[^/]+\/default\.nix/ { last_host_line = NR }
+    { lines[NR] = $0 }
+    END {
+      for (i = 1; i <= NR; i++) {
+        print lines[i]
+        if (i == last_host_line) {
+          print "        ./hosts/" hostname "/default.nix"
+          print "        ./hosts/" hostname "/home.nix"
+        }
+      }
+    }
+  ' "$FLAKE" >"$FLAKE.tmp" && mv "$FLAKE.tmp" "$FLAKE"
+  ok "flake.nix patched to include hosts/$HOSTNAME/default.nix and home.nix."
+fi
 
 # ── Disko — partition, format, mount ───────────────────────────────
 mount -o remount,size=4G /nix/.rw-store 2>/dev/null || true
@@ -651,7 +766,6 @@ mkdir -p /mnt/persist/var/cache/tuigreet
 mkdir -p /mnt/persist/var/log/journal
 mkdir -p /mnt/persist/var/lib/systemd
 
-# Generate a valid machine-id in /persist (this is the persistent one)
 {
   tr -d '-' </proc/sys/kernel/random/uuid
   echo
@@ -691,17 +805,12 @@ else
 fi
 NEW_HOST_PUBKEY="$(cat /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub)"
 
-if [[ -f "$HOST_DIR/bootstrap-override.nix" ]]; then
-  sed -i "s|<generated during install>|$NEW_HOST_PUBKEY|g" \
-    "$HOST_DIR/bootstrap-override.nix"
-fi
-
 # ── Hardware config ────────────────────────────────────────────────
 header "Generating hardware configuration…"
 
 nixos-generate-config --root /mnt --no-filesystems
 cp /mnt/etc/nixos/hardware-configuration.nix "$HOST_DIR/hardware.nix"
-ok "Hardware config written."
+ok "Hardware config written to hosts/$HOSTNAME/hardware.nix."
 
 # ── Secure Boot keys (bare metal only) ────────────────────────────
 if [[ $IS_VM == "false" ]]; then
@@ -737,11 +846,10 @@ else
   info "systemd-boot will be used instead of lanzaboote."
 fi
 
-# ── Temporary machine‑id for bootloader installation ───────────────
+# ── Temporary machine-id for bootloader installation ───────────────
 header "Creating temporary machine-id for bootloader..."
 
 mkdir -p /mnt/etc
-mkdir -p /mnt/persist/etc
 TMP_MACHINE_ID="$(cat /mnt/persist/etc/machine-id)"
 echo "$TMP_MACHINE_ID" >/mnt/etc/machine-id
 chmod 444 /mnt/etc/machine-id
@@ -754,7 +862,7 @@ cd "$TMPDIR"
 git add -A
 git -c user.email="bootstrap@localhost" \
   -c user.name="bootstrap" \
-  commit -m "bootstrap: generated config for $HOSTNAME with impermanence" \
+  commit -m "bootstrap: generated config for $HOSTNAME" \
   --allow-empty --quiet
 
 nixos-install \
@@ -764,7 +872,7 @@ nixos-install \
 
 ok "NixOS installed."
 
-# ── Remove temporary machine‑id & adjtime ──────────────────────────
+# ── Remove temporary machine-id & adjtime ──────────────────────────
 header "Cleaning up temporary files from /etc..."
 
 if [[ -f /mnt/etc/machine-id ]]; then
@@ -779,7 +887,6 @@ if [[ -f /mnt/etc/adjtime ]]; then
   ok "Removed /mnt/etc/adjtime"
 fi
 
-# Verification
 if [[ -e /mnt/etc/machine-id ]] || [[ -e /mnt/etc/adjtime ]]; then
   err "Failed to remove temporary files from /mnt/etc"
   exit 1
@@ -814,13 +921,15 @@ echo -e "    1. Add the pubkey above to secrets/secrets.nix"
 echo -e "    2. agenix -r -i ~/.ssh/id_ed25519"
 echo -e "    3. git add -A && git commit -m 'add $HOSTNAME host key' && git push"
 if [[ $IS_VM == "true" ]]; then
-  echo -e "    4. rm $DOTFILESDIR/modules/hosts/$HOSTNAME/bootstrap-override.nix"
-  echo -e "    5. Set bootstrapMode = false in user.nix"
+  echo -e "    4. rm $DOTFILESDIR/hosts/$HOSTNAME/bootstrap-override.nix"
+  echo -e "    5. Set bootstrapMode = false in hosts/$HOSTNAME/config.nix"
   echo -e "    6. nr"
 else
-  echo -e "    4. Set bootstrapMode = false in user.nix"
+  echo -e "    4. Set bootstrapMode = false in hosts/$HOSTNAME/config.nix"
   echo -e "    5. nr"
 fi
+echo ""
+echo -e "  ${YELLOW}${BOLD}Review system profiles for this host:${RESET}"
 echo ""
 echo -e "  ${CYAN}${BOLD}Impermanence:${RESET}"
 echo -e "  ${DIM}/ is wiped on every boot via btrfs @blank snapshot restore."

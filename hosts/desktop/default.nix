@@ -18,19 +18,11 @@ in {
         inputs.lanzaboote.nixosModules.lanzaboote
         inputs.impermanence.nixosModules.impermanence
 
-        # ── Universal system modules ───────────────────────────────────────
-        ../../modules/system/core.nix
-        ../../modules/system/audio.nix
-        ../../modules/system/desktop.nix
-        ../../modules/system/display.nix
-        ../../modules/system/entry.nix
-        ../../modules/system/lanzaboote.nix
-        ../../modules/system/secrets.nix
-        ../../modules/system/postgres.nix
-
-        # ── Desktop-specific profiles ──────────────────────────────────────
+        # ── Profiles ───────────────────────────────────────────────────────
+        ../../profiles/system/base.nix
+        ../../profiles/system/misc.nix
         ../../profiles/system/nvidia.nix
-        # DISABLED ../../profiles/system/virtualisation.nix
+        # ../../profiles/system/virtualisation.nix
       ]
       ++ (
         let

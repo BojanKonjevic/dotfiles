@@ -1,13 +1,4 @@
-{
-  inputs,
-  pkgs,
-  ...
-}: {
-  imports = [
-    inputs.nixvim.homeModules.nixvim
-    ../../modules/home/nixvim.nix
-  ];
-
+{pkgs, ...}: {
   home.packages = with pkgs; [
     python3
   ];
