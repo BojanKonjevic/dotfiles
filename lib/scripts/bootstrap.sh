@@ -777,49 +777,6 @@ chown -R 1000:100 "/mnt$HOME_DIR"
 ok "Dotfiles copied to $INSTALL_DOTFILES."
 
 # ── Done ───────────────────────────────────────────────────────────
-echo ""
-echo -e "${GREEN}${BOLD}  ✓ Installation complete!${RESET}"
-echo ""
-echo -e "  ${CYAN}${BOLD}New host pubkey (add this to secrets/secrets.nix):${RESET}"
-echo -e "  ${BOLD}$NEW_HOST_PUBKEY${RESET}"
-echo ""
-echo -e "  ${YELLOW}${BOLD}Post-boot steps to restore full agenix:${RESET}"
-echo -e "    1. Update agenix keys in secrets.nix"
-echo -e "    2. agenix -r -i ~/.ssh/id_ed25519"
-echo -e "    3. Add new ssh key to github"
-echo -e "    4. chmod 600 ~/.ssh/id_ed25519 
-                chmod 644 ~/.ssh/id_ed25519.pub"
-echo -e "    5. ssh -T git@github.com"
-if [[ $IS_VM == "true" ]]; then
-  echo -e "    6. rm $DOTFILESDIR/hosts/$HOSTNAME/bootstrap-override.nix"
-  echo -e "    7. Set bootstrapMode = false in hosts/$HOSTNAME/config.nix"
-  echo -e "    8. nr"
-  echo -e "    9. Push new host to git"
-else
-  echo -e "    6. Set bootstrapMode = false in hosts/$HOSTNAME/config.nix"
-  echo -e "    7. nr"
-  echo -e "    8. Push new host to git"
-fi
-echo ""
-echo -e "  ${YELLOW}${BOLD}Review system profiles for this host:${RESET}"
-echo ""
-echo -e "  ${CYAN}${BOLD}Impermanence:${RESET}"
-echo -e "  ${DIM}/ is wiped on every boot via btrfs @blank snapshot restore."
-echo -e "  /home (@home), /nix (@nix), and /persist (@persist) are never wiped."
-echo -e "  Persistent state is bind-mounted from /persist on each boot.${RESET}"
-echo ""
-echo -e "  ${CYAN}${BOLD}Verifying impermanence after first boot:${RESET}"
-echo -e "  ${DIM}  journalctl -b -u wipe-root          # confirm wipe ran"
-echo -e "    findmnt | grep persist              # confirm bind-mounts active"
-echo -e "    touch /test-impermanence && reboot  # file should vanish after reboot${RESET}"
-echo ""
-if [[ $IS_VM == "false" ]]; then
-  echo -e "  ${YELLOW}${BOLD}Secure Boot note:${RESET}"
-  echo -e "  ${DIM}If keys could not be auto-enrolled, enter your firmware,"
-  echo -e "  enable Setup Mode, then run:${RESET}"
-  echo -e "    sbctl enroll-keys --microsoft"
-  echo ""
-fi
 
 if confirm "Reboot now?"; then
   reboot
