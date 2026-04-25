@@ -707,6 +707,17 @@ else
   info "systemd-boot will be used instead of lanzaboote."
 fi
 
+# ── Set initial user password ──────────────────────────────────────
+# Change with mkpasswd -m sha-512 | sudo tee /persist/passwords/username
+header "Setting initial password for $USERNAME…"
+
+mkdir -p /mnt/persist/passwords
+chmod 700 /mnt/persist/passwords
+echo "$HASHED_PASSWORD" >/mnt/persist/passwords/"$USERNAME"
+chmod 600 /mnt/persist/passwords/"$USERNAME"
+unset HASHED_PASSWORD
+ok "Password hash written to /persist/passwords/$USERNAME."
+
 # ── Temporary machine-id for bootloader installation ───────────────
 header "Creating temporary machine-id for bootloader..."
 
@@ -732,17 +743,6 @@ nixos-install \
   --option download-buffer-size 134217728
 
 ok "NixOS installed."
-
-# ── Set initial user password ──────────────────────────────────────
-# Change with mkpasswd -m sha-512 | sudo tee /persist/passwords/username
-header "Setting initial password for $USERNAME…"
-
-mkdir -p /mnt/persist/passwords
-chmod 700 /mnt/persist/passwords
-echo "$HASHED_PASSWORD" >/mnt/persist/passwords/"$USERNAME"
-chmod 600 /mnt/persist/passwords/"$USERNAME"
-unset HASHED_PASSWORD
-ok "Password hash written to /persist/passwords/$USERNAME."
 
 # ── Remove temporary machine-id & adjtime ──────────────────────────
 header "Cleaning up temporary files from /etc..."
