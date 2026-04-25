@@ -19,28 +19,34 @@
           root = {
             size = "100%";
             content = {
-              type = "btrfs";
-              extraArgs = ["-L" "root" "-f"];
-              subvolumes = {
-                "@" = {
-                  mountpoint = "/";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@nix" = {
-                  mountpoint = "/nix";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@persist" = {
-                  mountpoint = "/persist";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@swap" = {
-                  mountpoint = "/swap";
-                  mountOptions = ["noatime"];
-                };
-                "@snapshots" = {
-                  mountpoint = "/.snapshots";
-                  mountOptions = ["compress=zstd" "noatime"];
+              type = "luks";
+              name = "cryptroot";
+              extraFormatArgs = ["--type" "luks2"];
+              settings.allowDiscards = true;
+              content = {
+                type = "btrfs";
+                extraArgs = ["-L" "root" "-f"];
+                subvolumes = {
+                  "@" = {
+                    mountpoint = "/";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
+                  "@nix" = {
+                    mountpoint = "/nix";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
+                  "@persist" = {
+                    mountpoint = "/persist";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
+                  "@swap" = {
+                    mountpoint = "/swap";
+                    mountOptions = ["noatime"];
+                  };
+                  "@snapshots" = {
+                    mountpoint = "/.snapshots";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
                 };
               };
             };
@@ -58,12 +64,18 @@
             size = "100%";
             type = "8300";
             content = {
-              type = "btrfs";
-              extraArgs = ["-L" "home" "-f"];
-              subvolumes = {
-                "@home" = {
-                  mountpoint = "/home";
-                  mountOptions = ["compress=zstd" "noatime"];
+              type = "luks";
+              name = "crypthome";
+              extraFormatArgs = ["--type" "luks2"];
+              settings.allowDiscards = true;
+              content = {
+                type = "btrfs";
+                extraArgs = ["-L" "home" "-f"];
+                subvolumes = {
+                  "@home" = {
+                    mountpoint = "/home";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
                 };
               };
             };

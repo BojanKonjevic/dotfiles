@@ -19,6 +19,7 @@ in {
       ../../profiles/home/media.nix
       ../../profiles/home/misc.nix
 
+
       # ── Base HM config ─────────────────────────────────────────────────────
       {
         home.username = userConfig.username;

@@ -5,8 +5,8 @@
 }: let
   userConfig = import ./config.nix;
 in {
-  flake.nixosConfigurations.desktop = inputs.nixpkgs.lib.nixosSystem {
-    system = "x86_64-linux";
+  flake.nixosConfigurations.${userConfig.hostname} = inputs.nixpkgs.lib.nixosSystem {
+    system = userConfig.system;
     specialArgs = {inherit inputs userConfig self;};
     modules =
       [
