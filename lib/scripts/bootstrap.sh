@@ -731,11 +731,6 @@ ok "Temporary machine-id written (reusing persistent ID)."
 header "Installing NixOS…"
 
 cd "$TMPDIR"
-git add -A
-git -c user.email="bootstrap@localhost" \
-  -c user.name="bootstrap" \
-  commit -m "bootstrap: generated config for $HOSTNAME" \
-  --allow-empty --quiet
 
 nixos-install \
   --flake "$TMPDIR#$HOSTNAME" \
@@ -789,16 +784,21 @@ echo -e "  ${CYAN}${BOLD}New host pubkey (add this to secrets/secrets.nix):${RES
 echo -e "  ${BOLD}$NEW_HOST_PUBKEY${RESET}"
 echo ""
 echo -e "  ${YELLOW}${BOLD}Post-boot steps to restore full agenix:${RESET}"
-echo -e "    1. Add the pubkey above to secrets/secrets.nix"
+echo -e "    1. Update agenix keys in secrets.nix"
 echo -e "    2. agenix -r -i ~/.ssh/id_ed25519"
-echo -e "    3. git add -A && git commit -m 'add $HOSTNAME host key' && git push"
+echo -e "    3. Add new ssh key to github"
+echo -e "    4. chmod 600 ~/.ssh/id_ed25519 
+                chmod 644 ~/.ssh/id_ed25519.pub"
+echo -e "    5. ssh -T git@github.com"
 if [[ $IS_VM == "true" ]]; then
-  echo -e "    4. rm $DOTFILESDIR/hosts/$HOSTNAME/bootstrap-override.nix"
-  echo -e "    5. Set bootstrapMode = false in hosts/$HOSTNAME/config.nix"
-  echo -e "    6. nr"
+  echo -e "    6. rm $DOTFILESDIR/hosts/$HOSTNAME/bootstrap-override.nix"
+  echo -e "    7. Set bootstrapMode = false in hosts/$HOSTNAME/config.nix"
+  echo -e "    8. nr"
+  echo -e "    9. Push new host to git"
 else
-  echo -e "    4. Set bootstrapMode = false in hosts/$HOSTNAME/config.nix"
-  echo -e "    5. nr"
+  echo -e "    6. Set bootstrapMode = false in hosts/$HOSTNAME/config.nix"
+  echo -e "    7. nr"
+  echo -e "    8. Push new host to git"
 fi
 echo ""
 echo -e "  ${YELLOW}${BOLD}Review system profiles for this host:${RESET}"

@@ -60,9 +60,6 @@ in {
       diff.colorMoved = "default";
     };
   };
-  home.file.".ssh/id_ed25519" = {
-    source = config.lib.file.mkOutOfStoreSymlink "/run/agenix/ssh-private-key";
-  };
   home.file.".ssh/id_ed25519.pub".text = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA8WKB45Qb5CqZPlE7LWKjkaCikJbjA87sVQwJWDTAB4 konjevicbojan1@gmail.com";
   programs.kitty = {
     enable = true;
