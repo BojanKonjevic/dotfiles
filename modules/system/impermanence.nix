@@ -59,6 +59,7 @@
       "/etc/machine-id"
       "/etc/adjtime"
       "/var/lib/systemd/random-seed"
+      "/etc/shadow"
     ];
   };
 }

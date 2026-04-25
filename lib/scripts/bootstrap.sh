@@ -714,6 +714,13 @@ nixos-install \
 
 ok "NixOS installed."
 
+# ── Set initial user password ──────────────────────────────────────
+header "Setting initial password for $USERNAME…"
+
+echo "$USERNAME:$HASHED_PASSWORD" | nixos-enter --root /mnt -- chpasswd -e
+unset HASHED_PASSWORD
+ok "Password written to /persist/etc/shadow via bind-mount."
+
 # ── Remove temporary machine-id & adjtime ──────────────────────────
 header "Cleaning up temporary files from /etc..."
 

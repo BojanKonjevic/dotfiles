@@ -67,7 +67,6 @@
   users.users.${userConfig.username} = {
     shell = pkgs.zsh;
     isNormalUser = true;
-    hashedPassword = "$6$4nQN1kr/uXFf6tkU$RriAbWRIQv5DgqduabqDaA.N3dtSgHisu9mYcveaUZegvzBN5svGf9zgcU.MufMPk/PlemNQyxpW1jgWmaxCy/";
     description = userConfig.fullName;
     extraGroups = [
       "libvirtd"
