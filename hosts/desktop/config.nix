@@ -2,11 +2,6 @@
 # All fields here are the single source of truth — nothing else should define
 # these per-machine values.
 {
-  # ── Identity ──────────────────────────────────────────────────────────────
-  username = "bojan";
-  fullName = "Bojan Konjevic";
-  email = "konjevicbojan1@gmail.com";
-
   # ── Machine ───────────────────────────────────────────────────────────────
   hostname = "desktop";
   system = "x86_64-linux";

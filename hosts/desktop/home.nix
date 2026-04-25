@@ -1,5 +1,5 @@
 {inputs, ...}: let
-  userConfig = import ./config.nix;
+  userConfig = (import ../../user.nix) // (import ./config.nix);
   system = userConfig.system;
   pkgs = inputs.nixpkgs.legacyPackages.${system};
 in {
@@ -18,7 +18,6 @@ in {
       ../../profiles/home/programming.nix
       ../../profiles/home/media.nix
       ../../profiles/home/misc.nix
-
 
       # ── Base HM config ─────────────────────────────────────────────────────
       {

@@ -95,7 +95,6 @@ esac
 # ── Auto-detect ────────────────────────────────────────────────────
 header "Auto-detecting system values…"
 
-DETECTED_USER="nixos"
 DETECTED_SYSTEM="$("${NIX[@]}" eval --impure --expr 'builtins.currentSystem' --raw 2>/dev/null || echo 'x86_64-linux')"
 DETECTED_TIMEZONE="$(timedatectl show --property=Timezone --value 2>/dev/null || echo 'Europe/Belgrade')"
 DETECTED_LOCALE="$(locale 2>/dev/null | grep '^LANG=' | cut -d= -f2 | tr -d '"' || echo 'en_US.UTF-8')"
@@ -127,6 +126,14 @@ else
   fi
 fi
 
+# ── Read user identity from repo ───────────────────────────────────
+header "Reading user identity from dotfiles repo…"
+
+_user_nix=$(curl -sf "https://raw.githubusercontent.com/BojanKonjevic/dotfiles/main/user.nix" 2>/dev/null || true)
+USERNAME=$(echo "$_user_nix" | grep -oP 'username\s*=\s*"\K[^"]+' || echo "bojan")
+HOME_DIR="/home/$USERNAME"
+ok "Username: $USERNAME (from user.nix)"
+
 echo ""
 info "Available disks:"
 lsblk -d -o NAME,SIZE,MODEL | grep -v loop | sed 's/^/    /'
@@ -134,11 +141,7 @@ lsblk -d -o NAME,SIZE,MODEL | grep -v loop | sed 's/^/    /'
 # ── Interactive prompts ────────────────────────────────────────────
 header "A few things I need from you…"
 
-prompt "Username to configure" "$DETECTED_USER" USERNAME
-HOME_DIR="/home/$USERNAME"
 prompt "Hostname for this machine" "$DETECTED_HOSTNAME" HOSTNAME
-prompt "Your full name" "Your Name" FULLNAME
-prompt "Your email" "you@example.com" EMAIL
 prompt "Weather city (e.g. New+York)" "New+York" WEATHERCITY
 prompt "Dotfiles location on new system" "$HOME_DIR/dotfiles" DOTFILESDIR
 prompt "Disk to install to" "$DETECTED_DISK" DISK
@@ -181,9 +184,7 @@ echo ""
 # ── Summary ────────────────────────────────────────────────────────
 header "Summary"
 echo ""
-echo -e "    username      = ${BOLD}$USERNAME${RESET}"
-echo -e "    fullName      = ${BOLD}$FULLNAME${RESET}"
-echo -e "    email         = ${BOLD}$EMAIL${RESET}"
+echo -e "    username      = ${BOLD}$USERNAME${RESET}  ${DIM}(from user.nix)${RESET}"
 echo -e "    hostname      = ${BOLD}$HOSTNAME${RESET}"
 echo -e "    system        = ${BOLD}$DETECTED_SYSTEM${RESET}"
 echo -e "    timezone      = ${BOLD}$DETECTED_TIMEZONE${RESET}"
@@ -242,11 +243,6 @@ cat >"$HOST_DIR/config.nix" <<CONFIGNIX
 # All fields here are the single source of truth — nothing else should define
 # these per-machine values.
 {
-  # ── Identity ──────────────────────────────────────────────────────────────
-  username = "$USERNAME";
-  fullName = "$FULLNAME";
-  email    = "$EMAIL";
-
   # ── Machine ───────────────────────────────────────────────────────────────
   hostname = "$HOSTNAME";
   system   = "$DETECTED_SYSTEM";
@@ -289,7 +285,7 @@ cat >"$HOST_DIR/default.nix" <<HOSTNIX
   inputs,
   ...
 }: let
-  userConfig = import ./config.nix;
+  userConfig = (import ../../user.nix) // (import ./config.nix);
 in {
   flake.nixosConfigurations.\${userConfig.hostname} = inputs.nixpkgs.lib.nixosSystem {
     system = userConfig.system;
@@ -321,13 +317,11 @@ HOSTNIX
 ok "default.nix written."
 
 # ── hosts/<hostname>/home.nix ─────────────────────────────────────
-# The home configuration is a separate flake-parts module that
-# lives alongside default.nix in the host directory.
 header "Writing hosts/$HOSTNAME/home.nix…"
 
 cat >"$HOST_DIR/home.nix" <<HOMENIX
 {inputs, ...}: let
-  userConfig = import ./config.nix;
+  userConfig = (import ../../user.nix) // (import ./config.nix);
   system = userConfig.system;
   pkgs = inputs.nixpkgs.legacyPackages.\${system};
 in {
@@ -347,7 +341,6 @@ in {
       ../../profiles/home/media.nix
       ../../profiles/home/misc.nix
 
-
       # ── Base HM config ─────────────────────────────────────────────────────
       {
         home.username = userConfig.username;
@@ -366,9 +359,6 @@ HOMENIX
 ok "home.nix written."
 
 # ── bootstrap-override.nix (VM only) ──────────────────────────────
-# On VMs, lanzaboote must be disabled
-# This override file is detected at eval time in default.nix via
-# builtins.pathExists and included automatically when present.
 if [[ $IS_VM == "true" ]]; then
   header "Writing hosts/$HOSTNAME/bootstrap-override.nix (VM)…"
   printf '%s\n' \
@@ -383,7 +373,6 @@ if [[ $IS_VM == "true" ]]; then
 fi
 
 # ── hardware.nix placeholder ───────────────────────────────────────
-# Replaced later by nixos-generate-config output.
 printf '{ ... }: {}\n' >"$HOST_DIR/hardware.nix"
 
 # ── Disko config ───────────────────────────────────────────────────
@@ -550,11 +539,9 @@ header "Registering $HOSTNAME in flake.nix…"
 
 FLAKE="$TMPDIR/flake.nix"
 
-# Guard: only patch once (idempotent for re-runs).
 if grep -q "hosts/${HOSTNAME}/default.nix" "$FLAKE"; then
   ok "flake.nix already contains $HOSTNAME — skipping patch."
 else
-  # Insert after the last existing "hosts/*/default.nix" line.
   awk -v hostname="$HOSTNAME" '
     /hosts\/[^/]+\/default\.nix/ { last_host_line = NR }
     { lines[NR] = $0 }
@@ -708,7 +695,6 @@ else
 fi
 
 # ── Set initial user password ──────────────────────────────────────
-# Change with mkpasswd -m sha-512 | sudo tee /persist/passwords/username
 header "Setting initial password for $USERNAME…"
 
 mkdir -p /mnt/persist/passwords
