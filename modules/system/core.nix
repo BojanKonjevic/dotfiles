@@ -68,6 +68,7 @@
     shell = pkgs.zsh;
     isNormalUser = true;
     description = userConfig.fullName;
+    hashedPasswordFile = "/persist/passwords/${userConfig.username}";
     extraGroups = [
       "libvirtd"
       "networkmanager"
