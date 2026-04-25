@@ -715,6 +715,7 @@ nixos-install \
 ok "NixOS installed."
 
 # ── Set initial user password ──────────────────────────────────────
+# Change with mkpasswd -m sha-512 | sudo tee /persist/passwords/username
 header "Setting initial password for $USERNAME…"
 
 mkdir -p /mnt/persist/passwords
