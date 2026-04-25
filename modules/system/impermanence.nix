@@ -7,7 +7,7 @@
     directories = [
       {
         directory = "/etc/ssh";
-        mode = "0755";
+        mode = "0700";
       }
       {
         directory = "/etc/secureboot";

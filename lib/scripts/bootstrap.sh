@@ -297,11 +297,7 @@ in {
       [
         ./hardware.nix
         ./disko.nix
-        ./impermanence.nix
-        ./wipe-root.nix
         inputs.disko.nixosModules.disko
-        inputs.lanzaboote.nixosModules.lanzaboote
-        inputs.impermanence.nixosModules.impermanence
 
         # ── Profiles ───────────────────────────────────────────────────────
         ../../profiles/system/base.nix
@@ -367,134 +363,6 @@ in {
 HOMENIX
 
 ok "home.nix written."
-
-# ── impermanence.nix ───────────────────────────────────────────────
-header "Writing hosts/$HOSTNAME/impermanence.nix…"
-
-cat >"$HOST_DIR/impermanence.nix" <<'IMPERMANENCE'
-{...}: {
-  fileSystems."/persist".neededForBoot = true;
-
-  environment.persistence."/persist" = {
-    hideMounts = true;
-
-    directories = [
-      { directory = "/etc/ssh";                               mode = "0755"; }
-      { directory = "/etc/secureboot";                        mode = "0700"; }
-      { directory = "/etc/NetworkManager/system-connections"; mode = "0700"; }
-      { directory = "/var/lib/nixos";                         mode = "0755"; }
-      { directory = "/var/lib/bluetooth";                     mode = "0700"; }
-      { directory = "/var/lib/postgresql";                    mode = "0700"; }
-      { directory = "/var/lib/pipewire";                      mode = "0755"; }
-      { directory = "/var/lib/fwupd";                         mode = "0755"; }
-      { directory = "/var/lib/libvirt";                       mode = "0755"; }
-      { directory = "/var/db/sudo";                           mode = "0700"; }
-      { directory = "/var/cache/tuigreet";                    mode = "0755"; }
-      { directory = "/var/log/journal";                       mode = "2755"; }
-    ];
-
-    files = [
-      "/etc/machine-id"
-      "/etc/adjtime"
-      "/var/lib/systemd/random-seed"
-    ];
-  };
-}
-IMPERMANENCE
-
-ok "impermanence.nix written."
-
-# ── wipe-root.nix ─────────────────────────────────────────────────
-header "Writing hosts/$HOSTNAME/wipe-root.nix…"
-
-cat >"$HOST_DIR/wipe-root.nix" <<'WIPEROOT'
-{pkgs, config, ...}:
-let
-  wipe-root-script = pkgs.writeShellApplication {
-    name = "wipe-root";
-    runtimeInputs = [
-      pkgs.btrfs-progs
-      pkgs.gnugrep
-      pkgs.gawk
-      pkgs.coreutils
-      pkgs.util-linux
-    ];
-    text = ''
-      echo "wipe-root: Starting root wipe..."
-
-      i=0
-      until test -e /dev/disk/by-label/root; do
-        echo "wipe-root: Waiting for /dev/disk/by-label/root... ($i)"
-        sleep 0.2
-        i=$(( i + 1 ))
-        if test "$i" -gt 15; then
-          echo "wipe-root: Timed out waiting for device"
-          exit 1
-        fi
-      done
-
-      MNT="$(mktemp -d)"
-      mount -t btrfs -o subvolid=5 /dev/disk/by-label/root "$MNT"
-
-      if btrfs subvolume list "$MNT" | grep -q ' @blank$'; then
-        echo "wipe-root: Deleting @ and all nested subvolumes..."
-
-        NESTED="$(btrfs subvolume list -o "$MNT/@" \
-          | awk '{print $NF}' \
-          | sort -r)"
-
-        if [ -n "$NESTED" ]; then
-          while IFS= read -r sub; do
-            echo "wipe-root: Deleting nested subvolume: $sub"
-            btrfs subvolume delete "$MNT/$sub"
-          done <<< "$NESTED"
-        fi
-
-        btrfs subvolume delete "$MNT/@"
-        echo "wipe-root: Creating snapshot from @blank..."
-        btrfs subvolume snapshot "$MNT/@blank" "$MNT/@"
-        echo "wipe-root: Wipe complete."
-      else
-        echo "wipe-root: @blank not found, skipping wipe." >&2
-      fi
-
-      umount "$MNT"
-      rmdir "$MNT"
-    '';
-  };
-in {
-  boot.initrd.supportedFilesystems = ["btrfs"];
-  boot.initrd.systemd.enable = true;
-
-  boot.initrd.systemd.storePaths = [
-    "${wipe-root-script}/bin/wipe-root"
-    "${pkgs.btrfs-progs}/bin/btrfs"
-    "${pkgs.gnugrep}/bin/grep"
-    "${pkgs.gawk}/bin/awk"
-    "${pkgs.coreutils}/bin/test"
-    "${pkgs.coreutils}/bin/sleep"
-    "${pkgs.coreutils}/bin/mktemp"
-    "${pkgs.coreutils}/bin/rmdir"
-    "${pkgs.coreutils}/bin/sort"
-    "${pkgs.util-linux}/bin/mount"
-    "${pkgs.util-linux}/bin/umount"
-  ];
-
-  boot.initrd.systemd.services.wipe-root = {
-    description = "Wipe / by restoring @blank btrfs snapshot";
-    wantedBy = ["initrd.target"];
-    after = ["dev-disk-by\\x2dlabel-root.device"];
-    before = ["sysroot.mount" "initrd-root-fs.target"];
-    unitConfig.DefaultDependencies = false;
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${wipe-root-script}/bin/wipe-root";
-    };
-  };
-}
-WIPEROOT
-
-ok "wipe-root.nix written."
 
 # ── bootstrap-override.nix (VM only) ──────────────────────────────
 # On VMs, lanzaboote must be disabled

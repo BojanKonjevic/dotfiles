@@ -1,8 +1,4 @@
-{
-  pkgs,
-  config,
-  ...
-}: let
+{pkgs, ...}: let
   wipe-root-script = pkgs.writeShellApplication {
     name = "wipe-root";
     runtimeInputs = [

@@ -1,6 +1,7 @@
 {...}: {
   perSystem = {pkgs, ...}: {
     apps.bootstrap = {
+      meta.description = "Bootstrap a new NixOS machine from dotfiles";
       type = "app";
       program = toString (
         pkgs.writeShellScript "bootstrap" ''
@@ -10,6 +11,7 @@
       );
     };
     apps.new-python-project = {
+      meta.description = "Creates a new python project from template";
       type = "app";
       program = toString (
         pkgs.writeShellScript "new-python-project" ''

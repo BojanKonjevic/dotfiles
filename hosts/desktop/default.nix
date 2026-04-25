@@ -12,11 +12,7 @@ in {
       [
         ./hardware.nix
         ./disko.nix
-        ./impermanence.nix
-        ./wipe-root.nix
         inputs.disko.nixosModules.disko
-        inputs.lanzaboote.nixosModules.lanzaboote
-        inputs.impermanence.nixosModules.impermanence
 
         # ── Profiles ───────────────────────────────────────────────────────
         ../../profiles/system/base.nix
