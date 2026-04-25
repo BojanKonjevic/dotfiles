@@ -250,6 +250,7 @@ cat >"$HOST_DIR/config.nix" <<CONFIGNIX
   # ── Machine ───────────────────────────────────────────────────────────────
   hostname = "$HOSTNAME";
   system   = "$DETECTED_SYSTEM";
+  homeDisk = "$HOME_DISK";
 
   # ── Paths ─────────────────────────────────────────────────────────────────
   homeDirectory  = "/home/$USERNAME";
@@ -411,28 +412,34 @@ if [[ -n $HOME_DISK ]]; then
           root = {
             size = "100%";
             content = {
-              type = "btrfs";
-              extraArgs = ["-L" "root" "-f"];
-              subvolumes = {
-                "@" = {
-                  mountpoint = "/";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@nix" = {
-                  mountpoint = "/nix";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@persist" = {
-                  mountpoint = "/persist";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@swap" = {
-                  mountpoint = "/swap";
-                  mountOptions = ["noatime"];
-                };
-                "@snapshots" = {
-                  mountpoint = "/.snapshots";
-                  mountOptions = ["compress=zstd" "noatime"];
+              type = "luks";
+              name = "cryptroot";
+              extraFormatArgs = ["--type" "luks2"];
+              settings.allowDiscards = true;
+              content = {
+                type = "btrfs";
+                extraArgs = ["-L" "root" "-f"];
+                subvolumes = {
+                  "@" = {
+                    mountpoint = "/";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
+                  "@nix" = {
+                    mountpoint = "/nix";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
+                  "@persist" = {
+                    mountpoint = "/persist";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
+                  "@swap" = {
+                    mountpoint = "/swap";
+                    mountOptions = ["noatime"];
+                  };
+                  "@snapshots" = {
+                    mountpoint = "/.snapshots";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
                 };
               };
             };
@@ -450,12 +457,18 @@ if [[ -n $HOME_DISK ]]; then
             size = "100%";
             type = "8300";
             content = {
-              type = "btrfs";
-              extraArgs = ["-L" "home" "-f"];
-              subvolumes = {
-                "@home" = {
-                  mountpoint = "/home";
-                  mountOptions = ["compress=zstd" "noatime"];
+              type = "luks";
+              name = "crypthome";
+              extraFormatArgs = ["--type" "luks2"];
+              settings.allowDiscards = true;
+              content = {
+                type = "btrfs";
+                extraArgs = ["-L" "home" "-f"];
+                subvolumes = {
+                  "@home" = {
+                    mountpoint = "/home";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
                 };
               };
             };
@@ -488,32 +501,38 @@ else
         root = {
           size = "100%";
           content = {
-            type = "btrfs";
-            extraArgs = ["-L" "root" "-f"];
-            subvolumes = {
-              "@" = {
-                mountpoint = "/";
-                mountOptions = ["compress=zstd" "noatime"];
-              };
-              "@nix" = {
-                mountpoint = "/nix";
-                mountOptions = ["compress=zstd" "noatime"];
-              };
-              "@home" = {
-                mountpoint = "/home";
-                mountOptions = ["compress=zstd" "noatime"];
-              };
-              "@persist" = {
-                mountpoint = "/persist";
-                mountOptions = ["compress=zstd" "noatime"];
-              };
-              "@swap" = {
-                mountpoint = "/swap";
-                mountOptions = ["noatime"];
-              };
-              "@snapshots" = {
-                mountpoint = "/.snapshots";
-                mountOptions = ["compress=zstd" "noatime"];
+            type = "luks";
+            name = "cryptroot";
+            extraFormatArgs = ["--type" "luks2"];
+            settings.allowDiscards = true;
+            content = {
+              type = "btrfs";
+              extraArgs = ["-L" "root" "-f"];
+              subvolumes = {
+                "@" = {
+                  mountpoint = "/";
+                  mountOptions = ["compress=zstd" "noatime"];
+                };
+                "@nix" = {
+                  mountpoint = "/nix";
+                  mountOptions = ["compress=zstd" "noatime"];
+                };
+                "@home" = {
+                  mountpoint = "/home";
+                  mountOptions = ["compress=zstd" "noatime"];
+                };
+                "@persist" = {
+                  mountpoint = "/persist";
+                  mountOptions = ["compress=zstd" "noatime"];
+                };
+                "@swap" = {
+                  mountpoint = "/swap";
+                  mountOptions = ["noatime"];
+                };
+                "@snapshots" = {
+                  mountpoint = "/.snapshots";
+                  mountOptions = ["compress=zstd" "noatime"];
+                };
               };
             };
           };
@@ -569,7 +588,7 @@ header "Creating @blank snapshot for impermanence…"
 
 BTRFS_MNT="/mnt/btrfs-root"
 mkdir -p "$BTRFS_MNT"
-mount -o subvolid=5 "/dev/disk/by-label/root" "$BTRFS_MNT"
+mount -o subvolid=5 /dev/mapper/cryptroot "$BTRFS_MNT"
 
 btrfs subvolume snapshot -r "$BTRFS_MNT/@" "$BTRFS_MNT/@blank"
 ok "@blank read-only snapshot created."

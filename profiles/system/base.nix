@@ -9,5 +9,6 @@
     ../../modules/system/impermanence.nix
     ../../modules/system/wipe-root.nix
     inputs.impermanence.nixosModules.impermanence
+    ../../modules/system/luks.nix
   ];
 }

@@ -12,8 +12,8 @@
       echo "wipe-root: Starting root wipe..."
 
       i=0
-      until test -e /dev/disk/by-label/root; do
-        echo "wipe-root: Waiting for /dev/disk/by-label/root... ($i)"
+      until test -e /dev/mapper/cryptroot; do
+        echo "wipe-root: Waiting for /dev/mapper/cryptroot... ($i)"
         sleep 0.2
         i=$(( i + 1 ))
         if test "$i" -gt 15; then
@@ -23,7 +23,7 @@
       done
 
       MNT="$(mktemp -d)"
-      mount -t btrfs -o subvolid=5 /dev/disk/by-label/root "$MNT"
+      mount -t btrfs -o subvolid=5 /dev/mapper/cryptroot "$MNT"
 
       if btrfs subvolume list "$MNT" | grep -q ' @blank$'; then
         echo "wipe-root: Deleting @ and all nested subvolumes..."
