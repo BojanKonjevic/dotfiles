@@ -165,12 +165,23 @@ HASHED_PASSWORD="$(mkpasswd -m sha-512 "$PASSWORD")"
 unset PASSWORD PASSWORD2
 
 # ── Wipe warning ───────────────────────────────────────────────────
-echo ""
-echo -e "  ${RED}${BOLD}╔════════════════════════════════════════════════╗${RESET}"
-echo -e "  ${RED}${BOLD}║  WARNING: $DISK WILL BE COMPLETELY WIPED       ║${RESET}"
-echo -e "  ${RED}${BOLD}║  ALL DATA ON THIS DISK WILL BE LOST FOREVER    ║${RESET}"
-echo -e "  ${RED}${BOLD}╚════════════════════════════════════════════════╝${RESET}"
-echo ""
+warn_text="WARNING: $DISK WILL BE COMPLETELY WIPED"
+warn2_text="ALL DATA ON THIS DISK WILL BE LOST FOREVER"
+box_width=52
+
+print_warn_line() {
+  local text="$1"
+  local pad=$((box_width - ${#text} - 4))
+  echo -e "  ${RED}${BOLD}║  ${text}$(printf ' %.0s' $(seq 1 $pad))  ║${RESET}"
+}
+
+echo -e "  ${RED}${BOLD}╔$(printf '═%.0s' $(seq 1 $box_width))╗${RESET}"
+print_warn_line "$warn_text"
+if [[ -n $HOME_DISK ]]; then
+  print_warn_line "WARNING: $HOME_DISK WILL BE COMPLETELY WIPED"
+fi
+print_warn_line "$warn2_text"
+echo -e "  ${RED}${BOLD}╚$(printf '═%.0s' $(seq 1 $box_width))╝${RESET}"
 
 # ── Summary ────────────────────────────────────────────────────────
 header "Summary"
