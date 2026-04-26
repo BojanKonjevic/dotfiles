@@ -4,4 +4,6 @@ let
 in {
   "cachix-token.age".publicKeys = [desktop me];
   "ssh-private-key.age".publicKeys = [desktop me];
+  "restic-password.age".publicKeys = [desktop me];
+  "restic-env.age".publicKeys = [desktop me];
 }

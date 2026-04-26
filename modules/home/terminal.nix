@@ -138,6 +138,7 @@ in {
       vmi = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh install";
       vmr = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh run";
       buildiso = "cd ${userConfig.dotfilesDir} && nix build .#iso";
+      restic-snapshots = "sudo bash -c 'env $(cat /run/agenix/restic-env) restic -r b2:bojan-backup --password-file /run/agenix/restic-password snapshots'";
     };
     initContent = ''
       export CACHIX_AUTH_TOKEN="$(cat /run/agenix/cachix-token 2>/dev/null)"
@@ -165,6 +166,11 @@ in {
         [[ $confirm == "y" ]] || { echo "Aborted."; return 1; }
         sudo dd if="$iso" of="$target" bs=4M status=progress conv=fsync
         echo -e "\033[1;32m✓\033[0m  Done — safe to remove drive."
+      }
+
+      restic-restore() {
+        local id=''${1:-latest}
+        sudo bash -c "env \$(cat /run/agenix/restic-env) restic -r b2:bojan-backup --password-file /run/agenix/restic-password restore $id --target /tmp/restore"
       }
 
       zstyle ':completion:*' menu select
