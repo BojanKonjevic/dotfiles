@@ -112,13 +112,23 @@ downgrade:
 db-drop:
     dropdb $NAME
 db-drop-test:
-    dropdb ${NAME}_test"
+    dropdb ${NAME}_test
+db-create:
+    createdb $NAME && createdb ${NAME}_test && just upgrade
+db-reset:
+    -dropdb $NAME
+    -dropdb ${NAME}_test
+    createdb $NAME && createdb ${NAME}_test && just upgrade"
 
   # Lines spliced into the Nix shellHook — printf renders ANSI, echo doesn't.
   SHELL_HELP='printf "  \033[34m%-26s\033[0m %s\n" "just run" "start dev server (--reload)"
           printf "  \033[34m%-26s\033[0m %s\n" "just migrate \"msg\"" "generate migration"
           printf "  \033[34m%-26s\033[0m %s\n" "just upgrade" "apply migrations"
-          printf "  \033[34m%-26s\033[0m %s\n" "just downgrade" "roll back one step"'
+          printf "  \033[34m%-26s\033[0m %s\n" "just downgrade" "roll back one step"
+          printf "  \033[34m%-26s\033[0m %s\n" "just db-drop" "delete the main db"
+          printf "  \033[34m%-26s\033[0m %s\n" "just db-drop-test" "delete the test db"
+          printf "  \033[34m%-26s\033[0m %s\n" "just db-create" "create both dbs + migrate"
+          printf "  \033[34m%-26s\033[0m %s\n" "just db-reset" "recreate both dbs + migrate"'
 else
   RUNTIME_DEPS='"python-dotenv",'
   JUST_RUN="python -m $PKG_NAME"
