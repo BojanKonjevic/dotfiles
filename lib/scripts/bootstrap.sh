@@ -716,6 +716,12 @@ ok "Temporary machine-id written (reusing persistent ID)."
 # ── Install ────────────────────────────────────────────────────────
 header "Installing NixOS…"
 
+git add -A
+git -c user.email="bootstrap@localhost" \
+  -c user.name="bootstrap" \
+  commit -m "bootstrap: generated config for $HOSTNAME" \
+  --allow-empty --quiet
+
 cd "$TMPDIR"
 
 nixos-install \
