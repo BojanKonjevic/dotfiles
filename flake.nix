@@ -66,6 +66,7 @@
         ./lib/treefmt.nix
         ./lib/git-hooks.nix
         ./lib/scripts.nix
+        ./lib/iso/default.nix
 
         # hosts
         ./hosts/desktop/default.nix

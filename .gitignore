@@ -13,3 +13,7 @@ result-*
 # Secrets
 *.pem
 *.key
+
+# VM files
+*.qcow2
+OVMF_VARS.fd
