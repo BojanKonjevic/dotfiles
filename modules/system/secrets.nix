@@ -13,7 +13,7 @@
       PermitRootLogin = "no";
     };
   };
-  age.secrets = lib.mkIf (!userConfig.bootstrapMode or false) {
+  age.secrets = lib.mkIf (!userConfig.bootstrapMode) {
     cachix-token = {
       file = "${self}/secrets/cachix-token.age";
       owner = userConfig.username;
