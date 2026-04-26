@@ -112,6 +112,7 @@ in {
     ];
     shellAliases = {
       v = "nvim";
+      f = "yazi";
       vf = "nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
       pg = "psql -d postgres --dbname";
       dev = "nix develop";
@@ -120,7 +121,7 @@ in {
       leet = "nvim -c 'Leet'";
       n = "nvim ${userConfig.notesFile}";
       ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history";
-      f = "thunar .";
+      t = "thunar .";
       ls = "eza --icons -l";
       net = "speedtest-go --server=14476";
       cat = "bat";

@@ -8,5 +8,6 @@
     ../../modules/home/scripts.nix
     inputs.nixvim.homeModules.nixvim
     ../../modules/home/nixvim.nix
+    ../../modules/home/yazi.nix
   ];
 }
