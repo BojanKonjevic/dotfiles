@@ -38,10 +38,6 @@
         mode = "0755";
       }
       {
-        directory = "/var/lib/libvirt";
-        mode = "0755";
-      }
-      {
         directory = "/var/db/sudo";
         mode = "0700";
       }

@@ -70,7 +70,6 @@
     description = userConfig.fullName;
     hashedPasswordFile = "/persist/passwords/${userConfig.username}";
     extraGroups = [
-      "libvirtd"
       "networkmanager"
       "wheel"
       "audio"

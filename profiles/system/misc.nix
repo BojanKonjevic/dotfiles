@@ -1,8 +1,15 @@
-{inputs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   imports = [
     inputs.lanzaboote.nixosModules.lanzaboote
     ../../modules/system/lanzaboote.nix
     ../../modules/system/postgres.nix
     ../../modules/system/restic.nix
+  ];
+  environment.systemPackages = with pkgs; [
+    qemu
   ];
 }

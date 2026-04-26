@@ -18,7 +18,6 @@ in {
         ../../profiles/system/base.nix
         ../../profiles/system/misc.nix
         ../../profiles/system/nvidia.nix
-        ../../profiles/system/virtualisation.nix
       ]
       ++ (
         let

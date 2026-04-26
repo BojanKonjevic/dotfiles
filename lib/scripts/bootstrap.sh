@@ -281,7 +281,6 @@ in {
         ../../profiles/system/base.nix
         ../../profiles/system/misc.nix
         ../../profiles/system/nvidia.nix
-        # ../../profiles/system/virtualisation.nix
       ]
       ++ (
         let
@@ -589,7 +588,6 @@ mkdir -p /mnt/persist/var/lib/bluetooth
 mkdir -p /mnt/persist/var/lib/postgresql
 mkdir -p /mnt/persist/var/lib/pipewire
 mkdir -p /mnt/persist/var/lib/fwupd
-mkdir -p /mnt/persist/var/lib/libvirt
 mkdir -p /mnt/persist/var/db/sudo
 mkdir -p /mnt/persist/var/cache/tuigreet
 mkdir -p /mnt/persist/var/log/journal
@@ -610,7 +608,6 @@ chmod 700 /mnt/persist/var/lib/bluetooth
 chmod 700 /mnt/persist/var/lib/postgresql
 chmod 755 /mnt/persist/var/lib/pipewire
 chmod 755 /mnt/persist/var/lib/fwupd
-chmod 755 /mnt/persist/var/lib/libvirt
 chmod 700 /mnt/persist/var/db/sudo
 chmod 755 /mnt/persist/var/cache/tuigreet
 chmod 2755 /mnt/persist/var/log/journal
