@@ -96,11 +96,6 @@ esac
 header "Auto-detecting system values…"
 
 DETECTED_SYSTEM="$("${NIX[@]}" eval --impure --expr 'builtins.currentSystem' --raw 2>/dev/null || echo 'x86_64-linux')"
-DETECTED_TIMEZONE="$(timedatectl show --property=Timezone --value 2>/dev/null || echo 'Europe/Belgrade')"
-DETECTED_LOCALE="$(locale 2>/dev/null | grep '^LANG=' | cut -d= -f2 | tr -d '"' || echo 'en_US.UTF-8')"
-DETECTED_LOCALE="${DETECTED_LOCALE:-en_US.UTF-8}"
-DETECTED_KB="$(localectl status 2>/dev/null | grep 'X11 Layout' | awk '{print $NF}' | grep -v '(unset)' || echo 'us')"
-DETECTED_KB="${DETECTED_KB:-us}"
 DETECTED_HOSTNAME="$(hostname)"
 DETECTED_STATE="$(grep 'system.stateVersion' /etc/nixos/configuration.nix 2>/dev/null | grep -oP '"\K[^"]+' | head -1 || echo '25.11')"
 DETECTED_STATE="${DETECTED_STATE:-25.11}"
@@ -110,9 +105,6 @@ DETECTED_DISK="$(lsblk -d -n -o NAME,TYPE | awk '$2=="disk"{print "/dev/"$1}' | 
 DETECTED_DISK="${DETECTED_DISK:-/dev/sda}"
 
 ok "system       → $DETECTED_SYSTEM"
-ok "timezone     → $DETECTED_TIMEZONE"
-ok "locale       → $DETECTED_LOCALE"
-ok "keyboard     → $DETECTED_KB"
 ok "stateVersion → $DETECTED_STATE"
 ok "RAM          → ${DETECTED_RAM_GB}GB"
 
@@ -142,7 +134,6 @@ lsblk -d -o NAME,SIZE,MODEL | grep -v loop | sed 's/^/    /'
 header "A few things I need from you…"
 
 prompt "Hostname for this machine" "$DETECTED_HOSTNAME" HOSTNAME
-prompt "Weather city (e.g. New+York)" "New+York" WEATHERCITY
 prompt "Dotfiles location on new system" "$HOME_DIR/dotfiles" DOTFILESDIR
 prompt "Disk to install to" "$DETECTED_DISK" DISK
 ask "Separate drive for /home? Leave blank to use subvolume on main disk:"
@@ -187,11 +178,7 @@ echo ""
 echo -e "    username      = ${BOLD}$USERNAME${RESET}  ${DIM}(from user.nix)${RESET}"
 echo -e "    hostname      = ${BOLD}$HOSTNAME${RESET}"
 echo -e "    system        = ${BOLD}$DETECTED_SYSTEM${RESET}"
-echo -e "    timezone      = ${BOLD}$DETECTED_TIMEZONE${RESET}"
-echo -e "    locale        = ${BOLD}$DETECTED_LOCALE${RESET}"
-echo -e "    kbLayout      = ${BOLD}$DETECTED_KB${RESET}"
 echo -e "    stateVersion  = ${BOLD}$DETECTED_STATE${RESET}"
-echo -e "    weatherCity   = ${BOLD}$WEATHERCITY${RESET}"
 echo -e "    dotfilesDir   = ${BOLD}$DOTFILESDIR${RESET}"
 echo -e "    disk          = ${RED}${BOLD}$DISK  ← WILL BE WIPED${RESET}"
 echo -e "    swap          = ${BOLD}${SWAP_GB}GB swapfile on @swap subvolume${RESET}"
@@ -258,12 +245,6 @@ cat >"$HOST_DIR/config.nix" <<CONFIGNIX
   # ── nh flake paths (used by NH_OS_FLAKE / NH_HOME_FLAKE env vars) ─────────
   osFlakePath = "$DOTFILESDIR";
   hmFlakePath = "$DOTFILESDIR";
-
-  # ── Locale ────────────────────────────────────────────────────────────────
-  timezone    = "$DETECTED_TIMEZONE";
-  locale      = "$DETECTED_LOCALE";
-  kbLayout    = "$DETECTED_KB";
-  weatherCity = "$WEATHERCITY";
 
   # ── Versions ──────────────────────────────────────────────────────────────
   stateVersion = "$DETECTED_STATE";

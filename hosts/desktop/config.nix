@@ -18,13 +18,7 @@
   osFlakePath = "/home/bojan/dotfiles";
   hmFlakePath = "/home/bojan/dotfiles";
 
-  # ── Locale ────────────────────────────────────────────────────────────────
-  timezone = "Europe/Belgrade";
-  locale = "en_US.UTF-8";
-  kbLayout = "us";
-  weatherCity = "Novi+Sad";
-
-  # ── Versions ──────────────────────────────────────────────────────────────
+  # ── Version ───────────────────────────────────────────────────────────────
   stateVersion = "25.11";
 
   # ── Bootstrap flag ────────────────────────────────────────────────────────
