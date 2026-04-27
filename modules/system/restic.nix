@@ -1,4 +1,5 @@
 {
+  lib,
   userConfig,
   config,
   pkgs,
@@ -8,7 +9,7 @@
     restic
   ];
 
-  services.restic.backups.daily = {
+  services.restic.backups.daily = lib.mkIf (!userConfig.bootstrapMode) {
     initialize = true;
     repository = "b2:bojan-backup";
     passwordFile = config.age.secrets.restic-password.path;

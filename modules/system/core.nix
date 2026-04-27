@@ -64,6 +64,7 @@
     options = "--delete-older-than 30d";
   };
   nix.optimise.automatic = true;
+  users.mutableUsers = false;
   users.users.${userConfig.username} = {
     shell = pkgs.zsh;
     isNormalUser = true;
