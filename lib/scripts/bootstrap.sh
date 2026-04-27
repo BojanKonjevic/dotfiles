@@ -308,6 +308,7 @@ in {
         ../../profiles/system/base.nix
         ../../profiles/system/misc.nix
         ../../profiles/system/nvidia.nix
+        #../../profiles/system/gaming.nix
       ]
       ++ extraModules;
   };
