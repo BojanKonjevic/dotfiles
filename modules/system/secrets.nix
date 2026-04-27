@@ -35,4 +35,5 @@
       mode = "0400";
     };
   };
+  age.identityPaths = ["/persist/etc/ssh/ssh_host_ed25519_key"];
 }
