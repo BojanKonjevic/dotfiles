@@ -7,7 +7,7 @@
     ../../modules/home/mic-toggle.nix
     ../../modules/home/scripts.nix
     inputs.nixvim.homeModules.nixvim
-    ../../modules/home/nixvim.nix
+    ../../modules/home/nixvim
     ../../modules/home/yazi.nix
   ];
 }
