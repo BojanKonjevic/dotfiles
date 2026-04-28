@@ -535,30 +535,6 @@ DISKO
 fi
 ok "disko.nix written (btrfs: @, @nix, @home, @persist, @swap, @snapshots; labeled 'root')."
 
-# ── Register the new host in flake.nix ────────────────────────────
-header "Registering $HOSTNAME in flake.nix…"
-
-FLAKE="$TMPDIR/flake.nix"
-
-if grep -q "hosts/${HOSTNAME}/default.nix" "$FLAKE"; then
-  ok "flake.nix already contains $HOSTNAME — skipping patch."
-else
-  awk -v hostname="$HOSTNAME" '
-    /hosts\/[^/]+\/default\.nix/ { last_host_line = NR }
-    { lines[NR] = $0 }
-    END {
-      for (i = 1; i <= NR; i++) {
-        print lines[i]
-        if (i == last_host_line) {
-          print "        ./hosts/" hostname "/default.nix"
-          print "        ./hosts/" hostname "/home.nix"
-        }
-      }
-    }
-  ' "$FLAKE" >"$FLAKE.tmp" && mv "$FLAKE.tmp" "$FLAKE"
-  ok "flake.nix patched to include hosts/$HOSTNAME/default.nix and home.nix."
-fi
-
 # ── Disko — partition, format, mount ───────────────────────────────
 mount -o remount,size=4G /nix/.rw-store 2>/dev/null || true
 header "Partitioning and formatting $DISK…"

@@ -57,21 +57,24 @@
   };
 
   outputs = inputs @ {flake-parts, ...}:
-    flake-parts.lib.mkFlake {inherit inputs;} {
-      imports = [
-        inputs.treefmt-nix.flakeModule
-        inputs.git-hooks.flakeModule
+    flake-parts.lib.mkFlake {inherit inputs;} ({...}: let
+      hostModules = builtins.concatMap (h: [
+        ./hosts/${h}/default.nix
+        ./hosts/${h}/home.nix
+      ]) (builtins.attrNames (builtins.readDir ./hosts));
+    in {
+      imports =
+        [
+          inputs.treefmt-nix.flakeModule
+          inputs.git-hooks.flakeModule
 
-        # lib — flake-parts perSystem modules only
-        ./lib/treefmt.nix
-        ./lib/git-hooks.nix
-        ./lib/scripts.nix
-        ./lib/iso/default.nix
-
-        # hosts
-        ./hosts/desktop/default.nix
-        ./hosts/desktop/home.nix
-      ];
+          # lib — flake-parts perSystem modules only
+          ./lib/treefmt.nix
+          ./lib/git-hooks.nix
+          ./lib/scripts.nix
+          ./lib/iso/default.nix
+        ]
+        ++ hostModules;
       systems = ["x86_64-linux"];
-    };
+    });
 }
