@@ -7,7 +7,8 @@
     ./plugins/navigation.nix
     ./plugins/git.nix
     ./plugins/tools.nix
-    ./keymaps.nix
+    ./plugins/harpoon.nix
+    ./plugins/leetcode.nix
   ];
 
   home.packages = [pkgs.nixd];
@@ -64,20 +65,73 @@
     extraPlugins = with pkgs.vimPlugins; [
       tiny-inline-diagnostic-nvim
       vim-visual-multi
-      leetcode-nvim
-      harpoon2
     ];
-
-    extraConfigLua = ''
-      require("leetcode").setup({
-        lang = "python3",
-        description = { position = "bottom" },
-      })
-    '';
 
     extraFiles = {
       "plugin/autocmds.lua".source = ./plugins/autocmds.lua;
       "plugin/diagnostic.lua".source = ./plugins/diagnostic.lua;
     };
+
+    keymaps = [
+      {
+        mode = "n";
+        key = "<C-h>";
+        action = "<C-w><C-h>";
+        options.desc = "Move focus left";
+      }
+      {
+        mode = "n";
+        key = "<C-l>";
+        action = "<C-w><C-l>";
+        options.desc = "Move focus right";
+      }
+      {
+        mode = "n";
+        key = "<C-j>";
+        action = "<C-w><C-j>";
+        options.desc = "Move focus down";
+      }
+      {
+        mode = "n";
+        key = "<C-k>";
+        action = "<C-w><C-k>";
+        options.desc = "Move focus up";
+      }
+
+      {
+        mode = "n";
+        key = "<C-s>";
+        action = ":w<CR>";
+        options = {
+          noremap = true;
+          silent = true;
+        };
+      }
+      {
+        mode = "i";
+        key = "<C-s>";
+        action = "<Esc>:w<CR>a";
+        options = {
+          noremap = true;
+          silent = true;
+        };
+      }
+
+      {
+        mode = "n";
+        key = "<C-q>";
+        action = ":qa<CR>";
+        options = {
+          noremap = true;
+          silent = true;
+        };
+      }
+
+      {
+        mode = "n";
+        key = "<Esc>";
+        action = "<cmd>nohlsearch<CR>";
+      }
+    ];
   };
 }

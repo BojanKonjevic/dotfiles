@@ -51,6 +51,47 @@
       };
     };
 
+    keymaps = [
+      # Lazygit
+      {
+        mode = "n";
+        key = "<C-g>";
+        action = "<cmd>LazyGit<CR>";
+        options.desc = "Toggle Lazygit";
+      }
+      # Diffview
+      {
+        mode = "n";
+        key = "<leader>gd";
+        action = "<cmd>DiffviewOpen<CR>";
+        options.desc = "[G]it [D]iff working tree";
+      }
+      {
+        mode = "n";
+        key = "<leader>gD";
+        action = "<cmd>DiffviewOpen HEAD~1<CR>";
+        options.desc = "[G]it [D]iff last commit";
+      }
+      {
+        mode = "n";
+        key = "<leader>gh";
+        action = "<cmd>DiffviewFileHistory %<CR>";
+        options.desc = "[G]it file [H]istory";
+      }
+      {
+        mode = "n";
+        key = "<leader>gH";
+        action = "<cmd>DiffviewFileHistory<CR>";
+        options.desc = "[G]it repo [H]istory";
+      }
+      {
+        mode = "n";
+        key = "<leader>gc";
+        action = "<cmd>DiffviewClose<CR>";
+        options.desc = "[G]it [C]lose diff";
+      }
+    ];
+
     extraConfigLua = ''
       vim.api.nvim_create_autocmd("FileType", {
         pattern = { "DiffviewFiles", "DiffviewFileHistory", "DiffviewFileHistoryPanel" },

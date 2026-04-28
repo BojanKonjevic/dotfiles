@@ -51,4 +51,27 @@
       };
     };
   };
+
+  programs.nixvim.keymaps = [
+    {
+      mode = "i";
+      key = "<Tab>";
+      action.__raw = ''
+        function()
+          local blink = require("blink.cmp")
+          if blink.is_visible() then
+            blink.accept()
+          else
+            return "\t"
+          end
+        end
+      '';
+      options = {
+        expr = true;
+        silent = true;
+        noremap = true;
+        desc = "blink accept";
+      };
+    }
+  ];
 }
