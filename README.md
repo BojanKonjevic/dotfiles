@@ -38,8 +38,7 @@ I prefer explicit imports over auto-discovery, even though auto-discovery reduce
 Each host lives in `hosts/<name>/` and has:
 
 - `config.nix` — a plain Nix attrset with all machine-specific values: hostname, disk devices, paths, state version. This is the single source of truth for anything per-machine. It gets merged with `user.nix` and passed everywhere as `userConfig`.
-- `default.nix` — the NixOS system definition, imports profiles and hardware config.
-- `home.nix` — the Home Manager configuration for that host.
+- `default.nix` — the host definition, imports system and hm profiles and hardware config.
 - `hardware.nix`, `disko.nix` — generated/declared disk layout and hardware config.
 - Any extra `.nix` files in the host dir are auto-discovered and imported. This is specifically for host-specific things that bootstrap doesn't write — like audio driver quirks — so they survive reinstalls without being clobbered.
 
@@ -117,11 +116,9 @@ TPM2 is enrolled for LUKS so the passphrase isn't needed on every boot (normal b
 
 ```bash
 nr                   # rebuild and switch OS (nh os switch)
-hm                   # switch Home Manager (nh home switch)
 nu                   # full update: OS + HM + push to cachix
 gc                   # garbage collect, keep last 10 generations
 ngens                # list OS generations
-hgens                # list HM generations
 
 ns                   # nix package search with fzf preview
 gi <owner/repo>      # copy a GitHub repo's full content to clipboard (for LLMs)

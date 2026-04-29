@@ -282,11 +282,11 @@ cat >"$HOST_DIR/default.nix" <<HOSTNIX
     "default.nix"
     "hardware.nix"
     "disko.nix"
-    "home.nix"
     "bootstrap-override.nix"
   ];
   hostDir = ./.;
-  extraModules = builtins.filter
+  extraModules =
+    builtins.filter
     (f: builtins.pathExists f)
     (map
       (f: hostDir + "/\${f}")
@@ -310,7 +310,26 @@ in {
             inherit inputs userConfig;
             quickshell = inputs.quickshell.packages.\${userConfig.system}.default;
           };
-          home-manager.users.\${userConfig.username} = import ./home.nix;
+          home-manager.users.\${userConfig.username} = {
+            inputs,
+            userConfig,
+            ...
+          }: {
+            imports = [
+              inputs.catppuccin.homeModules.catppuccin
+
+              # ── HM Profiles ──────────────────────────────────────────────
+              ../../profiles/home/base.nix
+              ../../profiles/home/desktop-env.nix
+              ../../profiles/home/programming.nix
+              ../../profiles/home/media.nix
+              ../../profiles/home/misc.nix
+            ];
+            home.username = userConfig.username;
+            home.homeDirectory = userConfig.homeDirectory;
+            home.stateVersion = userConfig.stateVersion;
+            news.display = "silent";
+          };
         }
 
         # ── Profiles ───────────────────────────────────────────────────────
@@ -325,35 +344,6 @@ in {
 HOSTNIX
 
 ok "default.nix written."
-
-# ── hosts/<hostname>/home.nix ─────────────────────────────────────
-header "Writing hosts/$HOSTNAME/home.nix…"
-
-cat >"$HOST_DIR/home.nix" <<HOMENIX
-{
-  inputs,
-  userConfig,
-  ...
-}: {
-  imports = [
-    inputs.catppuccin.homeModules.catppuccin
-
-    # ── Profiles ──────────────────────────────────────────────────────────
-    ../../profiles/home/base.nix
-    ../../profiles/home/desktop-env.nix
-    ../../profiles/home/programming.nix
-    ../../profiles/home/media.nix
-    ../../profiles/home/misc.nix
-  ];
-
-  home.username = userConfig.username;
-  home.homeDirectory = userConfig.homeDirectory;
-  home.stateVersion = userConfig.stateVersion;
-  news.display = "silent";
-}
-HOMENIX
-
-ok "home.nix written."
 
 # ── bootstrap-override.nix (VM only) ──────────────────────────────
 if [[ $IS_VM == "true" ]]; then

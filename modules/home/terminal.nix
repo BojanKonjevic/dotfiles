@@ -134,7 +134,6 @@ in {
       nr = "nh os switch";
       gc = "nh clean all --keep 10";
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
-      hgens = "nix-env --list-generations --profile $HOME/.local/state/nix/profiles/home-manager";
       vmi = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh install";
       vmr = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh run";
       buildiso = "cd ${userConfig.dotfilesDir} && nix build .#iso";

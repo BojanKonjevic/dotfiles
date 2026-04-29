@@ -9,7 +9,6 @@
     "default.nix"
     "hardware.nix"
     "disko.nix"
-    "home.nix"
     "bootstrap-override.nix"
   ];
   hostDir = ./.;
@@ -38,7 +37,26 @@ in {
             inherit inputs userConfig;
             quickshell = inputs.quickshell.packages.${userConfig.system}.default;
           };
-          home-manager.users.${userConfig.username} = import ./home.nix;
+          home-manager.users.${userConfig.username} = {
+            inputs,
+            userConfig,
+            ...
+          }: {
+            imports = [
+              inputs.catppuccin.homeModules.catppuccin
+
+              # ── HM Profiles ──────────────────────────────────────────────
+              ../../profiles/home/base.nix
+              ../../profiles/home/desktop-env.nix
+              ../../profiles/home/programming.nix
+              ../../profiles/home/media.nix
+              ../../profiles/home/misc.nix
+            ];
+            home.username = userConfig.username;
+            home.homeDirectory = userConfig.homeDirectory;
+            home.stateVersion = userConfig.stateVersion;
+            news.display = "silent";
+          };
         }
 
         # ── Profiles ───────────────────────────────────────────────────────
