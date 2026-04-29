@@ -255,7 +255,6 @@ cat >"$HOST_DIR/config.nix" <<CONFIGNIX
 
   # ── nh flake paths (used by NH_OS_FLAKE / NH_HOME_FLAKE env vars) ─────────
   osFlakePath = "$DOTFILESDIR";
-  hmFlakePath = "$DOTFILESDIR";
 
   # ── Versions ──────────────────────────────────────────────────────────────
   stateVersion = "$DETECTED_STATE";

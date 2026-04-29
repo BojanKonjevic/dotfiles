@@ -184,7 +184,6 @@ in {
       setopt PUSHD_SILENT
 
       export NH_OS_FLAKE="${userConfig.osFlakePath}"
-      export NH_HOME_FLAKE="${userConfig.hmFlakePath}"
       export STARSHIP_VI_MODE=1
 
       zvm_after_init() {
