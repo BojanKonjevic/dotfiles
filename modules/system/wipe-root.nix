@@ -11,17 +11,6 @@
     text = ''
       echo "wipe-root: Starting root wipe..."
 
-      i=0
-      until test -e /dev/mapper/cryptroot; do
-        echo "wipe-root: Waiting for /dev/mapper/cryptroot... ($i)"
-        sleep 0.2
-        i=$(( i + 1 ))
-        if test "$i" -gt 15; then
-          echo "wipe-root: Timed out waiting for device"
-          exit 1
-        fi
-      done
-
       MNT="$(mktemp -d)"
       mount -t btrfs -o subvolid=5 /dev/mapper/cryptroot "$MNT"
 
@@ -72,7 +61,8 @@ in {
   boot.initrd.systemd.services.wipe-root = {
     description = "Wipe / by restoring @blank btrfs snapshot";
     wantedBy = ["initrd.target"];
-    after = ["dev-disk-by\\x2dlabel-root.device"];
+    after = ["systemd-cryptsetup@cryptroot.service"];
+    wants = ["systemd-cryptsetup@cryptroot.service"];
     before = ["sysroot.mount" "initrd-root-fs.target"];
     unitConfig.DefaultDependencies = false;
     serviceConfig = {
