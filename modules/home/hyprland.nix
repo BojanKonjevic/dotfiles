@@ -36,6 +36,7 @@
         (opacityRule medium "org.qbittorrent.qBittorrent")
         (opacityRule medium "nm-connection-editor")
         (opacityRule terminal "kitty")
+        "opacity 1.0 override 1.0 override, match:fullscreen 1"
       ];
 
       env = [
