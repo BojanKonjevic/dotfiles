@@ -229,38 +229,30 @@ rm -rf "$TMPDIR"
 git clone https://github.com/BojanKonjevic/dotfiles "$TMPDIR"
 ok "Cloned to $TMPDIR."
 
-# ── Write hosts/<hostname>/config.nix ─────────────────────────────
-header "Writing hosts/$HOSTNAME/config.nix…"
-
 HOST_DIR="$TMPDIR/hosts/$HOSTNAME"
 rm -rf "$HOST_DIR"
 mkdir -p "$HOST_DIR"
 
+# ── Write hosts/<hostname>/config.nix ─────────────────────────────
+header "Writing hosts/$HOSTNAME/config.nix…"
+
 cat >"$HOST_DIR/config.nix" <<CONFIGNIX
-# Machine-specific values for the $HOSTNAME host.
-# All fields here are the single source of truth — nothing else should define
-# these per-machine values.
 {
-  # ── Machine ───────────────────────────────────────────────────────────────
   hostname = "$HOSTNAME";
   system   = "$DETECTED_SYSTEM";
   homeDisk = "$HOME_DISK";
 
-  # ── Paths ─────────────────────────────────────────────────────────────────
   homeDirectory  = "/home/$USERNAME";
   dotfilesDir    = "$DOTFILESDIR";
   wallpaperDir   = "/home/$USERNAME/Pictures/wallpapers";
   screenshotsDir = "/home/$USERNAME/Pictures/Screenshots";
   notesFile      = "/home/$USERNAME/Documents/notes.txt";
 
-  # ── nh flake paths (used by NH_OS_FLAKE / NH_HOME_FLAKE env vars) ─────────
   osFlakePath = "$DOTFILESDIR";
 
-  # ── Versions ──────────────────────────────────────────────────────────────
   stateVersion = "$DETECTED_STATE";
 
-  # ── Bootstrap flag ────────────────────────────────────────────────────────
-  # Disables agenix secrets that aren't available yet.
+  # Disables agenix secrets that aren't available yet
   bootstrapMode = true;
 }
 CONFIGNIX
@@ -268,258 +260,33 @@ CONFIGNIX
 ok "config.nix written."
 
 # ── hosts/<hostname>/default.nix ──────────────────────────────────
-header "Writing hosts/$HOSTNAME/default.nix…"
-
-cat >"$HOST_DIR/default.nix" <<HOSTNIX
-{
-  self,
-  inputs,
-  ...
-}: let
-  userConfig = (import ../../user.nix) // (import ./config.nix);
-  bootstrapFiles = [
-    "config.nix"
-    "default.nix"
-    "hardware.nix"
-    "disko.nix"
-    "bootstrap-override.nix"
-  ];
-  hostDir = ./.;
-  extraModules =
-    builtins.filter
-    (f: builtins.pathExists f)
-    (map
-      (f: hostDir + "/\${f}")
-      (builtins.filter
-        (f: !builtins.elem f bootstrapFiles)
-        (builtins.attrNames (builtins.readDir hostDir))));
-in {
-  flake.nixosConfigurations.\${userConfig.hostname} = inputs.nixpkgs.lib.nixosSystem {
-    system = userConfig.system;
-    specialArgs = {inherit inputs userConfig self;};
-    modules =
-      [
-        ./hardware.nix
-        ./disko.nix
-        inputs.disko.nixosModules.disko
-        inputs.home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = {
-            inherit inputs userConfig;
-            quickshell = inputs.quickshell.packages.\${userConfig.system}.default;
-          };
-          home-manager.users.\${userConfig.username} = {
-            inputs,
-            userConfig,
-            ...
-          }: {
-            imports = [
-              inputs.catppuccin.homeModules.catppuccin
-
-              # ── HM Profiles ──────────────────────────────────────────────
-              ../../profiles/home/base.nix
-              ../../profiles/home/desktop-env.nix
-              ../../profiles/home/programming.nix
-              ../../profiles/home/media.nix
-              ../../profiles/home/misc.nix
-            ];
-            home.username = userConfig.username;
-            home.homeDirectory = userConfig.homeDirectory;
-            home.stateVersion = userConfig.stateVersion;
-            news.display = "silent";
-          };
-        }
-
-        # ── Profiles ───────────────────────────────────────────────────────
-        ../../profiles/system/base.nix
-        ../../profiles/system/misc.nix
-        ../../profiles/system/nvidia.nix
-        #../../profiles/system/gaming.nix
-      ]
-      ++ extraModules;
-  };
-}
-HOSTNIX
-
-ok "default.nix written."
+header "Copying hosts/$HOSTNAME/default.nix from template…"
+cp "$TMPDIR/hosts/template/default.nix" "$HOST_DIR/default.nix"
+ok "default.nix copied."
 
 # ── bootstrap-override.nix (VM only) ──────────────────────────────
 if [[ $IS_VM == "true" ]]; then
-  header "Writing hosts/$HOSTNAME/bootstrap-override.nix (VM)…"
-  printf '%s\n' \
-    '{ lib, ... }:' \
-    '{' \
-    '  boot.loader.systemd-boot.enable = lib.mkOverride 0 true;' \
-    '  boot.loader.efi.canTouchEfiVariables = lib.mkOverride 0 true;' \
-    '  boot.lanzaboote.enable = lib.mkOverride 0 false;' \
-    '}' \
-    >"$HOST_DIR/bootstrap-override.nix"
-  ok "bootstrap-override.nix written."
+  header "Copying bootstrap-override.nix from template (VM)…"
+  cp "$TMPDIR/hosts/template/bootstrap-override.nix" "$HOST_DIR/bootstrap-override.nix"
+  ok "bootstrap-override.nix copied."
 fi
 
 # ── hardware.nix placeholder ───────────────────────────────────────
 printf '{ ... }: {}\n' >"$HOST_DIR/hardware.nix"
 
 # ── Disko config ───────────────────────────────────────────────────
-header "Generating hosts/$HOSTNAME/disko.nix…"
+header "Generating hosts/$HOSTNAME/disko.nix from template…"
 
 if [[ -n $HOME_DISK ]]; then
-  cat >"$HOST_DIR/disko.nix" <<DISKO
-{
-  disko.devices.disk = {
-    main = {
-      device = "$DISK";
-      type = "disk";
-      content = {
-        type = "gpt";
-        partitions = {
-          ESP = {
-            size = "512M";
-            type = "EF00";
-            content = {
-              type = "filesystem";
-              format = "vfat";
-              mountpoint = "/boot";
-              mountOptions = ["fmask=0077" "dmask=0077"];
-            };
-          };
-          root = {
-            size = "100%";
-            content = {
-              type = "luks";
-              name = "cryptroot";
-              extraFormatArgs = ["--type" "luks2"];
-              settings.allowDiscards = true;
-              content = {
-                type = "btrfs";
-                extraArgs = ["-L" "root" "-f"];
-                subvolumes = {
-                  "@" = {
-                    mountpoint = "/";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                  "@nix" = {
-                    mountpoint = "/nix";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                  "@persist" = {
-                    mountpoint = "/persist";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                  "@swap" = {
-                    mountpoint = "/swap";
-                    mountOptions = ["noatime"];
-                  };
-                  "@snapshots" = {
-                    mountpoint = "/.snapshots";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                };
-              };
-            };
-          };
-        };
-      };
-    };
-    home = {
-      device = "$HOME_DISK";
-      type = "disk";
-      content = {
-        type = "gpt";
-        partitions = {
-          home = {
-            size = "100%";
-            type = "8300";
-            content = {
-              type = "luks";
-              name = "crypthome";
-              extraFormatArgs = ["--type" "luks2"];
-              settings.allowDiscards = true;
-              content = {
-                type = "btrfs";
-                extraArgs = ["-L" "home" "-f"];
-                subvolumes = {
-                  "@home" = {
-                    mountpoint = "/home";
-                    mountOptions = ["compress=zstd" "noatime"];
-                  };
-                };
-              };
-            };
-          };
-        };
-      };
-    };
-  };
-}
-DISKO
+  cp "$TMPDIR/hosts/template/disko-dual.nix" "$HOST_DIR/disko.nix"
+  sed -i "s|BOOTSTRAP_DISK|$DISK|g" "$HOST_DIR/disko.nix"
+  sed -i "s|BOOTSTRAP_HOME_DISK|$HOME_DISK|g" "$HOST_DIR/disko.nix"
 else
-  cat >"$HOST_DIR/disko.nix" <<DISKO
-{
-  disko.devices.disk.main = {
-    device = "$DISK";
-    type = "disk";
-    content = {
-      type = "gpt";
-      partitions = {
-        ESP = {
-          size = "512M";
-          type = "EF00";
-          content = {
-            type = "filesystem";
-            format = "vfat";
-            mountpoint = "/boot";
-            mountOptions = ["fmask=0077" "dmask=0077"];
-          };
-        };
-        root = {
-          size = "100%";
-          content = {
-            type = "luks";
-            name = "cryptroot";
-            extraFormatArgs = ["--type" "luks2"];
-            settings.allowDiscards = true;
-            content = {
-              type = "btrfs";
-              extraArgs = ["-L" "root" "-f"];
-              subvolumes = {
-                "@" = {
-                  mountpoint = "/";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@nix" = {
-                  mountpoint = "/nix";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@home" = {
-                  mountpoint = "/home";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@persist" = {
-                  mountpoint = "/persist";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-                "@swap" = {
-                  mountpoint = "/swap";
-                  mountOptions = ["noatime"];
-                };
-                "@snapshots" = {
-                  mountpoint = "/.snapshots";
-                  mountOptions = ["compress=zstd" "noatime"];
-                };
-              };
-            };
-          };
-        };
-      };
-    };
-  };
-}
-DISKO
+  cp "$TMPDIR/hosts/template/disko-single.nix" "$HOST_DIR/disko.nix"
+  sed -i "s|BOOTSTRAP_DISK|$DISK|g" "$HOST_DIR/disko.nix"
 fi
-ok "disko.nix written (btrfs: @, @nix, @home, @persist, @swap, @snapshots; labeled 'root')."
+
+ok "disko.nix written."
 
 # ── Disko — partition, format, mount ───────────────────────────────
 mount -o remount,size=4G /nix/.rw-store 2>/dev/null || true
