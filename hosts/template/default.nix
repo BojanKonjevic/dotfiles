@@ -9,7 +9,6 @@
     "default.nix"
     "hardware.nix"
     "disko.nix"
-    "bootstrap-override.nix"
   ];
   hostDir = ./.;
   extraModules =
