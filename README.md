@@ -76,8 +76,6 @@ Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, kitty, vesktop,
 
 Neovim, configured entirely through **nixvim**. The goal is to have everything expressed in nixvim's options, with `extraPlugins`/`extraFiles` as a bridge for plugins that don't have native nixvim support yet.
 
-Oil.nvim and neo-tree coexist intentionally — neo-tree for a tree view of the project, oil for actually manipulating files (rename, delete, move).
-
 LSP is set up for Nix (nixd, with full flake-aware options completion), Python (pyright + ruff), and Lua.
 
 ---

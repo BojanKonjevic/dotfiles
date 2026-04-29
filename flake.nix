@@ -60,7 +60,6 @@
     flake-parts.lib.mkFlake {inherit inputs;} ({...}: let
       hostModules = builtins.concatMap (h: [
         ./hosts/${h}/default.nix
-        ./hosts/${h}/home.nix
       ]) (builtins.attrNames (builtins.readDir ./hosts));
     in {
       imports =
@@ -72,7 +71,7 @@
           ./lib/treefmt.nix
           ./lib/git-hooks.nix
           ./lib/scripts.nix
-          ./lib/iso/default.nix
+          ./lib/iso
         ]
         ++ hostModules;
       systems = ["x86_64-linux"];

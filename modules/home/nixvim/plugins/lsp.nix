@@ -40,7 +40,7 @@
             nixpkgs.expr = "import (builtins.getFlake \"${userConfig.osFlakePath}\").inputs.nixpkgs { }";
             options.nixos.expr = "(builtins.getFlake \"${userConfig.osFlakePath}\").nixosConfigurations.${userConfig.hostname}.options";
             options.home-manager.expr = ''
-              (builtins.getFlake "${userConfig.hmFlakePath}").homeConfigurations.${userConfig.username}.options
+              (builtins.getFlake "${userConfig.hmFlakePath}").nixosConfigurations.${userConfig.hostname}.options.home-manager.users.${userConfig.username}
             '';
           };
         };

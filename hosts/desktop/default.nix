@@ -30,12 +30,22 @@ in {
         ./hardware.nix
         ./disko.nix
         inputs.disko.nixosModules.disko
+        inputs.home-manager.nixosModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.extraSpecialArgs = {
+            inherit inputs userConfig;
+            quickshell = inputs.quickshell.packages.${userConfig.system}.default;
+          };
+          home-manager.users.${userConfig.username} = import ./home.nix;
+        }
 
         # ── Profiles ───────────────────────────────────────────────────────
         ../../profiles/system/base.nix
         ../../profiles/system/misc.nix
         ../../profiles/system/nvidia.nix
-        ../../profiles/system/gaming.nix
+        #../../profiles/system/gaming.nix
       ]
       ++ extraModules;
   };

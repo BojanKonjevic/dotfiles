@@ -42,6 +42,7 @@
   swapDevices = [{device = "/swap/swapfile";}];
   nix.registry = lib.mkForce {nixpkgs.flake = inputs.nixpkgs;};
   nix.nixPath = ["nixpkgs=${inputs.nixpkgs}"];
+  nix.settings.warn-dirty = false;
   nix.settings = {
     download-buffer-size = 134217728;
     max-jobs = "auto";

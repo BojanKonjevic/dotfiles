@@ -132,7 +132,6 @@ in {
       gi = "ingest";
       pyproj = "nix run github:BojanKonjevic/dotfiles#new-python-project";
       nr = "nh os switch";
-      hm = "nh home switch";
       gc = "nh clean all --keep 10";
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
       hgens = "nix-env --list-generations --profile $HOME/.local/state/nix/profiles/home-manager";
@@ -146,7 +145,6 @@ in {
 
       nu() {
         nh os switch -u \
-          && nh home switch \
           && cachix push bojan-dotfiles /run/current-system \
           && cachix push bojan-dotfiles "$HOME/.local/state/nix/profiles/home-manager"
       }
