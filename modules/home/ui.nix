@@ -5,7 +5,7 @@
 }: {
   home.packages = with pkgs; [
     swayimg
-    mpv
+    vlc
     xarchiver
   ];
   home.sessionVariables = {
@@ -52,14 +52,14 @@
         mimeType = ["image/png" "image/jpeg" "image/gif" "image/webp" "image/svg+xml"];
         startupNotify = true;
       };
-      mpv = {
-        name = "mpv";
+      vlc = {
+        name = "vlc";
         genericName = "Media Player";
-        comment = "Play videos and audio with mpv";
-        exec = "mpv %F";
+        comment = "Play videos and audio with vlc";
+        exec = "vlc %F";
         terminal = false;
         type = "Application";
-        icon = "mpv";
+        icon = "vlc";
         categories = ["AudioVideo" "Player" "Audio" "Video"];
         mimeType = ["video/mp4" "video/webm" "video/x-matroska" "audio/mp3"];
         startupNotify = true;
@@ -82,10 +82,10 @@
         "image/gif" = ["swayimg.desktop"];
         "image/webp" = ["swayimg.desktop"];
         "image/svg+xml" = ["swayimg.desktop"];
-        "video/mp4" = ["mpv.desktop"];
-        "video/webm" = ["mpv.desktop"];
-        "video/x-matroska" = ["mpv.desktop"];
-        "video/quicktime" = ["mpv.desktop"];
+        "video/mp4" = ["vlc.desktop"];
+        "video/webm" = ["vlc.desktop"];
+        "video/x-matroska" = ["vlc.desktop"];
+        "video/quicktime" = ["vlc.desktop"];
         "application/zip" = ["xarchiver.desktop"];
         "application/x-zip-compressed" = ["xarchiver.desktop"];
         "application/x-7z-compressed" = ["xarchiver.desktop"];
