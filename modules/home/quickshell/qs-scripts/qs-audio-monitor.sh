@@ -44,10 +44,15 @@ except:
 
 emit_state
 
-pw-mon 2>/dev/null | while read -r line; do
+last_emit=0
+pactl subscribe 2>/dev/null | while read -r line; do
   case "$line" in
-  *"added"* | *"removed"* | *"changed"*)
-    emit_state
+  *"sink"* | *"source"* | *"sink-input"* | *"server"*)
+    now=$(date +%s)
+    if ((now - last_emit >= 1)); then
+      emit_state
+      last_emit=$now
+    fi
     ;;
   esac
 done
