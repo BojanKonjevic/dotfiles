@@ -136,6 +136,7 @@ in {
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
       vmi = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh install";
       vmr = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh run";
+      postinstall = "cd ${userConfig.dotfilesDir} && nix run .#post-install";
       buildiso = "cd ${userConfig.dotfilesDir} && nix build .#iso";
       restic-snapshots = "sudo bash -c 'env $(cat /run/agenix/restic-env) restic -r b2:bojan-backup --password-file /run/agenix/restic-password snapshots'";
     };
