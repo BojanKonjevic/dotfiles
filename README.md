@@ -10,7 +10,7 @@ The main idea is that the system should be fully described by the config — no 
 
 Impermanence is a big part of this. The root filesystem is wiped on every boot by restoring a blank btrfs snapshot. Only things explicitly listed in the config survive reboots. This isn't primarily a security measure — it's about having a clean, predictable system and knowing exactly what's in it. Security is just a nice side effect.
 
-Secure Boot via lanzaboote is similiar: it was easy to add, there's no downside, so why not.
+Secure Boot via lanzaboote is similar: it was easy to add, there's no downside, so why not.
 
 ---
 
@@ -87,7 +87,7 @@ Managed with **agenix**. Secrets are encrypted to host SSH keys and decrypted at
 
 ## storage layout
 
-Example with a seperate home drive:
+Example with a separate home drive:
 
 ```
 /dev/sdx  →  main SSD (root disk)
