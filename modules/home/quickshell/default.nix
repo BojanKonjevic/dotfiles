@@ -6,7 +6,7 @@
   userConfig,
   ...
 }: let
-  coloursQml = ''
+  coloursFile = pkgs.writeText "Colours.qml" ''
     pragma Singleton
     import QtQuick
 
@@ -122,6 +122,7 @@ in {
     pkgs.awww
     pkgs.pulseaudio
     pkgs.pipewire
+    pkgs.jq
 
     # ── Bar helpers ──────────────────────────────────────────────────────
     (mkScript "qs-sysmon" "qs-sysmon.sh" {})
@@ -145,7 +146,7 @@ in {
   ];
 
   # ── Bar ───────────────────────────────────────────────────────────────────
-  xdg.configFile."quickshell/bar/Colours.qml".text = coloursQml;
+  xdg.configFile."quickshell/bar/Colours.qml".source = coloursFile;
   xdg.configFile."quickshell/bar/qmldir".source = ./bar/qmldir;
   xdg.configFile."quickshell/bar/shell.qml".source = ./bar/shell.qml;
   xdg.configFile."quickshell/bar/Bar.qml".source = ./bar/Bar.qml;
@@ -173,25 +174,25 @@ in {
   xdg.configFile."quickshell/bar/MediaAudioPanel.qml".source = ./bar/MediaAudioPanel.qml;
 
   # ── Launcher ──────────────────────────────────────────────────────────────
-  xdg.configFile."quickshell/launcher/Colours.qml".text = coloursQml;
+  xdg.configFile."quickshell/launcher/Colours.qml".source = coloursFile;
   xdg.configFile."quickshell/launcher/qmldir".source = ./launcher/qmldir;
   xdg.configFile."quickshell/launcher/shell.qml".source = ./launcher/shell.qml;
   xdg.configFile."quickshell/launcher/Launcher.qml".source = ./launcher/Launcher.qml;
 
   # ── Clipboard text ────────────────────────────────────────────────────────
-  xdg.configFile."quickshell/clip-text/Colours.qml".text = coloursQml;
+  xdg.configFile."quickshell/clip-text/Colours.qml".source = coloursFile;
   xdg.configFile."quickshell/clip-text/qmldir".source = ./clip-text/qmldir;
   xdg.configFile."quickshell/clip-text/shell.qml".source = ./clip-text/shell.qml;
   xdg.configFile."quickshell/clip-text/ClipText.qml".source = ./clip-text/ClipText.qml;
 
   # ── Clipboard image ───────────────────────────────────────────────────────
-  xdg.configFile."quickshell/clip-img/Colours.qml".text = coloursQml;
+  xdg.configFile."quickshell/clip-img/Colours.qml".source = coloursFile;
   xdg.configFile."quickshell/clip-img/qmldir".source = ./clip-img/qmldir;
   xdg.configFile."quickshell/clip-img/shell.qml".source = ./clip-img/shell.qml;
   xdg.configFile."quickshell/clip-img/ClipImage.qml".source = ./clip-img/ClipImage.qml;
 
   # ── Wallpaper ─────────────────────────────────────────────────────────────
-  xdg.configFile."quickshell/wallpaper/Colours.qml".text = coloursQml;
+  xdg.configFile."quickshell/wallpaper/Colours.qml".source = coloursFile;
   xdg.configFile."quickshell/wallpaper/qmldir".source = ./wallpaper/qmldir;
   xdg.configFile."quickshell/wallpaper/shell.qml".source = ./wallpaper/shell.qml;
   xdg.configFile."quickshell/wallpaper/WallpaperPicker.qml".source = ./wallpaper/WallpaperPicker.qml;

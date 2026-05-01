@@ -16,23 +16,14 @@ emit_state() {
   out_desc=$(pactl get-default-sink 2>/dev/null || echo "")
   in_desc=$(pactl get-default-source 2>/dev/null || echo "")
 
-  apps=$(pactl -f json list sink-inputs 2>/dev/null |
-    python3 -c "
-import json,sys
-try:
-  inputs=json.load(sys.stdin)
-  result=[]
-  for i in inputs:
-    idx=i.get('index',0)
-    props=i.get('properties',{})
-    name=props.get('application.name') or props.get('media.name') or 'Unknown'
-    vols=i.get('volume',{})
-    vol=int(list(vols.values())[0].get('value_percent','0%').rstrip('%'))/100.0 if vols else 0.0
-    result.append({'index':idx,'name':name,'volume':round(vol,3),'muted':i.get('mute',False)})
-  print(json.dumps(result))
-except:
-  print('[]')
-" 2>/dev/null || echo "[]")
+  apps=$(pactl -f json list sink-inputs 2>/dev/null | jq -c '
+    [.[] | {
+      index: .index,
+      name: (.properties["application.name"] // .properties["media.name"] // "Unknown"),
+      volume: ((.volume | to_entries[0].value.value_percent | rtrimstr("%") | tonumber) / 100),
+      muted: .mute
+    }]
+  ' 2>/dev/null || echo "[]")
 
   printf '{"type":"audio","data":{"output":{"desc":"%s","volume":%s,"muted":%s},"input":{"desc":"%s","volume":%s,"muted":%s},"apps":%s}}\n' \
     "$out_desc" "${out_vol_num:-0}" "$out_muted" \

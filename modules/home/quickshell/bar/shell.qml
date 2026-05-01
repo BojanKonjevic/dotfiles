@@ -45,17 +45,26 @@ ShellRoot {
     Process {
         id: saveProc
         property string payload: ""
+        property bool pendingSave: false
         command: ["bash", "-c", "mkdir -p \"$(dirname \"$NOTIF_FILE\")\" && printf '%s' \"$PAYLOAD\" > \"$NOTIF_FILE\""]
         environment: ({
                 "NOTIF_FILE": root.notifFilePath,
                 "PAYLOAD": saveProc.payload
             })
+        onExited: {
+            if (saveProc.pendingSave) {
+                saveProc.pendingSave = false;
+                saveProc.running = true;
+            }
+        }
     }
 
     function saveHistory() {
         saveProc.payload = JSON.stringify(root.notifHistory);
         if (!saveProc.running)
             saveProc.running = true;
+        else
+            saveProc.pendingSave = true;
     }
 
     function addToHistory(notif) {
@@ -298,9 +307,8 @@ ShellRoot {
     Connections {
         target: Hyprland
         function onRawEvent(event) {
-            if (event.name === "activespecial" || event.name === "submap") {
-                barState.activeSubmap = event.data === "" ? "" : event.data;
-            }
+            if (event.name === "submap")
+                barState.activeSubmap = event.data;
         }
     }
 
