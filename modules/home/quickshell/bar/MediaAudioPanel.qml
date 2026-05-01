@@ -30,29 +30,22 @@ PanelWindow {
     }
 
     // ── Volume debounce ───────────────────────────────────────────────────────
-    property string pendingType: ""
-    property string pendingArg1: ""
-    property string pendingArg2: ""
+    property var _pending: null
 
     Timer {
         id: setDebounce
         interval: 80
         onTriggered: {
-            if (root.pendingType === "")
+            if (!root._pending)
                 return;
-            if (root.pendingType === "app") {
-                Quickshell.execDetached(["qs-audio-set", "app", root.pendingArg1, root.pendingArg2]);
-            } else {
-                Quickshell.execDetached(["qs-audio-set", root.pendingType, root.pendingArg1]);
-            }
-            root.pendingType = "";
+            var p = root._pending;
+            root._pending = null;
+            Quickshell.execDetached(p);
         }
     }
 
     function setVolume(type, arg1, arg2) {
-        root.pendingType = type;
-        root.pendingArg1 = arg1;
-        root.pendingArg2 = arg2 || "";
+        root._pending = type === "app" ? ["qs-audio-set", "app", arg1, arg2] : ["qs-audio-set", type, arg1];
         setDebounce.restart();
     }
 
