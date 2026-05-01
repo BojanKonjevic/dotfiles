@@ -234,8 +234,9 @@ PanelWindow {
                         cursorShape: Qt.PointingHandCursor
                         onPressed: progressBar.dragging = true
                         onReleased: function (mouse) {
-                            progressBar.dragging = false;
                             var secs = (mouse.x / progressBar.width) * root.state_.mediaLength;
+                            root.state_.mediaPosition = secs;
+                            progressBar.dragging = false;
                             Quickshell.execDetached(["playerctl", "position", secs.toFixed(1)]);
                         }
                         onPositionChanged: function (mouse) {
