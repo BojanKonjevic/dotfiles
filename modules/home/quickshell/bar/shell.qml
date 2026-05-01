@@ -178,24 +178,37 @@ ShellRoot {
     }
 
     // ── Media position ────────────────────────────────────────────────────────
+    property real _lastSyncTime: 0
+
+    Timer {
+        interval: 500
+        running: barState.mediaStatus === "Playing"
+        repeat: true
+        onTriggered: {
+            var now = Date.now() / 1000;
+            barState.mediaPosition += (now - root._lastSyncTime);
+            root._lastSyncTime = now;
+        }
+    }
+
     Process {
-        id: mediaPosProc
+        id: mediaSyncProc
         command: ["playerctl", "position"]
         stdout: SplitParser {
             onRead: function (data) {
                 barState.mediaPosition = parseFloat(data) || 0;
+                root._lastSyncTime = Date.now() / 1000;
             }
         }
     }
 
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: {
-            if (!mediaPosProc.running)
-                mediaPosProc.running = true;
+    Connections {
+        target: barState
+        function onMediaStatusChanged() {
+            mediaSyncProc.running = true;
+        }
+        function onMediaTitleChanged() {
+            mediaSyncProc.running = true;
         }
     }
 
