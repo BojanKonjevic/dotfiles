@@ -124,8 +124,7 @@ in {
     pkgs.pipewire
 
     # ── Bar helpers ──────────────────────────────────────────────────────
-    (mkScript "qs-cpu" "qs-cpu.sh" {})
-    (mkScript "qs-mem" "qs-mem.sh" {})
+    (mkScript "qs-sysmon" "qs-sysmon.sh" {})
     (mkScript "qs-audio-set" "qs-audio-set.sh" {})
     (mkScript "qs-audio-monitor" "qs-audio-monitor.sh" {})
     (mkScript "qs-net-monitor" "qs-net-monitor.sh" {})

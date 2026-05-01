@@ -271,35 +271,26 @@ ShellRoot {
 
     // ── CPU + MEM ─────────────────────────────────────────────────────────────
     Process {
-        id: cpuProc
-        command: ["qs-cpu"]
-        stdout: SplitParser {
-            onRead: function (data) {
-                barState.cpuUsage = parseInt(data) || 0;
-            }
-        }
-    }
-
-    Process {
-        id: memProc
-        command: ["qs-mem"]
-        stdout: SplitParser {
-            onRead: function (data) {
-                barState.memUsage = parseInt(data) || 0;
-            }
-        }
-    }
-
-    Timer {
-        interval: 2000
+        id: sysmonProc
+        command: ["qs-sysmon"]
         running: true
-        repeat: true
-        triggeredOnStart: true
+        stdout: SplitParser {
+            onRead: function (data) {
+                try {
+                    var d = JSON.parse(data);
+                    barState.cpuUsage = d.cpu;
+                    barState.memUsage = d.mem;
+                } catch (_) {}
+            }
+        }
+        onExited: sysmonRestartTimer.restart()
+    }
+    Timer {
+        id: sysmonRestartTimer
+        interval: 2000
         onTriggered: {
-            if (!cpuProc.running)
-                cpuProc.running = true;
-            if (!memProc.running)
-                memProc.running = true;
+            if (!sysmonProc.running)
+                sysmonProc.running = true;
         }
     }
 
