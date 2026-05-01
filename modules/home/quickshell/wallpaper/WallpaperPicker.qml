@@ -29,8 +29,21 @@ Rectangle {
 
     property string searchText: ""
     property string currentWall: ""
+    property var visibleIndices: []
 
-    // ListModel — Repeater watches this natively, no JS array tricks needed
+    function rebuildVisible() {
+        var result = [];
+        var term = searchText.toLowerCase();
+        for (var i = 0; i < wallModel.count; i++) {
+            var n = wallModel.get(i).name;
+            if (term === "" || n.toLowerCase().indexOf(term) !== -1)
+                result.push(i);
+        }
+        visibleIndices = result;
+    }
+
+    onSearchTextChanged: rebuildVisible()
+
     ListModel {
         id: wallModel
     }
@@ -75,6 +88,7 @@ Rectangle {
                 } catch (_) {}
             }
         }
+        onExited: root.rebuildVisible()
     }
 
     // ── UI ───────────────────────────────────────────────────────────────────
@@ -235,52 +249,32 @@ Rectangle {
             }
             clip: true
             contentWidth: width
-            // Height is driven by visible rows — delegates with height:0 when filtered
             contentHeight: {
-                var visCount = 0;
-                for (var i = 0; i < wallModel.count; i++) {
-                    var n = wallModel.get(i).name;
-                    if (root.searchText === "" || n.toLowerCase().indexOf(root.searchText.toLowerCase()) !== -1)
-                        visCount++;
-                }
-                var rows = Math.ceil(visCount / root.cols);
+                var rows = Math.ceil(root.visibleIndices.length / root.cols);
                 return rows > 0 ? rows * root.cellH + (rows - 1) * root.gap : 0;
             }
             boundsBehavior: Flickable.StopAtBounds
 
-            // Manual positioned grid — delegates hide themselves when filtered out
-            // We track visible index separately for positioning
             Item {
                 id: gridContent
                 width: parent.width
                 height: parent.contentHeight
 
                 Repeater {
-                    model: wallModel
+                    model: root.visibleIndices
 
                     delegate: Item {
                         id: tile
-                        required property string name
-                        required property string path
+                        required property int modelData
                         required property int index
 
-                        readonly property bool matches: root.searchText === "" || name.toLowerCase().indexOf(root.searchText.toLowerCase()) !== -1
+                        readonly property string name: wallModel.get(modelData).name
+                        readonly property string path: wallModel.get(modelData).path
                         readonly property bool isCurrent: name === root.currentWall
 
-                        // Compute position among only visible items
-                        readonly property int visIndex: {
-                            var v = 0;
-                            for (var i = 0; i < tile.index; i++) {
-                                var n = wallModel.get(i).name;
-                                if (root.searchText === "" || n.toLowerCase().indexOf(root.searchText.toLowerCase()) !== -1)
-                                    v++;
-                            }
-                            return v;
-                        }
-                        readonly property int col: visIndex % root.cols
-                        readonly property int row: Math.floor(visIndex / root.cols)
+                        readonly property int col: index % root.cols
+                        readonly property int row: Math.floor(index / root.cols)
 
-                        visible: matches
                         width: root.cellW
                         height: root.cellH
                         x: col * (root.cellW + root.gap)
