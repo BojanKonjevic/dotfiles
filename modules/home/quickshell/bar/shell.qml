@@ -195,6 +195,10 @@ ShellRoot {
         repeat: true
         onTriggered: {
             var now = Date.now() / 1000;
+            if (root._lastSyncTime === 0) {
+                root._lastSyncTime = now;
+                return;
+            }
             barState.mediaPosition += (now - root._lastSyncTime);
             root._lastSyncTime = now;
         }

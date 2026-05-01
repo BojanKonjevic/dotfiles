@@ -1,4 +1,3 @@
-# qs-sysmon.sh
 #!/usr/bin/env bash
 while true; do
   read -r _ u1 _ s1 i1 rest1 </proc/stat
