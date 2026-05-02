@@ -47,7 +47,6 @@ in {
               # ── HM Profiles ──────────────────────────────────────────────
               ../../profiles/home/base.nix
               ../../profiles/home/desktop-env.nix
-              ../../profiles/home/programming.nix
               ../../profiles/home/media.nix
               ../../profiles/home/misc.nix
             ];
@@ -62,6 +61,7 @@ in {
         ../../profiles/system/base.nix
         ../../profiles/system/misc.nix
         ../../profiles/system/nvidia.nix
+        ../../profiles/system/programming.nix
         #../../profiles/system/gaming.nix
       ]
       ++ extraModules;

@@ -384,11 +384,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1777742961,
-        "narHash": "sha256-K94tMAuQgztz2+71dxUXBx5p4Vci6iItz6/r6x7qcq8=",
+        "lastModified": 1777751363,
+        "narHash": "sha256-DfCi+meRBiGhsaACR1SxmWPYsnapfQc9Ru8HntIsntU=",
         "owner": "BojanKonjevic",
         "repo": "new-python-project",
-        "rev": "3496d8112d18d17fc928184dd55edca7b4c29bf8",
+        "rev": "bb6d0288552beff00ae88a8346f587e65dd7df63",
         "type": "github"
       },
       "original": {

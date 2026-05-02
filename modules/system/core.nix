@@ -78,6 +78,7 @@
       "input"
       "ydotool"
       "video"
+      "docker"
     ];
   };
 }
