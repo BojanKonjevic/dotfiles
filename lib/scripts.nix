@@ -16,16 +16,7 @@
         ''
       );
     };
-    apps.new-python-project = {
-      meta.description = "Creates a new python project from template";
-      type = "app";
-      program = toString (
-        pkgs.writeShellScript "new-python-project" ''
-          export PATH="${pkgs.uv}/bin:$PATH"
-          exec ${pkgs.bash}/bin/bash ${./scripts/new-python-project.sh} "$@"
-        ''
-      );
-    };
+    apps.new-python-project = inputs.new-python-project.apps.${system}.default;
     apps.post-install = {
       meta.description = "Post-install setup for a freshly bootstrapped system";
       type = "app";

@@ -54,6 +54,9 @@
       url = "github:nix-community/impermanence";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    new-python-project = {
+      url = "github:BojanKonjevic/new-python-project";
+    };
   };
 
   outputs = inputs @ {flake-parts, ...}:

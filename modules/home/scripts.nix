@@ -17,9 +17,5 @@ in {
     pkgs.wl-clipboard
     (mkPythonScript "ingest" ingestPython ../../lib/scripts/ingest.py)
     (mkPythonScript "yttranscript" yttranscriptPython ../../lib/scripts/yttranscript.py)
-    (pkgs.writeShellScriptBin "pyproj" ''
-      export PATH="${pkgs.uv}/bin:$PATH"
-      exec ${pkgs.bash}/bin/bash ${../../lib/scripts/new-python-project.sh} "$@"
-    '')
   ];
 }

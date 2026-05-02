@@ -130,7 +130,7 @@ in {
       brd = "br --sizes --sort-by-size";
       yt = "yttranscript";
       gi = "ingest";
-      pyproj = "nix run github:BojanKonjevic/dotfiles#new-python-project";
+      pyproj = "nix run github:BojanKonjevic/new-python-project";
       nr = "nh os switch";
       gc = "nh clean all --keep 10";
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
