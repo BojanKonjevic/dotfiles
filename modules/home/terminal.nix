@@ -114,7 +114,6 @@ in {
       v = "nvim";
       f = "yazi";
       vf = "nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
-      pg = "psql -d postgres --dbname";
       dev = "nix develop";
       cal = "calcurse";
       hf = "cd ${userConfig.dotfilesDir} && nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
@@ -130,7 +129,7 @@ in {
       brd = "br --sizes --sort-by-size";
       yt = "yttranscript";
       gi = "ingest";
-      pyproj = "nix run github:BojanKonjevic/new-python-project";
+      sprout = "nix run github:BojanKonjevic/sprout";
       nr = "nh os switch";
       gc = "nh clean all --keep 10";
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";

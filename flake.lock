@@ -191,7 +191,7 @@
     },
     "flake-utils_2": {
       "inputs": {
-        "systems": "systems_3"
+        "systems": "systems_4"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -378,28 +378,9 @@
         "type": "github"
       }
     },
-    "new-python-project": {
-      "inputs": {
-        "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
-      },
-      "locked": {
-        "lastModified": 1777751710,
-        "narHash": "sha256-HfiqzQgXdc7xMQpFr2S1ymNeIY5eyz9g0TtbDAVd6Nw=",
-        "owner": "BojanKonjevic",
-        "repo": "new-python-project",
-        "rev": "742e0556eff69c74f4a2ffa37e126802e94737f4",
-        "type": "github"
-      },
-      "original": {
-        "owner": "BojanKonjevic",
-        "repo": "new-python-project",
-        "type": "github"
-      }
-    },
     "nix-search-tv": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
+        "flake-utils": "flake-utils",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -487,7 +468,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "systems": "systems_4"
+        "systems": "systems_3"
       },
       "locked": {
         "lastModified": 1777236345,
@@ -556,12 +537,12 @@
         "home-manager": "home-manager_2",
         "impermanence": "impermanence",
         "lanzaboote": "lanzaboote",
-        "new-python-project": "new-python-project",
         "nix-search-tv": "nix-search-tv",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs",
         "nixpkgs-nvidia": "nixpkgs-nvidia",
         "nixvim": "nixvim",
         "quickshell": "quickshell",
+        "sprout": "sprout",
         "treefmt-nix": "treefmt-nix",
         "zen-browser": "zen-browser"
       }
@@ -584,6 +565,25 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "sprout": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1777842934,
+        "narHash": "sha256-P5pLY7iqJwZeG2A8XXPJGDXYKVPckn8ncht1DpAQmvI=",
+        "owner": "BojanKonjevic",
+        "repo": "sprout",
+        "rev": "8ac04934f60e016a454459dde1ae7006b69bf474",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BojanKonjevic",
+        "repo": "sprout",
         "type": "github"
       }
     },

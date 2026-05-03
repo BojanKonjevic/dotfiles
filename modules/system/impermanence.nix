@@ -26,10 +26,6 @@
         mode = "0700";
       }
       {
-        directory = "/var/lib/postgresql";
-        mode = "0700";
-      }
-      {
         directory = "/var/lib/pipewire";
         mode = "0755";
       }

@@ -335,7 +335,6 @@ mkdir -p /mnt/persist/etc/secureboot
 mkdir -p /mnt/persist/etc/NetworkManager/system-connections
 mkdir -p /mnt/persist/var/lib/nixos
 mkdir -p /mnt/persist/var/lib/bluetooth
-mkdir -p /mnt/persist/var/lib/postgresql
 mkdir -p /mnt/persist/var/lib/pipewire
 mkdir -p /mnt/persist/var/lib/fwupd
 mkdir -p /mnt/persist/var/db/sudo
@@ -355,7 +354,6 @@ chmod 700 /mnt/persist/etc/secureboot
 chmod 700 /mnt/persist/etc/NetworkManager/system-connections
 chmod 755 /mnt/persist/var/lib/nixos
 chmod 700 /mnt/persist/var/lib/bluetooth
-chmod 700 /mnt/persist/var/lib/postgresql
 chmod 755 /mnt/persist/var/lib/pipewire
 chmod 755 /mnt/persist/var/lib/fwupd
 chmod 700 /mnt/persist/var/db/sudo
