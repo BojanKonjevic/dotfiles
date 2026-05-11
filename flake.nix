@@ -54,9 +54,6 @@
       url = "github:nix-community/impermanence";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    sprout = {
-      url = "github:BojanKonjevic/sprout";
-    };
   };
 
   outputs = inputs @ {flake-parts, ...}:

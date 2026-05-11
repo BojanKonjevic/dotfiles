@@ -129,7 +129,6 @@ in {
       brd = "br --sizes --sort-by-size";
       yt = "yttranscript";
       gi = "ingest";
-      sprout = "nix run github:BojanKonjevic/sprout";
       nr = "nh os switch";
       gc = "nh clean all --keep 10";
       ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
@@ -140,6 +139,7 @@ in {
       restic-snapshots = "sudo bash -c 'env $(cat /run/agenix/restic-env) restic -r b2:bojan-backup --password-file /run/agenix/restic-password snapshots'";
     };
     initContent = ''
+      export PATH="${userConfig.homeDirectory}/.local/bin:$PATH"
       export CACHIX_AUTH_TOKEN="$(cat /run/agenix/cachix-token 2>/dev/null)"
 
       nu() {
