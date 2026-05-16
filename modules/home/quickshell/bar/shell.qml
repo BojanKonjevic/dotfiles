@@ -247,6 +247,18 @@ ShellRoot {
         }
     }
 
+    FileView {
+        id: micStateFile
+        path: "/tmp/qs-mic-state"
+        watchChanges: true
+        onFileChanged: {
+            micStateFile.reload();
+        }
+        onLoaded: {
+            barState.micMuted = micStateFile.text().trim() === "muted";
+        }
+    }
+
     Timer {
         id: audioRestartTimer
         interval: 2000
