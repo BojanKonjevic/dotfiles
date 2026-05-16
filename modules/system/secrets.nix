@@ -24,6 +24,11 @@
       owner = userConfig.username;
       mode = "0600";
     };
+    pypi-key = {
+      file = "${self}/secrets/pypi-key.age";
+      owner = userConfig.username;
+      mode = "0400";
+    };
     restic-password = {
       file = "${self}/secrets/restic-password.age";
       owner = "root";

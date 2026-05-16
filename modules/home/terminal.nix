@@ -141,6 +141,7 @@ in {
     initContent = ''
       export PATH="${userConfig.homeDirectory}/.local/bin:$PATH"
       export CACHIX_AUTH_TOKEN="$(cat /run/agenix/cachix-token 2>/dev/null)"
+      export UV_PUBLISH_TOKEN="$(cat /run/agenix/pypi-key 2>/dev/null)"
 
       nu() {
         nh os switch -u \
