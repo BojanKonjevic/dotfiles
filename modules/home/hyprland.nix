@@ -27,7 +27,11 @@
         subtle = "0.95 0.92";
         medium = "0.93 0.90";
         terminal = "0.90 0.87";
-        opacityRule = opacity: class: "opacity ${opacity} override ${opacity} override, match:class ^(${class})$";
+        opacityRule = opacity: class: let
+          parts = lib.splitString " " opacity;
+          active = lib.elemAt parts 0;
+          inactive = lib.elemAt parts 1;
+        in "opacity ${active} override ${inactive} override, match:class ^(${class})$";
       in [
         (opacityRule subtle "vesktop")
         (opacityRule subtle "localsend_app")
@@ -125,7 +129,6 @@
       };
 
       dwindle = {
-        pseudotile = true;
         preserve_split = true;
       };
 
@@ -134,9 +137,16 @@
       };
 
       misc = {
-        vfr = true;
         force_default_wallpaper = 0;
         disable_hyprland_logo = false;
+      };
+
+      ecosystem = {
+        no_update_news = true;
+      };
+
+      debug = {
+        vfr = true;
       };
 
       bind = let
