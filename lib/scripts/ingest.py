@@ -1,8 +1,8 @@
 """
 GitIngest CLI Wrapper (NixOS + Wayland) - Direct to clipboard (Clean)
 Usage:
-  ./ingest.py <owner/repo> [--src|--test]
-  ./ingest.py -m <repo_name> [--src|--test]
+  ./ingest.py <owner/repo> [--src|--test|--docs]
+  ./ingest.py -m <repo_name> [--src|--test|--docs]
 """
 
 import sys
@@ -97,13 +97,17 @@ def main():
 
     # ---- Parse flags ----
     filter_dir = None
+    filter_flags = [f for f in sys.argv if f in ("--src", "--test", "--docs")]
+    if len(filter_flags) > 1:
+        print("Error: Please specify only one of --src, --test, or --docs.")
+        sys.exit(1)
+
     if "--src" in sys.argv:
-        if "--test" in sys.argv:
-            print("Error: Please specify only one of --src or --test.")
-            sys.exit(1)
         filter_dir = "src"
     elif "--test" in sys.argv:
         filter_dir = "tests"
+    elif "--docs" in sys.argv:
+        filter_dir = "docs"
 
     # ---- Parse repository argument ----
     if sys.argv[1] in ("-m", "--mine"):
