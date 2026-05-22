@@ -9,7 +9,6 @@
   services.openssh = {
     enable = true;
     settings = {
-      PasswordAuthentication = false;
       PermitRootLogin = "no";
     };
   };
@@ -36,6 +35,11 @@
     };
     restic-env = {
       file = "${self}/secrets/restic-env.age";
+      owner = "root";
+      mode = "0400";
+    };
+    duckdns-token = {
+      file = "${self}/secrets/duckdns-token.age";
       owner = "root";
       mode = "0400";
     };

@@ -17,3 +17,6 @@ result-*
 # VM files
 *.qcow2
 OVMF_VARS.fd
+
+#AI
+AGENTS.md

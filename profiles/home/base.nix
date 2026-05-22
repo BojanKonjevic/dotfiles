@@ -2,6 +2,7 @@
   imports = [
     ../../modules/home/theme.nix
     ../../modules/home/terminal.nix
+    ../../modules/home/ssh.nix
     ../../modules/home/ui.nix
     ../../modules/home/weather.nix
     ../../modules/home/mic-toggle.nix

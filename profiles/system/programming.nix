@@ -7,6 +7,7 @@
     mypy
     just
     redis
+    opencode
   ];
 
   virtualisation.docker.enable = true;

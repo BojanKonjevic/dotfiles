@@ -7,4 +7,5 @@ in {
   "pypi-key.age".publicKeys = [desktop me];
   "restic-password.age".publicKeys = [desktop me];
   "restic-env.age".publicKeys = [desktop me];
+  "duckdns-token.age".publicKeys = [desktop me];
 }

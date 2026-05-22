@@ -22,25 +22,6 @@ in {
   programs.bat.enable = true;
   programs.btop.enable = true;
   programs.cava.enable = true;
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false;
-    matchBlocks = {
-      "*" = {
-        addKeysToAgent = "yes";
-        extraOptions = {
-          ServerAliveInterval = "60";
-          ServerAliveCountMax = "3";
-        };
-      };
-      "github.com" = {
-        hostname = "github.com";
-        user = "git";
-        identityFile = "~/.ssh/id_ed25519";
-      };
-    };
-  };
-  services.ssh-agent.enable = true;
   programs.git = {
     enable = true;
     settings = {
@@ -60,7 +41,6 @@ in {
       diff.colorMoved = "default";
     };
   };
-  home.file.".ssh/id_ed25519.pub".text = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA8WKB45Qb5CqZPlE7LWKjkaCikJbjA87sVQwJWDTAB4 konjevicbojan1@gmail.com";
   programs.kitty = {
     enable = true;
     settings = {
@@ -71,6 +51,7 @@ in {
       copy_on_select = "yes";
       confirm_os_window_close = 0;
       shell_integration = "disabled";
+      clipboard_control = "write-clipboard write-primary read-clipboard-ask read-primary-ask";
     };
     keybindings = {
       "ctrl+shift+c" = "copy_to_clipboard";
@@ -113,6 +94,7 @@ in {
     shellAliases = {
       v = "nvim";
       f = "yazi";
+      oc = "opencode";
       vf = "nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
       dev = "nix develop";
       cal = "calcurse";
@@ -148,6 +130,12 @@ in {
           && cachix push bojan-dotfiles /run/current-system \
           && cachix push bojan-dotfiles "$HOME/.local/state/nix/profiles/home-manager"
       }
+
+      ship() {
+        git commit -m "$*"
+        git push
+      }
+
 
       flashiso() {
         local iso="${userConfig.dotfilesDir}/result/iso/nixos-custom-installer.iso"

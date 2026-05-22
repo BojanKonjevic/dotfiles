@@ -70,6 +70,7 @@
     extraFiles = {
       "plugin/autocmds.lua".source = ./plugins/autocmds.lua;
       "plugin/diagnostic.lua".source = ./plugins/diagnostic.lua;
+      "plugin/clipboard.lua".source = ./plugins/clipboard.lua;
     };
 
     keymaps = [
