@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
-    mosh
+    ttyd
   ];
 
   programs.ssh = {
@@ -24,18 +24,20 @@
 
       # home machine
       "home" = {
-        hostname = "bojandesktop.duckdns.org";
+        hostname = "desktop.tail5d8060.ts.net";
         user = "bojan";
         port = 22;
-        identityFile = "~/.ssh/id_ed25519";
         extraOptions = {
-          # Mosh handles keepalive itself, but SSH fallback still benefits from these
+          StrictHostKeyChecking = "no";
           ServerAliveInterval = "60";
           ServerAliveCountMax = "5";
-          # Speed up reconnects
-          ControlMaster = "auto";
-          ControlPath = "~/.ssh/control-%C";
-          ControlPersist = "10m";
+        };
+      };
+      "home-tailscale" = {
+        hostname = "100.95.213.119";
+        user = "bojan";
+        extraOptions = {
+          StrictHostKeyChecking = "no";
         };
       };
     };

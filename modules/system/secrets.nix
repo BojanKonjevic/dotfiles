@@ -38,9 +38,14 @@
       owner = "root";
       mode = "0400";
     };
-    duckdns-token = {
-      file = "${self}/secrets/duckdns-token.age";
+    tailscale = {
+      file = "${self}/secrets/tailscale.age";
       owner = "root";
+      mode = "0400";
+    };
+    ttyd = {
+      file = "${self}/secrets/ttyd.age";
+      owner = userConfig.username;
       mode = "0400";
     };
   };

@@ -45,6 +45,10 @@
         directory = "/var/log/journal";
         mode = "2755";
       }
+      {
+        directory = "/var/lib/tailscale";
+        mode = "0755";
+      }
     ];
 
     files = [
