@@ -47,6 +47,14 @@
           qml = ["qmlformat"];
           bash = ["shfmt"];
           sh = ["shfmt"];
+          typescript = ["prettierd"];
+          typescriptreact = ["prettierd"];
+          javascript = ["prettierd"];
+          javascriptreact = ["prettierd"];
+          json = ["prettierd"];
+          css = ["prettierd"];
+          html = ["prettierd"];
+          markdown = ["prettierd"];
         };
       };
     };

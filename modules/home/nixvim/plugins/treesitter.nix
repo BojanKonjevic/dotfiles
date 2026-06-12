@@ -11,6 +11,7 @@
       css
       diff
       html
+      javascript
       json
       lua
       luadoc
@@ -19,6 +20,8 @@
       nix
       python
       query
+      typescript
+      tsx
       vim
       vimdoc
     ];

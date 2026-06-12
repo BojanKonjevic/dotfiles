@@ -9,6 +9,7 @@
     ./plugins/tools.nix
     ./plugins/harpoon.nix
     ./plugins/leetcode.nix
+    ./plugins/cpp.nix
   ];
 
   home.packages = [pkgs.nixd];
@@ -57,6 +58,7 @@
 
     extraPackages = with pkgs; [
       alejandra
+      prettierd
       stylua
       kdePackages.qtdeclarative
       shfmt

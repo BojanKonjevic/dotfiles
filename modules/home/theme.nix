@@ -123,6 +123,7 @@ in {
     enable = true;
     flavor = "mocha";
     accent = "mauve";
+    hyprland.enable = false;
   };
   gtk = {
     enable = true;

@@ -9,6 +9,7 @@
     redis
     opencode
     pnpm
+    nodejs
   ];
 
   virtualisation.docker.enable = true;

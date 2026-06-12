@@ -76,8 +76,6 @@
         gaps_in = theme.gapsIn;
         gaps_out = theme.gapsOut;
         border_size = theme.borderSize;
-        "col.active_border" = "$mauve $blue 45deg";
-        "col.inactive_border" = "$surface1";
         resize_on_border = false;
         allow_tearing = false;
         layout = "dwindle";
@@ -190,6 +188,11 @@
     };
 
     extraConfig = ''
+      general {
+        col.active_border = rgba(${lib.removePrefix "#" theme.mauve}ff) rgba(${lib.removePrefix "#" theme.blue}ff) 45deg
+        col.inactive_border = rgba(${lib.removePrefix "#" theme.surface1}ff)
+      }
+
       bind = $mainMod, R, submap, resize
       submap = resize
         binde = , H, resizeactive, -20 0

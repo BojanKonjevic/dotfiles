@@ -47,6 +47,8 @@
           enable = true;
           settings.Lua.completion.callSnippet = "Replace";
         };
+        ts_ls.enable = true;
+        eslint.enable = true;
       };
     };
   };

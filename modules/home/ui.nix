@@ -14,6 +14,7 @@
     SUDO_EDITOR = "nvim";
     TERMINAL = "kitty";
     XDG_TERMINAL = "kitty";
+    SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
   };
   xdg = {
     enable = true;
@@ -86,6 +87,7 @@
         "video/webm" = ["vlc.desktop"];
         "video/x-matroska" = ["vlc.desktop"];
         "video/quicktime" = ["vlc.desktop"];
+        "application/pdf" = ["org.pwmt.zathura.desktop"];
         "application/zip" = ["xarchiver.desktop"];
         "application/x-zip-compressed" = ["xarchiver.desktop"];
         "application/x-7z-compressed" = ["xarchiver.desktop"];
