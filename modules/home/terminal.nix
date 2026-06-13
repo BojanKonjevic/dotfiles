@@ -91,7 +91,12 @@ in {
         file = "share/zsh-vi-mode/zsh-vi-mode.plugin.zsh";
       }
     ];
-    shellAliases = {
+    shellAliases = let
+      nhSwitch =
+        if pkgs.stdenv.hostPlatform.isDarwin
+        then "nh darwin switch"
+        else "nh os switch";
+    in {
       v = "nvim";
       f = "yazi";
       oc = "opencode";
@@ -102,7 +107,6 @@ in {
       leet = "nvim -c 'Leet'";
       n = "nvim ${userConfig.notesFile}";
       ns = "nix-search-tv print | fzf --preview 'nix-search-tv preview {}' --scheme history";
-      t = "thunar .";
       ls = "eza --icons -l";
       net = "speedtest-go --server=14476";
       cat = "bat";
@@ -111,13 +115,8 @@ in {
       brd = "br --sizes --sort-by-size";
       yt = "yttranscript";
       gi = "ingest";
-      nr = "nh os switch";
+      nr = nhSwitch;
       gc = "nh clean all --keep 10";
-      ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
-      vmi = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh install";
-      vmr = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh run";
-      postinstall = "cd ${userConfig.dotfilesDir} && nix run .#post-install";
-      buildiso = "cd ${userConfig.dotfilesDir} && nix build .#iso";
       restic-snapshots = "sudo bash -c 'env $(cat /run/agenix/restic-env) restic -r b2:bojan-backup --password-file /run/agenix/restic-password snapshots'";
     };
     initContent = ''
@@ -126,7 +125,11 @@ in {
       export UV_PUBLISH_TOKEN="$(cat /run/agenix/pypi-key 2>/dev/null)"
 
       nu() {
-        nh os switch -u \
+        ${
+        if pkgs.stdenv.hostPlatform.isDarwin
+        then "nh darwin switch -u"
+        else "nh os switch -u"
+      } \
           && cachix push bojan-dotfiles /run/current-system \
           && cachix push bojan-dotfiles "$HOME/.local/state/nix/profiles/home-manager"
       }
@@ -134,25 +137,6 @@ in {
       ship() {
         git commit -m "$*"
         git push
-      }
-
-
-      flashiso() {
-        local iso="${userConfig.dotfilesDir}/result/iso/nixos-custom-installer.iso"
-        if [[ ! -f "$iso" ]]; then
-          echo -e "\033[1;31m✗\033[0m  ISO not found, run buildiso first"
-          return 1
-        fi
-        echo -e "\033[1;36mAvailable disks:\033[0m"
-        lsblk -d -o NAME,SIZE,MODEL | grep -v loop
-        echo -n $'\n\033[1mTarget device (e.g. /dev/sdb): \033[0m'
-        read target
-        echo -e "\n\033[1;31mWARNING: $target will be completely wiped\033[0m"
-        echo -n $'\033[1mConfirm? (y/n): \033[0m'
-        read confirm
-        [[ $confirm == "y" ]] || { echo "Aborted."; return 1; }
-        sudo dd if="$iso" of="$target" bs=4M status=progress conv=fsync
-        echo -e "\033[1;32m✓\033[0m  Done — safe to remove drive."
       }
 
       restic-restore() {
@@ -172,6 +156,7 @@ in {
       setopt PUSHD_SILENT
 
       export NH_OS_FLAKE="${userConfig.osFlakePath}"
+      export NH_DARWIN_FLAKE="${userConfig.osFlakePath}"
       export STARSHIP_VI_MODE=1
 
       zvm_after_init() {

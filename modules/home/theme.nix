@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  pkgs,
+  lib,
+  ...
+}: let
   hexToRgb = hex: let
     r = builtins.fromJSON "0x${builtins.substring 1 2 hex}";
     g = builtins.fromJSON "0x${builtins.substring 3 2 hex}";
@@ -106,13 +110,6 @@
     fontName = "JetBrainsMono Nerd Font";
     fontPackage = pkgs.nerd-fonts.jetbrains-mono;
   };
-
-  catppuccinGtk = pkgs.catppuccin-gtk.override {
-    accents = ["mauve"];
-    variant = "mocha";
-  };
-  themeName = "catppuccin-mocha-mauve-standard";
-  themeDir = "${catppuccinGtk}/share/themes/${themeName}";
 in {
   _module.args.theme = palette;
   home.packages = [
@@ -124,35 +121,47 @@ in {
     autoEnable = true;
     flavor = "mocha";
     accent = "mauve";
-    hyprland.enable = false;
-  };
-  gtk = {
-    enable = true;
-    theme = {
-      name = themeName;
-      package = catppuccinGtk;
-    };
-    cursorTheme = {
-      name = palette.cursorTheme;
-      package = palette.cursorPackage;
-      size = s 20;
-    };
-    gtk3 = {
-      extraConfig.gtk-application-prefer-dark-theme = 1;
-      extraCss = builtins.readFile "${themeDir}/gtk-3.0/gtk.css";
-    };
-    gtk4 = {
-      extraConfig.gtk-application-prefer-dark-theme = 1;
-      extraCss = builtins.readFile "${themeDir}/gtk-4.0/gtk.css";
-      theme = null;
-    };
-  };
-  home.file.".config/gtk-4.0/assets" = {
-    source = "${themeDir}/gtk-4.0/assets";
-    recursive = true;
   };
   fonts = {
     fontconfig.enable = true;
     fontconfig.defaultFonts.monospace = [palette.fontName];
   };
+
+  imports = [
+    (lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) (let
+      catppuccinGtk = pkgs.catppuccin-gtk.override {
+        accents = ["mauve"];
+        variant = "mocha";
+      };
+      themeName = "catppuccin-mocha-mauve-standard";
+      themeDir = "${catppuccinGtk}/share/themes/${themeName}";
+    in {
+      catppuccin.hyprland.enable = false;
+      gtk = {
+        enable = true;
+        theme = {
+          name = themeName;
+          package = catppuccinGtk;
+        };
+        cursorTheme = {
+          name = palette.cursorTheme;
+          package = palette.cursorPackage;
+          size = s 20;
+        };
+        gtk3 = {
+          extraConfig.gtk-application-prefer-dark-theme = 1;
+          extraCss = builtins.readFile "${themeDir}/gtk-3.0/gtk.css";
+        };
+        gtk4 = {
+          extraConfig.gtk-application-prefer-dark-theme = 1;
+          extraCss = builtins.readFile "${themeDir}/gtk-4.0/gtk.css";
+          theme = null;
+        };
+      };
+      home.file.".config/gtk-4.0/assets" = {
+        source = "${themeDir}/gtk-4.0/assets";
+        recursive = true;
+      };
+    }))
+  ];
 }

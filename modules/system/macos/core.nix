@@ -16,11 +16,11 @@
       trusted-users = [userConfig.username];
       substituters = [
         "https://cache.nixos.org"
-        "https://bkonjevic.cachix.org"
+        "https://bojan-dotfiles.cachix.org"
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "bkonjevic.cachix.org-1:WpjIBY5gJqM76A4oBSWNu8tt9z5vFbGstqQp9MlrTZw="
+        "bojan-dotfiles.cachix.org-1:35eXWoN9Ob91Tn6cEhgLJ+6a09KMnZfRzKHbkQrPOX0="
       ];
       download-buffer-size = 1073741824;
       max-jobs = "auto";

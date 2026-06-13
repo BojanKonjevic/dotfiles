@@ -10,7 +10,6 @@
       "mas"
     ];
     casks = [
-      "aerospace"
       "ghostty"
       "raycast"
       "obsidian"

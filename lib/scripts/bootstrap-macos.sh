@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GIT_REPO="https://github.com/bkonjevic/dotfiles"
+GIT_REPO="https://github.com/BojanKonjevic/dotfiles"
 DOTFILES_DIR="$HOME/dotfiles"
 
 echo "═══════════════════════════════════════════════"

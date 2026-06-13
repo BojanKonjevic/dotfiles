@@ -6,6 +6,7 @@
     ../../../modules/home/nixos/ui.nix
     ../../../modules/home/weather.nix
     ../../../modules/home/nixos/mic-toggle.nix
+    ../../../modules/home/nixos/terminal-aliases.nix
     ../../../modules/home/scripts.nix
     inputs.nixvim.homeModules.nixvim
     ../../../modules/home/nixvim

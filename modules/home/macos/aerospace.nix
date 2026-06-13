@@ -44,7 +44,9 @@
     alt-f = "fullscreen"
     alt-slash = "layout tiles horizontal vertical"
     alt-comma = "workspace-back-and-forth"
-    alt-shift-enter = "exec-and-forget open -n /Applications/Ghostty.app"
+    alt-enter = "exec-and-forget open -n /Applications/Kitty.app"
+    alt-backslash = "exec-and-forget mic-toggle"
+    alt-shift-enter = "exec-and-forget open -n /Applications/Kitty.app"
 
     [mode.main.binding.alt-minus]
     resize = "smart -50"
