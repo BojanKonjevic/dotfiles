@@ -1,14 +1,11 @@
 {
-  self,
   inputs,
-  ...
+  self,
 }: let
   userConfig = (import ../../user.nix) // (import ./config.nix);
   bootstrapFiles = [
     "config.nix"
     "default.nix"
-    "hardware.nix"
-    "disko.nix"
   ];
   hostDir = ./.;
   extraModules =
@@ -20,22 +17,16 @@
         (f: !builtins.elem f bootstrapFiles)
         (builtins.attrNames (builtins.readDir hostDir))));
 in {
-  flake.nixosConfigurations.${userConfig.hostname} = inputs.nixpkgs.lib.nixosSystem {
+  darwinConfigurations.${userConfig.hostname} = inputs.nix-darwin.lib.darwinSystem {
     system = userConfig.system;
     specialArgs = {inherit inputs userConfig self;};
     modules =
       [
-        ./hardware.nix
-        ./disko.nix
-        inputs.disko.nixosModules.disko
-        inputs.home-manager.nixosModules.home-manager
+        inputs.home-manager.darwinModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = {
-            inherit inputs userConfig;
-            quickshell = inputs.quickshell.packages.${userConfig.system}.default;
-          };
+          home-manager.extraSpecialArgs = {inherit inputs userConfig;};
           home-manager.users.${userConfig.username} = {
             inputs,
             userConfig,
@@ -45,10 +36,10 @@ in {
               inputs.catppuccin.homeModules.catppuccin
 
               # ── HM Profiles ──────────────────────────────────────────────
-              ../../profiles/home/nixos/base.nix
-              ../../profiles/home/nixos/desktop.nix
-              ../../profiles/home/nixos/media.nix
-              ../../profiles/home/nixos/misc.nix
+              ../../profiles/home/macos/base.nix
+              ../../profiles/home/macos/desktop.nix
+              ../../profiles/home/macos/media.nix
+              ../../profiles/home/macos/misc.nix
             ];
             home.username = userConfig.username;
             home.homeDirectory = userConfig.homeDirectory;
@@ -57,12 +48,9 @@ in {
           };
         }
 
-        # ── Profiles ───────────────────────────────────────────────────────
-        ../../profiles/system/nixos/base.nix
-        ../../profiles/system/nixos/misc.nix
-        ../../profiles/system/nixos/nvidia.nix
-        ../../profiles/system/nixos/programming.nix
-        #../../profiles/system/nixos/gaming.nix
+        # ── System Profiles ─────────────────────────────────────────────────
+        ../../profiles/system/macos/base.nix
+        ../../profiles/system/macos/programming.nix
       ]
       ++ extraModules;
   };

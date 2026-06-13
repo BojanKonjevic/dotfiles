@@ -4,6 +4,18 @@
   theme,
   ...
 }: let
+  isDarwin = pkgs.stdenv.isDarwin;
+
+  # macOS uses ~/Library, Linux uses XDG-standard paths
+  themeDir =
+    if isDarwin
+    then "Library/Application Support"
+    else ".local/share";
+  configDir =
+    if isDarwin
+    then "Library/Preferences"
+    else ".config";
+
   src = pkgs.fetchzip {
     url = "https://github.com/catppuccin/qbittorrent/archive/refs/tags/v2.0.1.zip";
     hash = "sha256-JuD/4a+r+PLNqogVQl2yPhn5Q7R49Fm77QhXS9MCj+U=";
@@ -89,10 +101,10 @@
 in {
   home.packages = [pkgs.qbittorrent];
 
-  home.file.".local/share/qBittorrent/themes/catppuccin-mocha-mauve.qbtheme".source = themePath;
+  home.file."${themeDir}/qBittorrent/themes/catppuccin-mocha-mauve.qbtheme".source = themePath;
 
   home.activation.qbittorrentTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    _conf="$HOME/.config/qBittorrent/qBittorrent.conf"
+    _conf="$HOME/${configDir}/qBittorrent/qBittorrent.conf"
     _theme="${themePath}"
     _awk="${pkgs.gawk}/bin/awk"
     _sed="${pkgs.gnused}/bin/sed"

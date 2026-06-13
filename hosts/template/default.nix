@@ -43,11 +43,10 @@ in {
           }: {
             imports = [
               inputs.catppuccin.homeModules.catppuccin
-              ../../profiles/home/base.nix
-              ../../profiles/home/desktop-env.nix
-              ../../profiles/home/programming.nix
-              ../../profiles/home/media.nix
-              ../../profiles/home/misc.nix
+              ../../profiles/home/nixos/base.nix
+              ../../profiles/home/nixos/desktop.nix
+              ../../profiles/home/nixos/media.nix
+              ../../profiles/home/nixos/misc.nix
             ];
             home.username = userConfig.username;
             home.homeDirectory = userConfig.homeDirectory;
@@ -55,9 +54,9 @@ in {
             news.display = "silent";
           };
         }
-        ../../profiles/system/base.nix
-        ../../profiles/system/misc.nix
-        ../../profiles/system/nvidia.nix
+        ../../profiles/system/nixos/base.nix
+        ../../profiles/system/nixos/misc.nix
+        ../../profiles/system/nixos/nvidia.nix
         #../../profiles/system/gaming.nix
       ]
       ++ extraModules;

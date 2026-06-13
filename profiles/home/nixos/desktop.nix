@@ -1,9 +1,9 @@
 {...}: {
   imports = [
-    ../../modules/home/hypridle.nix
-    ../../modules/home/hyprland.nix
-    ../../modules/home/hyprlock.nix
-    ../../modules/home/quickshell
+    ../../../modules/home/nixos/hypridle.nix
+    ../../../modules/home/nixos/hyprland.nix
+    ../../../modules/home/nixos/hyprlock.nix
+    ../../../modules/home/nixos/quickshell
   ];
   programs.mangohud = {
     enable = true;

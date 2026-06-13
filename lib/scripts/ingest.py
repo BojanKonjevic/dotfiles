@@ -10,6 +10,7 @@ import re
 import subprocess
 import urllib.request
 import urllib.error
+import platform
 
 MY_GITHUB = "https://github.com/BojanKonjevic"
 
@@ -180,13 +181,14 @@ def main():
                 sys.exit(1)
             digest = filtered
 
-        subprocess.run(["wl-copy"], input=digest, text=True, check=True)
+        clipboard_tool = "pbcopy" if platform.system() == "Darwin" else "wl-copy"
+        subprocess.run([clipboard_tool], input=digest, text=True, check=True)
 
         print("\n✅ Done! Full digest copied to clipboard.")
         print("   Paste anywhere with Ctrl+V (or middle click)")
 
     except FileNotFoundError:
-        print("❌ 'gitingest' or 'wl-copy' not found.")
+        print("❌ 'gitingest' or clipboard tool not found.")
         sys.exit(1)
     except subprocess.CalledProcessError as e:
         print(f"❌ gitingest failed (exit code {e.returncode})")

@@ -1,6 +1,6 @@
 # bojan's dotfiles
 
-NixOS + Home Manager configuration for a Hyprland desktop. Built to feel clean, cohesive, and easy to reinstall from scratch.
+NixOS + nix-darwin + Home Manager configuration. Hyprland/Quickshell desktop on Linux, AeroSpace/Raycast on macOS. Built to feel clean, cohesive, and easy to reinstall from scratch.
 
 ---
 
@@ -19,7 +19,15 @@ Secure Boot via lanzaboote is similar: it was easy to add, there's no downside, 
 ```
 hosts/          per-machine config (hardware, disk layout, host-specific values)
 modules/        config files, each responsible for one program or small group
-profiles/       compositions of modules, imported selectively per host, and some additional options
+  home/nixos/     home-manager modules for Linux
+  home/macos/     home-manager modules for macOS
+  system/nixos/   NixOS system modules
+  system/macos/   nix-darwin system modules
+profiles/       compositions of modules, imported selectively per host
+  home/nixos/     home-manager profiles for Linux
+  home/macos/     home-manager profiles for macOS
+  system/nixos/   NixOS system profiles
+  system/macos/   nix-darwin system profiles
 lib/            flake tooling, scripts, ISO builder
 secrets/        agenix-encrypted secrets
 user.nix        identity shared across all hosts (name, email, timezone, etc.)
@@ -27,7 +35,7 @@ user.nix        identity shared across all hosts (name, email, timezone, etc.)
 
 **Modules** are primitives. Each one is responsible for a single program (`hyprland.nix`, `kitty`, `zathura`) or a tight cluster that always goes together (`terminal.nix`). They don't know about each other.
 
-**Profiles** are categories that you choose to import per host — `desktop-env.nix`, `media.nix`, `programming.nix`. They're what you actually compose when defining a machine. This makes it easy to imagine a headless server host that only imports `base.nix` and nothing else.
+**Profiles** are categories that you choose to import per host — `desktop.nix`, `media.nix`, `programming.nix`. They're what you actually compose when defining a machine. This makes it easy to imagine a headless server host that only imports `base.nix` and nothing else.
 
 I prefer explicit imports over auto-discovery, even though auto-discovery reduces boilerplate. It's easier to reason about what's actually loaded when you can just read the import list.
 
@@ -38,36 +46,45 @@ I prefer explicit imports over auto-discovery, even though auto-discovery reduce
 Each host lives in `hosts/<name>/` and has:
 
 - `config.nix` — a plain Nix attrset with all machine-specific values: hostname, disk devices, paths, state version. This is the single source of truth for anything per-machine. It gets merged with `user.nix` and passed everywhere as `userConfig`.
-- `default.nix` — the host definition, imports system and hm profiles and hardware config.
-- `hardware.nix`, `disko.nix` — generated/declared disk layout and hardware config.
-- Any extra `.nix` files in the host dir are auto-discovered and imported. This is specifically for host-specific things that bootstrap doesn't write — like audio driver quirks — so they survive reinstalls without being clobbered.
+- `default.nix` — the host definition, imports platform-appropriate system and home profiles.
+- NixOS hosts: `hardware.nix`, `disko.nix` — generated/declared disk layout and hardware config.
+- macOS hosts: `darwin.nix` — hardware-specific darwin config.
+
+Host definitions for Linux are auto-discovered under `hosts/` via flake-parts. macOS hosts are defined directly in `flake.nix`'s `darwinConfigurations`.
+
+Currently defined hosts:
+
+- **desktop** — NixOS, Hyprland/Quickshell
+- **macbook** — macOS, AeroSpace/Raycast
 
 ---
 
 ## bootstrap
 
-The `lib/scripts/bootstrap.sh` script installs the full system from scratch onto a new machine. It:
+Platform-specific bootstrap scripts live in `lib/scripts/`:
 
-- auto-detects hardware, generates `config.nix` and all host files
-- partitions and formats disks with disko (btrfs + LUKS, separate home disk if provided)
-- creates the `@blank` snapshot for impermanence
-- sets up the swapfile, `/persist` directory structure, SSH host key
-- handles Secure Boot key enrollment on bare metal, skips it on VMs
-- runs `nixos-install` and copies the dotfiles to the new system
+- `bootstrap-nixos.sh` — installs NixOS from scratch: partitions and formats disks with disko, sets up btrfs + LUKS + impermanence, handles Secure Boot, runs `nixos-install`.
+- `bootstrap-macos.sh` — installs nix-darwin and Home Manager on a fresh macOS machine.
 
-On reinstall, bootstrap only overwrites files it owns. Host-specific files that already exist are left alone, which is the point of the auto-discovery pattern in `default.nix`.
-
-There's also a custom ISO (`nix build .#iso`) with the bootstrap script baked in as well as some useful tools like zoxide and nvim, usable as a USB installer. There is also a script for testing the ISO quickly in VMs.
+There's also a custom ISO (`nix build .#iso`) with the bootstrap-nixos script baked in, usable as a USB installer.
 
 ---
 
-## the desktop
+## the desktop (Linux)
 
 The entire desktop UI is built on **Quickshell** (QML) — bar, notification popups, notification panel, media/audio panel, app launcher, clipboard managers, wallpaper picker. Everything.
 
 The reason is cohesion. One language, one renderer, one visual style, rather than waybar + swaync + rofi each doing their own thing. The bar and all its panels share a single `barState` object so every panel can know about and react to every other panel cleanly.
 
+**Hyprland** is the compositor, with **Hyprlock** for the lockscreen and **Hypridle** for idle management.
+
 Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, kitty, vesktop, qBittorrent, zen-browser, hyprlock, the Quickshell UI... The full palette is defined once in `modules/home/theme.nix` and injected into Quickshell as a generated `Colours.qml` singleton at build time, so nothing is hardcoded in QML. Everything not explicitly themed is either automatic with the Catppuccin nixos module or doesn't have it available.
+
+## the desktop (macOS)
+
+**AeroSpace** replaces Hyprland as the window manager (tiling, keybindings mirrored from the Linux config). **Raycast** replaces the Quickshell panels — launcher, clipboard manager, media controls, power management — and is seeded declaratively via `config.json`. Workspace state is shown natively by AeroSpace's window borders and workspace-switch overlay.
+
+Common UX: same keybindings (mod = opt), same terminal (kitty, set via `TERMINAL`), same `ingest.py` clipboard utility (pbcopy on macOS, wl-copy on Linux).
 
 ---
 
@@ -81,7 +98,7 @@ LSP is set up for Nix (nixd, with full flake-aware options completion), Python (
 
 ## secrets
 
-Managed with **agenix**. Secrets are encrypted to host SSH keys and decrypted at activation. The `bootstrapMode` flag in `config.nix` disables secret decryption during initial install (since the host key doesn't exist in `secrets.nix` yet). After first boot, you add the new host key, re-encrypt, and flip the flag.
+Managed with **agenix**. Secrets are encrypted to host SSH keys and decrypted at activation. Works identically on Linux and macOS. The `bootstrapMode` flag in `config.nix` disables secret decryption during initial install (since the host key doesn't exist in `secrets.nix` yet). After first boot, you add the new host key, re-encrypt, and flip the flag.
 
 ---
 
@@ -126,7 +143,7 @@ gi <owner/repo>      # copy a GitHub repo's full content to clipboard (for LLMs)
 
 ---
 
-## post-install guide
+## post-install guide (NixOS)
 
 > Run these steps after the first successful boot into the installed system from bootstrap.
 
@@ -216,7 +233,42 @@ Set `bootstrapMode = false` in `hosts/<hostname>/config.nix`, then `nr`.
 
 ---
 
-### Verify impermanence
+## post-install guide (macOS)
+
+> Run these steps after `bootstrap-macos.sh` completes.
+
+### 1. Restore agenix secrets
+
+Generate an SSH key, add it to GitHub, add the public key to `secrets/secrets.nix`, then re-encrypt:
+
+```bash
+agenix -r -i ~/.ssh/id_ed25519
+```
+
+### 2. Disable bootstrap mode
+
+In `hosts/macbook/config.nix`, set `bootstrapMode = false`, then rebuild:
+
+```bash
+darwin-rebuild switch --flake .#macbook
+```
+
+### 3. Dump Raycast config
+
+After opening Raycast and setting preferences manually, dump the config to the repo:
+
+```bash
+cp ~/Library/Application\ Support/com.raycast.macOS/config.json \
+  modules/home/macos/raycast/config.json
+```
+
+### 4. Push to git
+
+Commit and push the new host config and updated `secrets/secrets.nix`.
+
+---
+
+### Verify impermanence (NixOS only)
 
 ```bash
 journalctl -b -u wipe-root       # confirm wipe ran on boot

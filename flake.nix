@@ -1,5 +1,5 @@
 {
-  description = "NixOS + Home Manager configuration";
+  description = "NixOS + nix-darwin + Home Manager configuration";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -7,6 +7,10 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     lanzaboote = {
       url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     agenix = {
@@ -26,6 +30,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    nix-darwin = {
+      url = "github:lnl7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     nix-search-tv = {
       url = "github:3timeslazy/nix-search-tv";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -56,11 +65,11 @@
     };
   };
 
-  outputs = inputs @ {flake-parts, ...}:
-    flake-parts.lib.mkFlake {inherit inputs;} ({...}: let
+  outputs = {self, ...} @ inputs:
+    inputs.flake-parts.lib.mkFlake {inherit inputs;} ({...}: let
       hostModules = builtins.concatMap (h: [
         ./hosts/${h}/default.nix
-      ]) (builtins.filter (h: h != "template") (builtins.attrNames (builtins.readDir ./hosts)));
+      ]) (builtins.filter (h: !builtins.elem h ["template" "macbook"]) (builtins.attrNames (builtins.readDir ./hosts)));
     in {
       imports =
         [
@@ -75,5 +84,6 @@
         ]
         ++ hostModules;
       systems = ["x86_64-linux"];
-    });
+    })
+    // (import ./hosts/macbook/default.nix {inherit inputs self;});
 }

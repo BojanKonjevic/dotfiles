@@ -5,8 +5,8 @@
 }: {
   imports = [
     inputs.lanzaboote.nixosModules.lanzaboote
-    ../../modules/system/lanzaboote.nix
-    ../../modules/system/restic.nix
+    ../../../modules/system/nixos/lanzaboote.nix
+    ../../../modules/system/nixos/restic.nix
   ];
   environment.systemPackages = with pkgs; [
     qemu

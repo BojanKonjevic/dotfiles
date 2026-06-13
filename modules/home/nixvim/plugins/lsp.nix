@@ -1,4 +1,18 @@
-{userConfig, ...}: {
+{
+  userConfig,
+  pkgs,
+  ...
+}: let
+  flakePath = userConfig.osFlakePath;
+  nixOptions =
+    if pkgs.stdenv.isDarwin
+    then {
+      darwin.expr = "(builtins.getFlake \"${flakePath}\").darwinConfigurations.${userConfig.hostname}.options";
+    }
+    else {
+      nixos.expr = "(builtins.getFlake \"${flakePath}\").nixosConfigurations.${userConfig.hostname}.options";
+    };
+in {
   programs.nixvim.plugins = {
     lazydev = {
       enable = true;
@@ -37,8 +51,8 @@
           enable = true;
           settings.nixd = {
             formatting.command = ["alejandra"];
-            nixpkgs.expr = "import (builtins.getFlake \"${userConfig.osFlakePath}\").inputs.nixpkgs { }";
-            options.nixos.expr = "(builtins.getFlake \"${userConfig.osFlakePath}\").nixosConfigurations.${userConfig.hostname}.options";
+            nixpkgs.expr = "import (builtins.getFlake \"${flakePath}\").inputs.nixpkgs { }";
+            options = nixOptions;
           };
         };
         pyright.enable = true;

@@ -10,7 +10,7 @@
       pkgs.sbctl
       pkgs.home-manager
     ]}:$PATH"
-    exec ${pkgs.bash}/bin/bash ${../scripts/bootstrap.sh} "$@"
+    exec ${pkgs.bash}/bin/bash ${../scripts/bootstrap-nixos.sh} "$@"
   '';
 
   welcome = ''
