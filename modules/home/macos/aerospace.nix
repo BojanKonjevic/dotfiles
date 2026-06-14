@@ -1,6 +1,4 @@
-{pkgs, ...}: {
-  home.packages = [pkgs.aerospace];
-
+{...}: {
   xdg.configFile."aerospace/aerospace.toml".text = ''
     [gaps]
     inner.horizontal = 8
@@ -47,6 +45,7 @@
     alt-enter = "exec-and-forget open -n /Applications/Kitty.app"
     alt-backslash = "exec-and-forget mic-toggle"
     alt-shift-enter = "exec-and-forget open -n /Applications/Kitty.app"
+    ctrl-escape = "exec-and-forget cliclick c:."
 
     [mode.main.binding.alt-minus]
     resize = "smart -50"
@@ -56,8 +55,5 @@
 
     [start-at-login]
     true
-
-    [on-workspace-change]
-    "sketchybar" = "sketchybar --trigger aerospace_workspace_change"
   '';
 }

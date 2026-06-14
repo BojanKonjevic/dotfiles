@@ -1,6 +1,11 @@
-{...}: let
+{lib, ...}: let
   raycastConfigPath = "Library/Application Support/com.raycast.macOS/config.json";
   seedConfig = builtins.readFile ./config.json;
 in {
-  home.file."${raycastConfigPath}".text = seedConfig;
+  home.activation.raycastSeed = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    if [ ! -f "$HOME/${raycastConfigPath}" ]; then
+      mkdir -p "$HOME/Library/Application Support/com.raycast.macOS"
+      cp ${./config.json} "$HOME/${raycastConfigPath}"
+    fi
+  '';
 }

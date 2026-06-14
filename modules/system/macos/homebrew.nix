@@ -8,9 +8,12 @@
     };
     brews = [
       "mas"
+      "colima"
     ];
     casks = [
-      "ghostty"
+      "aerospace"
+      "libreoffice"
+      "localsend"
       "raycast"
       "obsidian"
       "spotify"

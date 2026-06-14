@@ -45,7 +45,9 @@
   environment.systemPackages = [pkgs.vim];
   system.defaults.dock = {
     autohide = true;
-    autohide-delay = 1000.0;
+    autohide-delay = 999999;
+    autohide-time-modifier = 0.0;
+    mru-spaces = false;
   };
   system.defaults.finder = {
     AppleShowAllExtensions = true;
@@ -61,6 +63,7 @@
     disable-shadow = true;
   };
   system.defaults.NSGlobalDomain = {
+    AppleInterfaceStyle = "Dark";
     AppleKeyboardUIMode = 3;
     ApplePressAndHoldEnabled = false;
     InitialKeyRepeat = 15;
@@ -84,17 +87,63 @@
   };
   system.defaults.universalaccess.reduceTransparency = false;
 
-  # Never sleep when on AC power — display still turns off, no wake delay at desk
-  system.activationScripts.power.text = ''
-    pmset -c sleep 0
-  '';
-
-  # ── Keyboard Best Practices ────────────────────────────────────────────────
-  # For 1:1 AeroSpace experience on the 60% + MacBook Air built-in keyboard:
-  # System Settings → Keyboard → Modifier Keys → select each keyboard →
+  # ── Keyboard Consistency (60% external + MacBook built-in) ─────────────────
+  # Goal: AeroSpace modifier (⌥) is always the thumb key next to spacebar.
+  #
+  # Layouts before swapping:
+  #
+  #   60% (left of spacebar):      Ctrl  |  Win        |  Alt  |  ← thumb
+  #   MacBook (left of spacebar):  Fn    |  Ctrl       |  ⌥    |  ⌘    ← thumb
+  #
+  #   60% key → macOS maps as:     Ctrl  →  Ctrl
+  #                                Win   →  ⌘
+  #                                Alt   →  ⌥   ← thumb, AeroSpace modifier
+  #
+  # Problem: on the MacBook built-in, the thumb key is ⌘, not ⌥.
+  # Fix: swap ⌥ ↔ ⌘ for the internal keyboard only.
+  #
+  # After swapping:
+  #
+  #   60%:                        Ctrl  |  Win  (⌘)  |  Alt  (⌥)  |  ← thumb (⌥)
+  #   MacBook built-in:           Fn    |  Ctrl       |  ⌘          |  ⌥     ← thumb (⌥)
+  #
+  #   Ctrl is corner on 60%, position 2 on MacBook — close enough.
+  #   Win/⌘ is middle on both. Copy/paste muscle memory matches.
+  #   Thumb = ⌥ = AeroSpace modifier on both keyboards. ✓
+  #
+  # System Settings → Keyboard → Modifier Keys → select "MacBook Air Keyboard" →
   #   swap Option (⌥) ↔ Command (⌘)
-  # This makes the thumb-key next to spacebar = Option/AeroSpace on both keyboards.
   # ────────────────────────────────────────────────────────────────────────────
+
+  system.defaults.WindowManager = {
+    EnableStandardClickToShowDesktop = false;
+    StandardHideDesktopIcons = true;
+    EnableTilingByEdgeDrag = false;
+    EnableTopTilingByEdgeDrag = false;
+    EnableTilingOptionAccelerator = false;
+    EnableTiledWindowMargins = false;
+  };
+
+  system.defaults.CustomUserPreferences = {
+    "com.apple.Siri".StatusMenuVisible = false;
+    "com.apple.assistant.support"."Assistant Enabled" = false;
+    "com.apple.Siri".VoiceTriggerUserEnabled = false;
+  };
+
+  # Kill Spotlight completely — icon hidden, keyboard shortcuts disabled
+  # Raycast replaces Cmd+Space, indexing stays on (Raycast and other apps need it)
+  system.activationScripts.extraUser.text = ''
+    defaults -currentHost write com.apple.Spotlight MenuItemHidden -int 1
+    /usr/libexec/PlistBuddy -c "Set AppleSymbolicHotKeys:64:enabled false" \
+      ~/Library/Preferences/com.apple.symbolichotkeys.plist 2>/dev/null || true
+    /usr/libexec/PlistBuddy -c "Set AppleSymbolicHotKeys:65:enabled false" \
+      ~/Library/Preferences/com.apple.symbolichotkeys.plist 2>/dev/null || true
+
+    # Kill Mission Control gestures — 3-finger swipe up/down/spread
+    defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerVertSwipeGesture -int 0
+    defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerHorizSwipeGesture -int 0
+    defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadPinchGesture -int 0
+  '';
 
   system.defaults.loginwindow = {
     GuestEnabled = false;

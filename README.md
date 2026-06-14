@@ -82,9 +82,11 @@ Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, kitty, vesktop,
 
 ## the desktop (macOS)
 
-**AeroSpace** replaces Hyprland as the window manager (tiling, keybindings mirrored from the Linux config). **Raycast** replaces the Quickshell panels — launcher, clipboard manager, media controls, power management — and is seeded declaratively via `config.json`. Workspace state is shown natively by AeroSpace's window borders and workspace-switch overlay.
+**AeroSpace** replaces Hyprland as the window manager — same keybindings (mod = ⌥, h/j/k/l for focus, Shift to move, numbers for workspaces). **Raycast** replaces the Quickshell panels (launcher, clipboard, media) with its config seeded declaratively via `config.json`. **AeroSpace's built-in menu bar icon** shows the current workspace number.
 
-Common UX: same keybindings (mod = opt), same terminal (kitty, set via `TERMINAL`), same `ingest.py` clipboard utility (pbcopy on macOS, wl-copy on Linux).
+A native **mic status bar** agent shows green/red mic state via SF Symbols in the menu bar, click to toggle. A **cursor warp agent** moves the cursor to the center of the focused window on AeroSpace keyboard actions (⌥+h/j/k/l or ⌥+Shift+number), mimicking Hyprland's `cursor_warp_to_center`.
+
+macOS default annoyances removed: Dock permanently hidden (999999s delay), Siri fully disabled, Spotlight icon + keyboard shortcuts killed, Mission Control gestures disabled, desktop icons hidden, Stage Manager and native window tiling off, click-wallpaper-reveal-desktop off, spaces never auto-rearrange. The shelf is empty.
 
 ---
 
@@ -253,16 +255,27 @@ In `hosts/macbook/config.nix`, set `bootstrapMode = false`, then rebuild:
 darwin-rebuild switch --flake .#macbook
 ```
 
-### 3. Dump Raycast config
+### 3. Grant accessibility permissions
 
-After opening Raycast and setting preferences manually, dump the config to the repo:
+Two background agents need Accessibility permission. On first build, macOS will prompt for each. Grant both:
+
+- **cursor-warp** — event tap + AX observer for cursor warping on AeroSpace focus changes
+- **mic-status-bar** — reads mic state from `/tmp/qs-mic-state`
+
+If you miss the prompts, add them manually in System Settings → Privacy & Security → Accessibility.
+
+### 4. Dump Raycast config
+
+After opening Raycast and setting preferences manually (install extensions, configure hotkeys), dump the config to the repo:
 
 ```bash
 cp ~/Library/Application\ Support/com.raycast.macOS/config.json \
   modules/home/macos/raycast/config.json
 ```
 
-### 4. Push to git
+Then switch the Raycast module from `home.activation` (seed once) back to `home.file` (always enforce).
+
+### 5. Push to git
 
 Commit and push the new host config and updated `secrets/secrets.nix`.
 

@@ -7,8 +7,8 @@
     [
       nvd
       cachix
-      localsend
-      libreoffice
+      cliclick
+      shottr
       p7zip
       unzip
       dejsonlz4
