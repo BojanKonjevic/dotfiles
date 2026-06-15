@@ -18,7 +18,6 @@
       "obsidian"
       "spotify"
       "telegram"
-      "discord"
       "visual-studio-code"
       "qlmarkdown"
       "quicklook-json"

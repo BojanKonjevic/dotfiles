@@ -19,9 +19,11 @@
 in {
   home.packages = [micStatusBar];
 
-  launchd.user.agents.mic-status-bar = {
+  launchd.agents.mic-status-bar = {
     enable = true;
-    command = "${micStatusBar}/bin/mic-status-bar";
-    keepAlive = true;
+    config = {
+      ProgramArguments = ["${micStatusBar}/bin/mic-status-bar"];
+      KeepAlive = true;
+    };
   };
 }

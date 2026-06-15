@@ -5,7 +5,6 @@
 }: {
   networking.hostName = userConfig.hostname;
   time.timeZone = userConfig.timezone;
-  system.defaults.NSGlobalDomain.AppleLocale = userConfig.locale;
   system.defaults.NSGlobalDomain.AppleICUForce24HourTime = true;
   security.pam.enableSudoTouchIdAuth = true;
   nix = {
@@ -128,6 +127,7 @@
     "com.apple.Siri".StatusMenuVisible = false;
     "com.apple.assistant.support"."Assistant Enabled" = false;
     "com.apple.Siri".VoiceTriggerUserEnabled = false;
+    "NSGlobalDomain".AppleLocale = userConfig.locale;
   };
 
   # Kill Spotlight completely — icon hidden, keyboard shortcuts disabled
@@ -149,6 +149,5 @@
     GuestEnabled = false;
     SHOWFULLNAME = true;
   };
-  system.defaults.CustomMenuBar = [];
   system.stateVersion = 4;
 }

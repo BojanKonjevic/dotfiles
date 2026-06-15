@@ -19,9 +19,11 @@
 in {
   home.packages = [cursorWarp];
 
-  launchd.user.agents.cursor-warp = {
+  launchd.agents.cursor-warp = {
     enable = true;
-    command = "${cursorWarp}/bin/cursor-warp";
-    keepAlive = true;
+    config = {
+      ProgramArguments = ["${cursorWarp}/bin/cursor-warp"];
+      KeepAlive = true;
+    };
   };
 }

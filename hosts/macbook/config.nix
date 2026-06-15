@@ -21,5 +21,5 @@
 
   # ── Bootstrap flag ────────────────────────────────────────────────────────
   # Disables agenix secrets that aren't available yet.
-  bootstrapMode = false;
+  bootstrapMode = true;
 }

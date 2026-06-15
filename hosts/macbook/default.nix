@@ -29,6 +29,7 @@ in {
           home-manager.extraSpecialArgs = {inherit inputs userConfig;};
           home-manager.users.${userConfig.username} = {
             inputs,
+            lib,
             userConfig,
             ...
           }: {
@@ -42,7 +43,7 @@ in {
               ../../profiles/home/macos/misc.nix
             ];
             home.username = userConfig.username;
-            home.homeDirectory = userConfig.homeDirectory;
+            home.homeDirectory = lib.mkForce userConfig.homeDirectory;
             home.stateVersion = userConfig.stateVersion;
             news.display = "silent";
           };
