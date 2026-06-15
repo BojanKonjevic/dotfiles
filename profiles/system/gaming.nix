@@ -1,4 +1,11 @@
-{pkgs, ...}: {
+{
+  lib,
+  userConfig,
+  inputs,
+  ...
+}: let
+  pkgs = inputs.nixpkgs.legacyPackages.${userConfig.system};
+in {
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true;

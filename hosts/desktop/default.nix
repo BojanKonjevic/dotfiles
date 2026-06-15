@@ -45,10 +45,10 @@ in {
               inputs.catppuccin.homeModules.catppuccin
 
               # ── HM Profiles ──────────────────────────────────────────────
-              ../../profiles/home/nixos/base.nix
-              ../../profiles/home/nixos/desktop.nix
-              ../../profiles/home/nixos/media.nix
-              ../../profiles/home/nixos/misc.nix
+              ../../profiles/home/base.nix
+              ../../profiles/home/desktop.nix
+              ../../profiles/home/media.nix
+              ../../profiles/home/misc.nix
             ];
             home.username = userConfig.username;
             home.homeDirectory = userConfig.homeDirectory;
@@ -58,11 +58,11 @@ in {
         }
 
         # ── Profiles ───────────────────────────────────────────────────────
-        ../../profiles/system/nixos/base.nix
-        ../../profiles/system/nixos/misc.nix
-        ../../profiles/system/nixos/nvidia.nix
-        ../../profiles/system/nixos/programming.nix
-        #../../profiles/system/nixos/gaming.nix
+        ../../profiles/system/base.nix
+        ../../profiles/system/misc.nix
+        ../../profiles/system/nvidia.nix
+        ../../profiles/system/programming.nix
+        #../../profiles/system/gaming.nix
       ]
       ++ extraModules;
   };

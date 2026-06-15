@@ -69,7 +69,7 @@
     inputs.flake-parts.lib.mkFlake {inherit inputs;} ({...}: let
       hostModules = builtins.concatMap (h: [
         ./hosts/${h}/default.nix
-      ]) (builtins.filter (h: !builtins.elem h ["template" "macbook"]) (builtins.attrNames (builtins.readDir ./hosts)));
+      ]) (builtins.filter (h: h != "template") (builtins.attrNames (builtins.readDir ./hosts)));
     in {
       imports =
         [
@@ -84,6 +84,5 @@
         ]
         ++ hostModules;
       systems = ["x86_64-linux"];
-    })
-    // (import ./hosts/macbook/default.nix {inherit inputs self;});
+    });
 }

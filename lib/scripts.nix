@@ -16,7 +16,6 @@
         ''
       );
     };
-    apps.new-python-project = inputs.new-python-project.apps.${system}.default;
     apps.bootstrap-macos = {
       meta.description = "Bootstrap a new macOS machine from dotfiles";
       type = "app";

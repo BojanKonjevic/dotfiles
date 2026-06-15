@@ -19,8 +19,8 @@ in {
   home.packages =
     [
       pkgs.gitingest
-      (mkPythonScript "ingest" ingestPython ../../lib/scripts/ingest.py)
-      (mkPythonScript "yttranscript" yttranscriptPython ../../lib/scripts/yttranscript.py)
+      (mkPythonScript "ingest" ingestPython ../../../lib/scripts/ingest.py)
+      (mkPythonScript "yttranscript" yttranscriptPython ../../../lib/scripts/yttranscript.py)
     ]
     ++ lib.optionals (!pkgs.stdenv.isDarwin) [
       pkgs.wl-clipboard

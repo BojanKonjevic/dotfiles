@@ -3,10 +3,12 @@
     CURRENT=$(osascript -e "input volume of (get volume settings)")
     if [ "$CURRENT" -eq 0 ]; then
       osascript -e "set volume input volume 100"
-      echo "unmuted" > /tmp/qs-mic-state
+      echo "unmuted" > /tmp/qs-mic-state.tmp
+      mv /tmp/qs-mic-state.tmp /tmp/qs-mic-state
     else
       osascript -e "set volume input volume 0"
-      echo "muted" > /tmp/qs-mic-state
+      echo "muted" > /tmp/qs-mic-state.tmp
+      mv /tmp/qs-mic-state.tmp /tmp/qs-mic-state
     fi
   '';
 in {

@@ -1,6 +1,7 @@
 {
-  inputs,
   self,
+  inputs,
+  ...
 }: let
   userConfig = (import ../../user.nix) // (import ./config.nix);
   bootstrapFiles = [
@@ -17,7 +18,7 @@
         (f: !builtins.elem f bootstrapFiles)
         (builtins.attrNames (builtins.readDir hostDir))));
 in {
-  darwinConfigurations.${userConfig.hostname} = inputs.nix-darwin.lib.darwinSystem {
+  flake.darwinConfigurations.${userConfig.hostname} = inputs.nix-darwin.lib.darwinSystem {
     system = userConfig.system;
     specialArgs = {inherit inputs userConfig self;};
     modules =
@@ -37,10 +38,10 @@ in {
               inputs.catppuccin.homeModules.catppuccin
 
               # ── HM Profiles ──────────────────────────────────────────────
-              ../../profiles/home/macos/base.nix
-              ../../profiles/home/macos/desktop.nix
-              ../../profiles/home/macos/media.nix
-              ../../profiles/home/macos/misc.nix
+              ../../profiles/home/base.nix
+              ../../profiles/home/desktop.nix
+              ../../profiles/home/media.nix
+              ../../profiles/home/misc.nix
             ];
             home.username = userConfig.username;
             home.homeDirectory = lib.mkForce userConfig.homeDirectory;
@@ -50,8 +51,8 @@ in {
         }
 
         # ── System Profiles ─────────────────────────────────────────────────
-        ../../profiles/system/macos/base.nix
-        ../../profiles/system/macos/programming.nix
+        ../../profiles/system/base.nix
+        ../../profiles/system/programming.nix
       ]
       ++ extraModules;
   };

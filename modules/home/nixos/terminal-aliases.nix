@@ -8,7 +8,7 @@
     buildiso = "cd ${userConfig.dotfilesDir} && nix build .#iso";
   };
 
-  programs.zsh.initExtra = ''
+  programs.zsh.initContent = ''
     flashiso() {
       local iso="${userConfig.dotfilesDir}/result/iso/nixos-custom-installer.iso"
       if [[ ! -f "$iso" ]]; then

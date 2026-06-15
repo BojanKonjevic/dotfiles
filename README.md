@@ -78,7 +78,7 @@ The reason is cohesion. One language, one renderer, one visual style, rather tha
 
 **Hyprland** is the compositor, with **Hyprlock** for the lockscreen and **Hypridle** for idle management.
 
-Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, kitty, vesktop, qBittorrent, zen-browser, hyprlock, the Quickshell UI... The full palette is defined once in `modules/home/theme.nix` and injected into Quickshell as a generated `Colours.qml` singleton at build time, so nothing is hardcoded in QML. Everything not explicitly themed is either automatic with the Catppuccin nixos module or doesn't have it available.
+Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, kitty, vesktop, qBittorrent, zen-browser, hyprlock, the Quickshell UI... The full palette is defined once in `modules/home/shared/theme.nix` and injected into Quickshell as a generated `Colours.qml` singleton at build time, so nothing is hardcoded in QML. Everything not explicitly themed is either automatic with the Catppuccin nixos module or doesn't have it available.
 
 ## the desktop (macOS)
 
