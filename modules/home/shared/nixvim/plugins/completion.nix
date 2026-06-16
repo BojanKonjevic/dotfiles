@@ -21,7 +21,10 @@
         completion = {
           documentation.auto_show = true;
           ghost_text.enabled = true;
-          list.selection = "auto_insert";
+          list.selection = {
+            preselect = true;
+            auto_insert = true;
+          };
         };
         sources = {
           default = ["lsp" "path" "snippets" "lazydev"];
