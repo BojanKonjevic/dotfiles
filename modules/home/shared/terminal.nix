@@ -131,7 +131,17 @@ in {
         else "nh os switch -u"
       } \
           && cachix push bojan-dotfiles /run/current-system \
-          && cachix push bojan-dotfiles "$HOME/.local/state/nix/profiles/home-manager"
+          && cachix push bojan-dotfiles "$HOME/.local/state/nix/profiles/home-manager" \
+          ${
+        if pkgs.stdenv.hostPlatform.isDarwin
+        then ''
+          && echo "Updating Homebrew..." \
+          && brew update \
+          && brew upgrade \
+          && brew cleanup
+        ''
+        else ""
+      }
       }
 
       ship() {

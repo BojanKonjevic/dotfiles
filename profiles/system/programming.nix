@@ -21,14 +21,14 @@ in
       ]
       ++ lib.optionals isDarwin [docker-client]
       ++ lib.optionals (!isDarwin) [docker];
+    services.redis.servers."" = {
+      enable = true;
+      port = 6379;
+    };
   }
   // lib.optionalAttrs (!isDarwin) {
     virtualisation.docker.enable = true;
     programs.nix-ld.enable = true;
   }
   // lib.optionalAttrs isDarwin {
-    services.redis = {
-      enable = true;
-      port = 6379;
-    };
   }
