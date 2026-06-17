@@ -9,7 +9,7 @@ in
   {
     imports =
       lib.optionals isDarwin [
-        ../../modules/home/macos/aerospace.nix
+        ../../modules/home/macos/rift.nix
         ../../modules/home/macos/raycast
         ../../modules/home/macos/mic-status-bar
         ../../modules/home/macos/cursor-warp

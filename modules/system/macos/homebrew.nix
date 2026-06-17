@@ -9,9 +9,9 @@
     brews = [
       "mas"
       "colima"
+      "acsandmann/tap/rift"
     ];
     casks = [
-      "aerospace"
       "libreoffice"
       "localsend"
       "raycast"
