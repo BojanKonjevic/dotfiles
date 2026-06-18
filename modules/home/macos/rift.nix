@@ -103,9 +103,9 @@ in {
     "mod + F" = "toggle_fullscreen"
     "mod + Slash" = "toggle_orientation"
     "mod + Comma" = "switch_to_last_workspace"
-    "mod + Enter" = { exec = ["open", "-n", "/Applications/Kitty.app"] }
+    "mod + Enter" = { exec = ["kitty"] }
     "mod + Backslash" = { exec = ["mic-toggle"] }
-    "modShift + Enter" = { exec = ["open", "-n", "/Applications/Kitty.app"] }
+    "modShift + Enter" = { exec = ["kitty"] }
     "mod + E" = { exec = ["open", "-n", "/System/Library/CoreServices/Finder.app"] }
     "mod + N" = { exec = ["open", "-n", "-a", "Zen Browser", "--args", "--private-window"] }
     "mod + Space" = { exec = ["open", "-n", "/Applications/Raycast.app"] }
@@ -114,18 +114,21 @@ in {
     "mod + Equal" = "resize_window_grow"
   '';
 
-  xdg.configFile."borders/bordersrc".text = ''
-    #! /bin/bash
-    options=(
-      style=round
-      width=${toString theme.borderSize}
-      hidpi=on
-      active_color=${activeBorder}
-      inactive_color=${inactiveBorder}
-      order=above
-    )
-    borders "''${options[@]}"
-  '';
+  xdg.configFile."borders/bordersrc" = {
+    text = ''
+      #! /bin/bash
+      options=(
+        style=round
+        width=${toString theme.borderSize}
+        hidpi=on
+        active_color=${activeBorder}
+        inactive_color=${inactiveBorder}
+        order=above
+      )
+      borders "''${options[@]}"
+    '';
+    executable = true;
+  };
 
   launchd.agents.rift = {
     enable = true;

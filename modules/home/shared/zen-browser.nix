@@ -1,8 +1,13 @@
 {
   config,
+  pkgs,
   theme,
   ...
 }: let
+  zenBase =
+    if pkgs.stdenv.hostPlatform.isDarwin
+    then "Library/Application Support/zen"
+    else ".zen";
   zenProfile = "${config.home.username}.default";
 in {
   programs.zen-browser = {
@@ -50,7 +55,7 @@ in {
       };
     };
   };
-  home.file.".zen/profiles.ini".text = ''
+  home.file."${zenBase}/profiles.ini".text = ''
     [Profile0]
     Name=${config.home.username}
     IsRelative=1
@@ -66,7 +71,7 @@ in {
     Locked=1
   '';
 
-  home.file.".zen/${zenProfile}/user.js".text = ''
+  home.file."${zenBase}/${zenProfile}/user.js".text = ''
     user_pref("font.name.monospace.x-western", "${theme.fontName}");
     user_pref("font.name.sans-serif.x-western", "${theme.fontName}");
     user_pref("font.name.serif.x-western", "${theme.fontName}");
@@ -114,7 +119,7 @@ in {
     user_pref("geo.provider.use_geoclue", false);
   '';
 
-  home.file.".zen/${zenProfile}/chrome/userChrome.css".text = ''
+  home.file."${zenBase}/${zenProfile}/chrome/userChrome.css".text = ''
     :root {
       --zen-primary-color: ${theme.mauve} !important;
       --zen-colors-primary: ${theme.surface0} !important;
@@ -193,7 +198,7 @@ in {
     }
   '';
 
-  home.file.".zen/${zenProfile}/chrome/userContent.css".text = ''
+  home.file."${zenBase}/${zenProfile}/chrome/userContent.css".text = ''
     @media (prefers-color-scheme: dark) {
 
       @-moz-document url-prefix("about:") {

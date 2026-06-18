@@ -125,9 +125,9 @@ in {
     flavor = "mocha";
     accent = "mauve";
   };
-  fonts = {
-    fontconfig.enable = true;
-    fontconfig.defaultFonts.monospace = [palette.fontName];
+  fonts.fontconfig = lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
+    enable = true;
+    defaultFonts.monospace = [palette.fontName];
   };
 
   imports = [
