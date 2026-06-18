@@ -10,6 +10,7 @@
       "mas"
       "colima"
       "acsandmann/tap/rift"
+      "FelixKratz/formulae/borders"
     ];
     casks = [
       "libreoffice"

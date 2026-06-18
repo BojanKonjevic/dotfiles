@@ -1,9 +1,12 @@
 {
   config,
+  lib,
   theme,
   ...
 }: let
   brewPrefix = config.homebrew.brewPrefix or "/opt/homebrew";
+  activeBorder = "0xff${lib.removePrefix "#" theme.mauve}";
+  inactiveBorder = "0xff${lib.removePrefix "#" theme.surface1}";
 in {
   xdg.configFile."rift/config.toml".text = ''
     [settings]
@@ -104,10 +107,24 @@ in {
     "mod + Backslash" = { exec = ["mic-toggle"] }
     "modShift + Enter" = { exec = ["open", "-n", "/Applications/Kitty.app"] }
     "mod + E" = { exec = ["open", "-n", "/System/Library/CoreServices/Finder.app"] }
+    "mod + N" = { exec = ["open", "-n", "-a", "Zen Browser", "--args", "--private-window"] }
     "mod + Space" = { exec = ["open", "-n", "/Applications/Raycast.app"] }
     "Ctrl + Escape" = { exec = ["cliclick", "c:."] }
     "mod + Minus" = "resize_window_shrink"
     "mod + Equal" = "resize_window_grow"
+  '';
+
+  xdg.configFile."borders/bordersrc".text = ''
+    #! /bin/bash
+    options=(
+      style=round
+      width=${toString theme.borderSize}
+      hidpi=on
+      active_color=${activeBorder}
+      inactive_color=${inactiveBorder}
+      order=above
+    )
+    borders "''${options[@]}"
   '';
 
   launchd.agents.rift = {
@@ -118,6 +135,20 @@ in {
       RunAtLoad = true;
       StandardOutPath = "/tmp/rift.stdout.log";
       StandardErrorPath = "/tmp/rift.stderr.log";
+    };
+  };
+
+  launchd.agents.borders = {
+    enable = true;
+    config = {
+      ProgramArguments = ["${brewPrefix}/bin/borders"];
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/borders.stdout.log";
+      StandardErrorPath = "/tmp/borders.stderr.log";
+      EnvironmentVariables = {
+        XDG_CONFIG_HOME = "${config.xdg.configHome}";
+      };
     };
   };
 }

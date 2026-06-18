@@ -24,8 +24,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // ── Event Tap: detect AeroSpace focus-change keys ────────────────────────
-    // AeroSpace keycodes (ANSI physical positions):
+    // ── Event Tap: detect Rift focus-change keys ────────────────────────
+    // Rift keycodes (ANSI physical positions):
     //   h=4, j=38, k=40, l=37  (focus/move direction)
     //   numbers 1-0 = 18-29    (workspace select/move)
 
