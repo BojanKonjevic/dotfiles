@@ -6,12 +6,6 @@
   ...
 }: {
   imports = [inputs.agenix.nixosModules.default];
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-    };
-  };
   age.secrets = lib.mkIf (!userConfig.bootstrapMode) {
     cachix-token = {
       file = "${self}/secrets/cachix-token.age";
