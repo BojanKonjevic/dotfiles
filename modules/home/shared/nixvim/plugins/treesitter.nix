@@ -8,6 +8,8 @@
     };
     grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
       bash
+      c
+      cpp
       css
       diff
       html

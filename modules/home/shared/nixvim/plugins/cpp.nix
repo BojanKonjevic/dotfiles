@@ -1,10 +1,15 @@
 {pkgs, ...}: {
   programs.nixvim = {
     # ── LSP ───────────────────────────────────────────────────────────────
-    plugins.lsp.servers = {
+    lsp.servers = {
       clangd = {
         enable = true;
-        cmd = ["clangd" "--background-index" "--clang-tidy" "--header-insertion=iwyu"];
+        config.cmd = [
+          "clangd"
+          "--background-index"
+          "--clang-tidy"
+          "--header-insertion=iwyu"
+        ];
       };
     };
 
