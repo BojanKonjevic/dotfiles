@@ -117,7 +117,6 @@ in {
       gi = "ingest";
       nr = nhSwitch;
       gc = "nh clean all --keep 10";
-      restic-snapshots = "sudo bash -c 'env $(cat /run/agenix/restic-env) restic -r b2:bojan-backup --password-file /run/agenix/restic-password snapshots'";
     };
     initContent = ''
       export PATH="${userConfig.homeDirectory}/.local/bin:$PATH"
@@ -147,11 +146,6 @@ in {
       ship() {
         git commit -m "$*"
         git push
-      }
-
-      restic-restore() {
-        local id=''${1:-latest}
-        sudo bash -c "env \$(cat /run/agenix/restic-env) restic -r b2:bojan-backup --password-file /run/agenix/restic-password restore $id --target /tmp/restore"
       }
 
       zstyle ':completion:*' menu select

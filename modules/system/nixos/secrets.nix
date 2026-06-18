@@ -22,16 +22,6 @@
       owner = userConfig.username;
       mode = "0400";
     };
-    restic-password = {
-      file = "${self}/secrets/restic-password.age";
-      owner = "root";
-      mode = "0400";
-    };
-    restic-env = {
-      file = "${self}/secrets/restic-env.age";
-      owner = "root";
-      mode = "0400";
-    };
     tailscale = {
       file = "${self}/secrets/tailscale.age";
       owner = "root";
