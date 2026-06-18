@@ -7,6 +7,5 @@
     ../../../modules/home/shared/scripts.nix
     inputs.nixvim.homeModules.nixvim
     ../../../modules/home/shared/nixvim
-    ../../../modules/home/shared/yazi.nix
   ];
 }

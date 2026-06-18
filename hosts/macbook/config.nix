@@ -19,6 +19,9 @@
   # ── Version ───────────────────────────────────────────────────────────────
   stateVersion = "25.11";
 
+  # ── macOS brew prefix ──────────────────────────────────────────────────
+  brewPrefix = "/opt/homebrew";
+
   # ── Bootstrap flag ────────────────────────────────────────────────────────
   # Disables agenix secrets that aren't available yet.
   bootstrapMode = true;

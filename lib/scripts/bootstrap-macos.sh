@@ -40,6 +40,7 @@ if [ ! -f "hosts/$HOSTNAME/config.nix" ]; then
 {
   hostname = "$HOSTNAME";
   system = "aarch64-darwin";
+  brewPrefix = "/opt/homebrew";
   homeDirectory = "/Users/bojan";
   dotfilesDir = "$DOTFILES_DIR";
   wallpaperDir = "/Users/bojan/Pictures/wallpapers";
@@ -54,7 +55,7 @@ fi
 
 # ── 5. First build (bootstrap mode — no secrets) ─────────────────────────────
 echo "First build (bootstrapMode = true)..."
-nix run nix-darwin -- switch --flake ".#$HOSTNAME" 2>&1 | tee /tmp/darwin-rebuild.log
+nix run github:lnl7/nix-darwin -- switch --flake ".#$HOSTNAME" 2>&1 | tee /tmp/darwin-rebuild.log
 
 # ── 6. Post-bootstrap instructions ──────────────────────────────────────────
 echo ""

@@ -16,6 +16,7 @@ in {
     eza
     calcurse
     delta
+    lazygit
   ];
   programs.zoxide.enable = true;
   programs.broot.enable = true;
@@ -98,7 +99,7 @@ in {
         else "nh os switch";
     in {
       v = "nvim";
-      f = "yazi";
+      lg = "lazygit";
       oc = "opencode";
       vf = "nvim +'lua vim.defer_fn(function() require(\"telescope.builtin\").find_files() end, 0)'";
       dev = "nix develop";

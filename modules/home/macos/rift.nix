@@ -2,9 +2,10 @@
   config,
   lib,
   theme,
+  userConfig,
   ...
 }: let
-  brewPrefix = config.homebrew.brewPrefix or "/opt/homebrew";
+  brewPrefix = userConfig.brewPrefix;
   activeBorder = "0xff${lib.removePrefix "#" theme.mauve}";
   inactiveBorder = "0xff${lib.removePrefix "#" theme.surface1}";
 in {
