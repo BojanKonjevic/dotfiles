@@ -1,6 +1,6 @@
 # bojan's dotfiles
 
-NixOS + nix-darwin + Home Manager configuration. Hyprland/Quickshell desktop on Linux, AeroSpace/Raycast on macOS. Built to feel clean, cohesive, and easy to reinstall from scratch.
+NixOS + nix-darwin + Home Manager configuration. Hyprland/Quickshell desktop on Linux, Rift/Raycast on macOS. Built to feel clean, cohesive, and easy to reinstall from scratch.
 
 ---
 
@@ -19,13 +19,16 @@ Secure Boot via lanzaboote is similar: it was easy to add, there's no downside, 
 ```
 hosts/          per-machine config (hardware, disk layout, host-specific values)
 modules/        config files, each responsible for one program or small group
+  home/shared/    home-manager modules for both platforms
   home/nixos/     home-manager modules for Linux
   home/macos/     home-manager modules for macOS
   system/nixos/   NixOS system modules
   system/macos/   nix-darwin system modules
 profiles/       compositions of modules, imported selectively per host
+  home/shared/    home-manager profiles for both platforms
   home/nixos/     home-manager profiles for Linux
   home/macos/     home-manager profiles for macOS
+  system/shared/  system profiles for both platforms
   system/nixos/   NixOS system profiles
   system/macos/   nix-darwin system profiles
 lib/            flake tooling, scripts, ISO builder
@@ -55,7 +58,7 @@ Host definitions for Linux are auto-discovered under `hosts/` via flake-parts. m
 Currently defined hosts:
 
 - **desktop** — NixOS, Hyprland/Quickshell
-- **macbook** — macOS, AeroSpace/Raycast
+- **macbook** — macOS, Rift/Raycast
 
 ---
 
@@ -82,9 +85,9 @@ Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, kitty, vesktop,
 
 ## the desktop (macOS)
 
-**AeroSpace** replaces Hyprland as the window manager — same keybindings (mod = ⌥, h/j/k/l for focus, Shift to move, numbers for workspaces). **Raycast** replaces the Quickshell panels (launcher, clipboard, media) with its config seeded declaratively via `config.json`. **AeroSpace's built-in menu bar icon** shows the current workspace number.
+**Rift** is the tiling window manager — BSP layout, instant virtual workspaces (10 by default), gesture support, animations. Same keybindings as Hyprland (mod = ⌥, h/j/k/l for focus, Shift to move, numbers for workspaces). **JankyBorders** adds Catppuccin-themed window borders via CGS private APIs (no SIP required, installed from Homebrew, managed as a launchd agent).
 
-A native **mic status bar** agent shows green/red mic state via SF Symbols in the menu bar, click to toggle. A **cursor warp agent** moves the cursor to the center of the focused window on AeroSpace keyboard actions (⌥+h/j/k/l or ⌥+Shift+number), mimicking Hyprland's `cursor_warp_to_center`.
+**Raycast** replaces the Quickshell panels (launcher, clipboard, system controls) — its config is seeded on first launch via `home.activation`. A native **mic status bar** agent shows mic state via SF Symbols in the menu bar, click to toggle. A **cursor warp agent** warps the cursor to the center of the focused window via event tap and AX observer, mimicking Hyprland's `cursor_warp_to_center`.
 
 macOS default annoyances removed: Dock permanently hidden (999999s delay), Siri fully disabled, Spotlight icon + keyboard shortcuts killed, Mission Control gestures disabled, desktop icons hidden, Stage Manager and native window tiling off, click-wallpaper-reveal-desktop off, spaces never auto-rearrange. The shelf is empty.
 
@@ -257,23 +260,23 @@ darwin-rebuild switch --flake .#macbook
 
 ### 3. Grant accessibility permissions
 
-Two background agents need Accessibility permission. On first build, macOS will prompt for each. Grant both:
+Several background agents need Accessibility permission. On first build, macOS will prompt for each. Grant all:
 
-- **cursor-warp** — event tap + AX observer for cursor warping on AeroSpace focus changes
+- **Rift** — window management, keyboard event tap
+- **borders** — observes window events for border updates
+- **cursor-warp** — event tap + AX observer for cursor warping on focus changes
 - **mic-status-bar** — reads mic state from `/tmp/qs-mic-state`
 
 If you miss the prompts, add them manually in System Settings → Privacy & Security → Accessibility.
 
-### 4. Dump Raycast config
+### 4. Configure Raycast (optional)
 
-After opening Raycast and setting preferences manually (install extensions, configure hotkeys), dump the config to the repo:
+Raycast is seeded with a base config on first launch. After installing extensions and configuring hotkeys, dump the updated config to the repo to persist it:
 
 ```bash
 cp ~/Library/Application\ Support/com.raycast.macOS/config.json \
   modules/home/macos/raycast/config.json
 ```
-
-Then switch the Raycast module from `home.activation` (seed once) back to `home.file` (always enforce).
 
 ### 5. Push to git
 
