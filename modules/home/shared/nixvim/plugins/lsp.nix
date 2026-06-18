@@ -4,14 +4,16 @@
   ...
 }: let
   flakePath = userConfig.osFlakePath;
-  nixOptions =
-    if pkgs.stdenv.isDarwin
-    then {
-      darwin.expr = "(builtins.getFlake \"${flakePath}\").darwinConfigurations.${userConfig.hostname}.options";
-    }
-    else {
-      nixos.expr = "(builtins.getFlake \"${flakePath}\").nixosConfigurations.${userConfig.hostname}.options";
+  nixOptions = {
+    enable = true;
+    target = {
+      args = [];
+      installable =
+        if pkgs.stdenv.isDarwin
+        then "${flakePath}#darwinConfigurations.${userConfig.hostname}.options"
+        else "${flakePath}#nixosConfigurations.${userConfig.hostname}.options";
     };
+  };
 in {
   programs.nixvim = {
     plugins = {
