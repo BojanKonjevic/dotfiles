@@ -14,22 +14,7 @@
     XDG_TERMINAL = "kitty";
   };
 
-  xdg = {
-    enable = true;
-    userDirs = {
-      enable = true;
-      createDirectories = true;
-      desktop = null;
-      setSessionVariables = false;
-      templates = null;
-      publicShare = null;
-      videos = null;
-      download = "${config.home.homeDirectory}/Downloads";
-      documents = "${config.home.homeDirectory}/Documents";
-      pictures = "${config.home.homeDirectory}/Pictures";
-      music = "${config.home.homeDirectory}/Music";
-    };
-  };
+  xdg.enable = true;
 
   home.activation.setDefaultApps = lib.hm.dag.entryAfter ["writeBoundary"] ''
     duti_bin="${pkgs.duti}/bin/duti"

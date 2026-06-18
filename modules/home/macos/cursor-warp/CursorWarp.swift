@@ -57,7 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 return Unmanaged.passUnretained(event)
             },
             userInfo: Unmanaged.passUnretained(self).toOpaque()
-        ), tap.isValid else {
+        ), CFMachPortIsValid(tap) else {
             NSLog("CursorWarp: failed to create event tap")
             return
         }
