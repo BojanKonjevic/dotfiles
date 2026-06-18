@@ -21,7 +21,7 @@ in
       ]
       ++ lib.optionals isDarwin [docker-client]
       ++ lib.optionals (!isDarwin) [docker];
-    services.redis.servers."" = {
+    services.redis.servers."" = lib.mkIf (!isDarwin) {
       enable = true;
       port = 6379;
     };

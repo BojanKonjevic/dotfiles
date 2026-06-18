@@ -1,9 +1,4 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
-}: let
+{pkgs, ...}: let
   cursorWarp = pkgs.stdenv.mkDerivation {
     name = "cursor-warp";
     src = ./CursorWarp.swift;

@@ -38,10 +38,12 @@ in {
               inputs.catppuccin.homeModules.catppuccin
 
               # ── HM Profiles ──────────────────────────────────────────────
-              ../../profiles/home/base.nix
-              ../../profiles/home/desktop.nix
-              ../../profiles/home/media.nix
-              ../../profiles/home/misc.nix
+              ../../profiles/home/macos/base.nix
+              ../../profiles/home/macos/desktop.nix
+              ../../profiles/home/macos/misc.nix
+              ../../profiles/home/shared/base.nix
+              ../../profiles/home/shared/media.nix
+              ../../profiles/home/shared/misc.nix
             ];
             home.username = userConfig.username;
             home.homeDirectory = lib.mkForce userConfig.homeDirectory;
@@ -51,8 +53,11 @@ in {
         }
 
         # ── System Profiles ─────────────────────────────────────────────────
-        ../../profiles/system/base.nix
-        ../../profiles/system/programming.nix
+        ../../profiles/system/macos/base.nix
+        ../../profiles/system/macos/desktop.nix
+        ../../profiles/system/macos/media.nix
+        ../../profiles/system/macos/misc.nix
+        ../../profiles/system/shared/programming.nix
       ]
       ++ extraModules;
   };

@@ -74,6 +74,8 @@
     NSAutomaticSpellingCorrectionEnabled = false;
     NSNavPanelExpandedStateForSaveMode = true;
     NSTableViewDefaultSizeMode = 2;
+    NSAutomaticWindowAnimationsEnabled = false;
+    NSWindowShouldDragOnGesture = true;
   };
   system.keyboard = {
     enableKeyMapping = true;

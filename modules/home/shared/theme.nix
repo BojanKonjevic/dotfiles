@@ -112,10 +112,13 @@
   };
 in {
   _module.args.theme = palette;
-  home.packages = [
-    palette.cursorPackage
-    palette.fontPackage
-  ];
+  home.packages = with pkgs;
+    [
+      palette.fontPackage
+    ]
+    ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [
+      palette.cursorPackage
+    ];
   catppuccin = {
     enable = true;
     autoEnable = true;

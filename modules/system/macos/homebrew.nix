@@ -6,27 +6,8 @@
       autoUpdate = true;
       upgrade = true;
     };
-    brews = [
-      "mas"
-      "colima"
-      "acsandmann/tap/rift"
-      "FelixKratz/formulae/borders"
-    ];
-    casks = [
-      "libreoffice"
-      "localsend"
-      "raycast"
-      "obsidian"
-      "spotify"
-      "telegram"
-      "visual-studio-code"
-      "qlmarkdown"
-      "quicklook-json"
-      "qlvideo"
-      "the-unarchiver"
-      "iina"
-    ];
-    masApps = {
-    };
+    brews = ["mas"];
+    casks = [];
+    masApps = {};
   };
 }

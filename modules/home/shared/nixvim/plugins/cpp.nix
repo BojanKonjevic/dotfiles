@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   programs.nixvim = {
     # ── LSP ───────────────────────────────────────────────────────────────
     lsp.servers = {
@@ -86,12 +90,15 @@
   };
 
   # ── Tooling packages ──────────────────────────────────────────────────
-  home.packages = with pkgs; [
-    gcc
-    gnumake
-    clang-tools
-    cppcheck
-    valgrind
-    diffutils
-  ];
+  home.packages = with pkgs;
+    [
+      gcc
+      gnumake
+      clang-tools
+      cppcheck
+      diffutils
+    ]
+    ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [
+      valgrind
+    ];
 }

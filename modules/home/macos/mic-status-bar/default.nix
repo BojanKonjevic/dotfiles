@@ -1,9 +1,4 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
-}: let
+{pkgs, ...}: let
   micStatusBar = pkgs.stdenv.mkDerivation {
     name = "mic-status-bar";
     src = ./MicStatusBar.swift;
