@@ -1,10 +1,10 @@
 {
+  pkgs,
   lib,
   userConfig,
   inputs,
   ...
 }: let
-  pkgs = inputs.nixpkgs.legacyPackages.${userConfig.system};
   isDarwin = userConfig.system == "aarch64-darwin";
 in
   {
@@ -20,7 +20,7 @@ in
         nodejs
       ]
       ++ lib.optionals isDarwin [docker-client]
-      ++ lib.optionals (!isDarwin) [bruno docker];
+      ++ lib.optionals (!isDarwin) [bruno docker tableplus];
     services.redis.servers."" = lib.mkIf (!isDarwin) {
       enable = true;
       port = 6379;
@@ -31,5 +31,5 @@ in
     programs.nix-ld.enable = true;
   }
   // lib.optionalAttrs isDarwin {
-    homebrew.casks = ["bruno" "orbstack"];
+    homebrew.casks = ["bruno" "orbstack" "tableplus"];
   }
