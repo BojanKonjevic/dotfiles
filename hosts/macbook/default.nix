@@ -36,6 +36,7 @@ in {
           }: {
             imports = [
               inputs.catppuccin.homeModules.catppuccin
+              inputs.mac-app-util.homeManagerModules.default
 
               # ── HM Profiles ──────────────────────────────────────────────
               ../../profiles/home/macos/base.nix

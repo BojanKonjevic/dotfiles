@@ -89,7 +89,7 @@
   system.defaults.universalaccess.reduceTransparency = false;
 
   # ── Keyboard Consistency (60% external + MacBook built-in) ─────────────────
-  # Goal: Rfit modifier (⌥) is always the thumb key next to spacebar.
+  # Goal: Rift modifier (⌥) is always the thumb key next to spacebar.
   #
   # Layouts before swapping:
   #
@@ -98,7 +98,7 @@
   #
   #   60% key → macOS maps as:     Ctrl  →  Ctrl
   #                                Win   →  ⌘
-  #                                Alt   →  ⌥   ← thumb, Rfit modifier
+  #                                Alt   →  ⌥   ← thumb, Rift modifier
   #
   # Problem: on the MacBook built-in, the thumb key is ⌘, not ⌥.
   # Fix: swap ⌥ ↔ ⌘ for the internal keyboard only.
@@ -110,7 +110,7 @@
   #
   #   Ctrl is corner on 60%, position 2 on MacBook — close enough.
   #   Win/⌘ is middle on both. Copy/paste muscle memory matches.
-  #   Thumb = ⌥ = Rfit modifier on both keyboards. ✓
+  #   Thumb = ⌥ = Rift modifier on both keyboards. ✓
   #
   # System Settings → Keyboard → Modifier Keys → select "MacBook Air Keyboard" →
   #   swap Option (⌥) ↔ Command (⌘)
@@ -145,6 +145,11 @@
     defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerVertSwipeGesture -int 0
     defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerHorizSwipeGesture -int 0
     defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadPinchGesture -int 0
+  '';
+
+  # Exclude /nix from indexing — saves Raycast from
+  system.activationScripts.excludeNixFromSpotlight.text = ''
+    touch /nix/.metadata_never_index 2>/dev/null || true
   '';
 
   system.defaults.loginwindow = {

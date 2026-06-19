@@ -21,12 +21,12 @@ in
       ]
       ++ lib.optionals isDarwin [docker-client]
       ++ lib.optionals (!isDarwin) [bruno docker tableplus];
-    services.redis.servers."" = lib.mkIf (!isDarwin) {
+  }
+  // lib.optionalAttrs (!isDarwin) {
+    services.redis.servers."" = {
       enable = true;
       port = 6379;
     };
-  }
-  // lib.optionalAttrs (!isDarwin) {
     virtualisation.docker.enable = true;
     programs.nix-ld.enable = true;
   }

@@ -1,10 +1,9 @@
 {pkgs, ...}: let
-  frameworks = with pkgs.darwin.apple_sdk.frameworks; [AppKit Foundation];
   cursorWarp = pkgs.stdenv.mkDerivation {
     name = "cursor-warp";
     src = ./CursorWarp.swift;
     nativeBuildInputs = with pkgs; [swift];
-    buildInputs = frameworks;
+    buildInputs = with pkgs; [apple-sdk_15];
     buildPhase = ''
       swiftc -o cursor-warp "$src" \
         -framework AppKit \
@@ -23,6 +22,7 @@ in {
     config = {
       ProgramArguments = ["${cursorWarp}/bin/cursor-warp"];
       KeepAlive = true;
+      RunAtLoad = true;
     };
   };
 }

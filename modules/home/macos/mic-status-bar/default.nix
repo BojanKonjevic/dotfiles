@@ -1,10 +1,13 @@
-{pkgs, ...}: let
-  frameworks = with pkgs.darwin.apple_sdk.frameworks; [AppKit Foundation];
+{
+  pkgs,
+  config,
+  ...
+}: let
   micStatusBar = pkgs.stdenv.mkDerivation {
     name = "mic-status-bar";
     src = ./MicStatusBar.swift;
     nativeBuildInputs = with pkgs; [swift];
-    buildInputs = frameworks;
+    buildInputs = with pkgs; [apple-sdk_15];
     buildPhase = ''
       swiftc -o mic-status-bar "$src" \
         -framework AppKit \
@@ -22,7 +25,11 @@ in {
     enable = true;
     config = {
       ProgramArguments = ["${micStatusBar}/bin/mic-status-bar"];
+      EnvironmentVariables = {
+        MIC_TOGGLE_PATH = "${config.home.profileDirectory}/bin/mic-toggle";
+      };
       KeepAlive = true;
+      RunAtLoad = true;
     };
   };
 }

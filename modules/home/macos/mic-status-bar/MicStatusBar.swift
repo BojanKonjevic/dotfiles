@@ -2,9 +2,14 @@ import AppKit
 import Foundation
 
 let stateFilePath = "/tmp/qs-mic-state"
-let micTogglePath = FileManager.default.homeDirectoryForCurrentUser
-    .appendingPathComponent(".nix-profile/bin/mic-toggle")
-    .path
+let micTogglePath: String
+if let envPath = ProcessInfo.processInfo.environment["MIC_TOGGLE_PATH"], !envPath.isEmpty {
+    micTogglePath = envPath
+} else {
+    micTogglePath = FileManager.default.homeDirectoryForCurrentUser
+        .appendingPathComponent(".nix-profile/bin/mic-toggle")
+        .path
+}
 
 class StatusBarController: NSObject {
     let statusItem = NSStatusBar.system.statusItem(

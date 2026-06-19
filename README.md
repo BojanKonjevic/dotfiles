@@ -51,7 +51,6 @@ Each host lives in `hosts/<name>/` and has:
 - `config.nix` — a plain Nix attrset with all machine-specific values: hostname, disk devices, paths, state version, platform-specific settings (e.g. `darwinSystemVersion`, `brewPrefix`). This is the single source of truth for anything per-machine. It gets merged with `user.nix` and passed everywhere as `userConfig`.
 - `default.nix` — the host definition, imports platform-appropriate system and home profiles.
 - NixOS hosts: `hardware.nix`, `disko.nix` — generated/declared disk layout and hardware config.
-- macOS hosts: `config.nix` — machine-specific values (system, paths, brew prefix).
 
 Host definitions for Linux are auto-discovered under `hosts/` via flake-parts. macOS hosts are defined directly in `flake.nix`'s `darwinConfigurations`.
 
@@ -69,7 +68,7 @@ Platform-specific bootstrap scripts live in `lib/scripts/`:
 - `bootstrap-nixos.sh` — installs NixOS from scratch: partitions and formats disks with disko, sets up btrfs + LUKS + impermanence, handles Secure Boot, runs `nixos-install`. Interactive prompts for hostname, disk selection, etc.
 - `bootstrap-macos.sh` — installs nix-darwin and Home Manager on a fresh macOS machine. Auto-detects architecture, user, and home directory. Optional first argument sets the hostname (default: `macbook`).
 
-Both scripts read `user.nix` from the repo for identity values (username, email, timezone). There's also a custom ISO (`nix build .#iso`) with the bootstrap-nixos script baked in, usable as a USB installer.
+The NixOS bootstrap reads `user.nix` from the repo for identity values (username, email, timezone); the macOS bootstrap auto-detects everything from the running session. There's also a custom ISO (`nix build .#iso`) with the bootstrap-nixos script baked in, usable as a USB installer.
 
 ---
 
@@ -258,16 +257,16 @@ In `hosts/macbook/config.nix`, set `bootstrapMode = false`, then rebuild:
 darwin-rebuild switch --flake .#macbook
 ```
 
-### 3. Grant accessibility permissions
+### 3. Grant accessibility and input monitoring permissions
 
-Several background agents need Accessibility permission. On first build, macOS will prompt for each. Grant all:
+Several background agents need Accessibility permission, and **cursor-warp** additionally needs Input Monitoring. On first build, macOS will prompt for each. Grant all:
 
-- **Rift** — window management, keyboard event tap
-- **borders** — observes window events for border updates
-- **cursor-warp** — event tap + AX observer for cursor warping on focus changes
-- **mic-status-bar** — reads mic state from `/tmp/qs-mic-state`
+- **Rift** — window management, keyboard event tap (Accessibility)
+- **borders** — observes window events for border updates (Accessibility)
+- **cursor-warp** — event tap + AX observer for cursor warping on focus changes (**Accessibility + Input Monitoring**)
+- **mic-status-bar** — reads mic state from `/tmp/qs-mic-state` (Accessibility)
 
-If you miss the prompts, add them manually in System Settings → Privacy & Security → Accessibility.
+If you miss the prompts, add them manually in System Settings → Privacy & Security → Accessibility (and Privacy → Input Monitoring for cursor-warp).
 
 ### 4. Configure Raycast (optional)
 

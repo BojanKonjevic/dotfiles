@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   theme,
   userConfig,
   ...
@@ -139,19 +140,23 @@ in {
       RunAtLoad = true;
       StandardOutPath = "/tmp/rift.stdout.log";
       StandardErrorPath = "/tmp/rift.stderr.log";
+      EnvironmentVariables = {
+        PATH = "${config.home.profileDirectory}/bin:/run/current-system/sw/bin:${brewPrefix}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+      };
     };
   };
 
   launchd.agents.borders = {
     enable = true;
     config = {
-      ProgramArguments = ["${brewPrefix}/bin/borders"];
+      ProgramArguments = ["${pkgs.bash}/bin/bash" "${config.xdg.configHome}/borders/bordersrc"];
       KeepAlive = true;
       RunAtLoad = true;
       StandardOutPath = "/tmp/borders.stdout.log";
       StandardErrorPath = "/tmp/borders.stderr.log";
       EnvironmentVariables = {
         XDG_CONFIG_HOME = "${config.xdg.configHome}";
+        PATH = "${config.home.profileDirectory}/bin:/run/current-system/sw/bin:${brewPrefix}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
       };
     };
   };

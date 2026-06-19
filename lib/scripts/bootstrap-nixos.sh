@@ -261,13 +261,13 @@ ok "config.nix written."
 
 # ── hosts/<hostname>/default.nix ──────────────────────────────────
 header "Copying hosts/$HOSTNAME/default.nix from template…"
-cp "$TMPDIR/hosts/template/default.nix" "$HOST_DIR/default.nix"
+cp "$TMPDIR/hosts/template-nixos/default.nix" "$HOST_DIR/default.nix"
 ok "default.nix copied."
 
 # ── bootstrap-override.nix (VM only) ──────────────────────────────
 if [[ $IS_VM == "true" ]]; then
   header "Copying bootstrap-override.nix from template (VM)…"
-  cp "$TMPDIR/hosts/template/bootstrap-override.nix" "$HOST_DIR/bootstrap-override.nix"
+  cp "$TMPDIR/hosts/template-nixos/bootstrap-override.nix" "$HOST_DIR/bootstrap-override.nix"
   ok "bootstrap-override.nix copied."
 fi
 
@@ -278,11 +278,11 @@ printf '{ ... }: {}\n' >"$HOST_DIR/hardware.nix"
 header "Generating hosts/$HOSTNAME/disko.nix from template…"
 
 if [[ -n $HOME_DISK ]]; then
-  cp "$TMPDIR/hosts/template/disko-dual.nix" "$HOST_DIR/disko.nix"
+  cp "$TMPDIR/hosts/template-nixos/disko-dual.nix" "$HOST_DIR/disko.nix"
   sed -i "s|BOOTSTRAP_DISK|$DISK|g" "$HOST_DIR/disko.nix"
   sed -i "s|BOOTSTRAP_HOME_DISK|$HOME_DISK|g" "$HOST_DIR/disko.nix"
 else
-  cp "$TMPDIR/hosts/template/disko-single.nix" "$HOST_DIR/disko.nix"
+  cp "$TMPDIR/hosts/template-nixos/disko-single.nix" "$HOST_DIR/disko.nix"
   sed -i "s|BOOTSTRAP_DISK|$DISK|g" "$HOST_DIR/disko.nix"
 fi
 

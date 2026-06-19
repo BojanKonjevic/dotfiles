@@ -1,4 +1,5 @@
 {...}: {
+  homebrew.brews = ["cliclick"];
   homebrew.casks = [
     "libreoffice"
     "localsend"
@@ -6,6 +7,7 @@
     "qlmarkdown"
     "quicklook-json"
     "qlvideo"
+    "tailscale"
     "the-unarchiver"
   ];
 }
