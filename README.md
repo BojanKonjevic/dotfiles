@@ -266,18 +266,31 @@ In `hosts/macbook/config.nix`, set `bootstrapMode = false`, then rebuild:
 darwin-rebuild switch --flake .#macbook
 ```
 
-### 3. Grant accessibility and input monitoring permissions
+### 3. Grant accessibility, input monitoring, and automation permissions
 
-Several background agents need Accessibility permission, and **cursor-warp** additionally needs Input Monitoring. On first build, macOS will prompt for each. Grant all:
+Several background agents need Accessibility permission, and some need additional permissions. On first build, macOS will prompt for each. Grant all:
 
 - **Rift** — window management, keyboard event tap (Accessibility)
 - **borders** — observes window events for border updates (Accessibility)
 - **cursor-warp** — event tap + AX observer for cursor warping on focus changes (**Accessibility + Input Monitoring**)
 - **mic-status-bar** — reads mic state from `/tmp/qs-mic-state` (Accessibility)
+- **mic-toggle** — controls input volume via `osascript`, may prompt for **Automation** permission to control System Events
 
-If you miss the prompts, add them manually in System Settings → Privacy & Security → Accessibility (and Privacy → Input Monitoring for cursor-warp).
+If you miss the prompts, add them manually in System Settings → Privacy & Security → Accessibility, Input Monitoring, and Automation.
 
-### 4. Configure Raycast (optional)
+**Don't panic if Rift/borders don't appear immediately after first boot.** The Homebrew formulae install in parallel with launchd loading the agents. If launchd tries to start them before `brew` finishes, they'll fail once — `KeepAlive` retries automatically. A second `darwin-rebuild switch` or a reboot resolves it.
+
+### 4. Verify default browser associations
+
+The post-install activation sets Zen Browser as the default for HTTP/HTTPS and HTML files via `duti`. Verify it took:
+
+```bash
+duti -x html
+```
+
+Expected output: `app.zen-browser.zen` (or whatever the flake's actual bundle ID is). If it's different, update the bundle ID in `modules/home/macos/ui.nix`.
+
+### 5. Configure Raycast (optional)
 
 Raycast is seeded with a base config on first launch. After installing extensions and configuring hotkeys, dump the updated config to the repo to persist it:
 
@@ -286,7 +299,7 @@ cp ~/Library/Application\ Support/com.raycast.macOS/config.json \
   modules/home/macos/raycast/config.json
 ```
 
-### 5. Push to git
+### 6. Push to git
 
 Commit and push the new host config and updated `secrets/secrets.nix`.
 

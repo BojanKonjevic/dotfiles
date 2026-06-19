@@ -23,5 +23,5 @@
       mode = "0400";
     };
   };
-  age.identityPaths = ["/Users/${userConfig.username}/.ssh/id_ed25519"];
+  age.identityPaths = ["${userConfig.homeDirectory}/.ssh/id_ed25519"];
 }
