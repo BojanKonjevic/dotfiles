@@ -48,10 +48,10 @@ I prefer explicit imports over auto-discovery, even though auto-discovery reduce
 
 Each host lives in `hosts/<name>/` and has:
 
-- `config.nix` — a plain Nix attrset with all machine-specific values: hostname, disk devices, paths, state version. This is the single source of truth for anything per-machine. It gets merged with `user.nix` and passed everywhere as `userConfig`.
+- `config.nix` — a plain Nix attrset with all machine-specific values: hostname, disk devices, paths, state version, platform-specific settings (e.g. `darwinSystemVersion`, `brewPrefix`). This is the single source of truth for anything per-machine. It gets merged with `user.nix` and passed everywhere as `userConfig`.
 - `default.nix` — the host definition, imports platform-appropriate system and home profiles.
 - NixOS hosts: `hardware.nix`, `disko.nix` — generated/declared disk layout and hardware config.
-- macOS hosts: `darwin.nix` — hardware-specific darwin config.
+- macOS hosts: `config.nix` — machine-specific values (system, paths, brew prefix).
 
 Host definitions for Linux are auto-discovered under `hosts/` via flake-parts. macOS hosts are defined directly in `flake.nix`'s `darwinConfigurations`.
 
@@ -66,10 +66,10 @@ Currently defined hosts:
 
 Platform-specific bootstrap scripts live in `lib/scripts/`:
 
-- `bootstrap-nixos.sh` — installs NixOS from scratch: partitions and formats disks with disko, sets up btrfs + LUKS + impermanence, handles Secure Boot, runs `nixos-install`.
-- `bootstrap-macos.sh` — installs nix-darwin and Home Manager on a fresh macOS machine.
+- `bootstrap-nixos.sh` — installs NixOS from scratch: partitions and formats disks with disko, sets up btrfs + LUKS + impermanence, handles Secure Boot, runs `nixos-install`. Interactive prompts for hostname, disk selection, etc.
+- `bootstrap-macos.sh` — installs nix-darwin and Home Manager on a fresh macOS machine. Auto-detects architecture, user, and home directory. Optional first argument sets the hostname (default: `macbook`).
 
-There's also a custom ISO (`nix build .#iso`) with the bootstrap-nixos script baked in, usable as a USB installer.
+Both scripts read `user.nix` from the repo for identity values (username, email, timezone). There's also a custom ISO (`nix build .#iso`) with the bootstrap-nixos script baked in, usable as a USB installer.
 
 ---
 
@@ -83,7 +83,7 @@ The reason is cohesion. One language, one renderer, one visual style, rather tha
 
 Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, kitty, vesktop, qBittorrent, zen-browser, hyprlock, the Quickshell UI... The full palette is defined once in `modules/home/shared/theme.nix` and injected into Quickshell as a generated `Colours.qml` singleton at build time, so nothing is hardcoded in QML. Everything not explicitly themed is either automatic with the Catppuccin nixos module or doesn't have it available.
 
-## the desktop (macOS)
+## the macbook (macOS)
 
 **Rift** is the tiling window manager — BSP layout, instant virtual workspaces (10 by default), gesture support, animations. Same keybindings as Hyprland (mod = ⌥, h/j/k/l for focus, Shift to move, numbers for workspaces). **JankyBorders** adds Catppuccin-themed window borders via CGS private APIs (no SIP required, installed from Homebrew, managed as a launchd agent).
 

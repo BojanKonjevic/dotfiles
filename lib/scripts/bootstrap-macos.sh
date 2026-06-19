@@ -2,81 +2,84 @@
 set -euo pipefail
 
 GIT_REPO="https://github.com/BojanKonjevic/dotfiles"
-DOTFILES_DIR="$HOME/dotfiles"
+
+# ── Auto-detect ──────────────────────────────────────────────────
+USERNAME="${USER:-bojan}"
+HOME_DIR="${HOME:-/Users/$USERNAME}"
+HOSTNAME="${1:-macbook}"
+DETECTED_ARCH="$(uname -m)"
+case "$DETECTED_ARCH" in
+arm64)
+  SYSTEM="aarch64-darwin"
+  BREW_PREFIX="/opt/homebrew"
+  ;;
+x86_64)
+  SYSTEM="x86_64-darwin"
+  BREW_PREFIX="/usr/local"
+  ;;
+*)
+  SYSTEM="aarch64-darwin"
+  BREW_PREFIX="/opt/homebrew"
+  ;;
+esac
+DOTFILES_DIR="${HOME_DIR}/dotfiles"
 
 echo "═══════════════════════════════════════════════"
-echo "         macOS Bootstrap — nix-darwin"
+echo "    macOS Bootstrap — $HOSTNAME ($SYSTEM)"
 echo "═══════════════════════════════════════════════"
 
-# ── 1. Install Nix ──────────────────────────────────────────────────────────
+# ── 1. Install Nix ────────────────────────────────────────────────
 if ! command -v nix &>/dev/null; then
-  echo "Installing Nix..."
+  echo "→ Installing Nix..."
   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix |
     sh -s -- install --no-confirm
   . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 fi
 
-# ── 2. Install Homebrew ─────────────────────────────────────────────────────
+# ── 2. Install Homebrew ───────────────────────────────────────────
 if ! command -v brew &>/dev/null; then
-  echo "Installing Homebrew..."
+  echo "→ Installing Homebrew..."
   NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+  eval "$("${BREW_PREFIX}/bin/brew" shellenv)"
 fi
 
-# ── 3. Clone dotfiles ───────────────────────────────────────────────────────
+# ── 3. Clone dotfiles ─────────────────────────────────────────────
 if [ ! -d "$DOTFILES_DIR" ]; then
-  echo "Cloning dotfiles..."
+  echo "→ Cloning dotfiles..."
   git clone "$GIT_REPO" "$DOTFILES_DIR"
 fi
 
 cd "$DOTFILES_DIR"
 
-# ── 4. Create host config ───────────────────────────────────────────────────
-HOSTNAME="${1:-macbook}"
-if [ ! -f "hosts/$HOSTNAME/config.nix" ]; then
-  echo "Creating host config for $HOSTNAME..."
+# ── 4. Create host config ─────────────────────────────────────────
+if [ -f "hosts/$HOSTNAME/config.nix" ]; then
+  echo "→ hosts/$HOSTNAME/config.nix already exists, leaving it alone."
+else
   mkdir -p "hosts/$HOSTNAME"
-  cat >"hosts/$HOSTNAME/config.nix" <<EOF
+  cat >"hosts/$HOSTNAME/config.nix" <<CONFIGNIX
 {
   hostname = "$HOSTNAME";
-  system = "aarch64-darwin";
-  brewPrefix = "/opt/homebrew";
-  homeDirectory = "/Users/bojan";
-  dotfilesDir = "$DOTFILES_DIR";
-  wallpaperDir = "/Users/bojan/Pictures/wallpapers";
-  screenshotsDir = "/Users/bojan/Pictures/Screenshots";
-  notesFile = "/Users/bojan/Documents/notes.txt";
+  system = "$SYSTEM";
+  brewPrefix = "$BREW_PREFIX";
+
+  homeDirectory  = "$HOME_DIR";
+  dotfilesDir    = "$DOTFILES_DIR";
+  wallpaperDir   = "$HOME_DIR/Pictures/wallpapers";
+  screenshotsDir = "$HOME_DIR/Pictures/Screenshots";
+  notesFile      = "$HOME_DIR/Documents/notes.txt";
+
   osFlakePath = "$DOTFILES_DIR";
+
   stateVersion = "25.11";
+  darwinSystemVersion = 4;
+
+  # Disables agenix secrets that aren't available yet
   bootstrapMode = true;
 }
-EOF
+CONFIGNIX
+  echo "→ Config written to hosts/$HOSTNAME/config.nix."
 fi
 
-# ── 5. First build (bootstrap mode — no secrets) ─────────────────────────────
-echo "First build (bootstrapMode = true)..."
+# ── 5. First build (bootstrap mode — no secrets) ──────────────────
+echo "→ First build (bootstrapMode = true)..."
 nix run github:lnl7/nix-darwin -- switch --flake ".#$HOSTNAME" 2>&1 | tee /tmp/darwin-rebuild.log
-
-# ── 6. Post-bootstrap instructions ──────────────────────────────────────────
-echo ""
-echo "═══════════════════════════════════════════════"
-echo "  Bootstrap complete!"
-echo ""
-echo "  NEXT STEPS:"
-echo "  1. Generate SSH key:"
-echo "     ssh-keygen -t ed25519 -C 'konjevicbojan1@gmail.com'"
-echo ""
-echo "  2. Add to GitHub:"
-echo "     pbcopy < ~/.ssh/id_ed25519.pub"
-echo "     → https://github.com/settings/keys"
-echo ""
-echo "  3. Add key to secrets.nix and re-key:"
-echo "     nix run github:ryantm/agenix -- --rekey"
-echo ""
-echo "  4. Set bootstrapMode = false in hosts/$HOSTNAME/config.nix"
-echo ""
-echo "  5. Rebuild:"
-echo "     darwin-rebuild switch --flake .#$HOSTNAME"
-echo ""
-echo "  6. Open Raycast (Alt+Space) and go through setup"
-echo "═══════════════════════════════════════════════"

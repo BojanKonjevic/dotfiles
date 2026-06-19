@@ -1,5 +1,9 @@
-{...}: {
-  programs.zathura = {
+{
+  lib,
+  pkgs,
+  ...
+}: {
+  programs.zathura = lib.mkIf (!pkgs.stdenv.hostPlatform.isDarwin) {
     enable = true;
     options = {
       recolor = "true";

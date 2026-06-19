@@ -89,7 +89,7 @@
   system.defaults.universalaccess.reduceTransparency = false;
 
   # ── Keyboard Consistency (60% external + MacBook built-in) ─────────────────
-  # Goal: AeroSpace modifier (⌥) is always the thumb key next to spacebar.
+  # Goal: Rfit modifier (⌥) is always the thumb key next to spacebar.
   #
   # Layouts before swapping:
   #
@@ -98,7 +98,7 @@
   #
   #   60% key → macOS maps as:     Ctrl  →  Ctrl
   #                                Win   →  ⌘
-  #                                Alt   →  ⌥   ← thumb, AeroSpace modifier
+  #                                Alt   →  ⌥   ← thumb, Rfit modifier
   #
   # Problem: on the MacBook built-in, the thumb key is ⌘, not ⌥.
   # Fix: swap ⌥ ↔ ⌘ for the internal keyboard only.
@@ -110,7 +110,7 @@
   #
   #   Ctrl is corner on 60%, position 2 on MacBook — close enough.
   #   Win/⌘ is middle on both. Copy/paste muscle memory matches.
-  #   Thumb = ⌥ = AeroSpace modifier on both keyboards. ✓
+  #   Thumb = ⌥ = Rfit modifier on both keyboards. ✓
   #
   # System Settings → Keyboard → Modifier Keys → select "MacBook Air Keyboard" →
   #   swap Option (⌥) ↔ Command (⌘)
@@ -151,5 +151,5 @@
     GuestEnabled = false;
     SHOWFULLNAME = true;
   };
-  system.stateVersion = 4;
+  system.stateVersion = userConfig.darwinSystemVersion;
 }

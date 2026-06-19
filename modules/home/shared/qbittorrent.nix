@@ -4,7 +4,7 @@
   theme,
   ...
 }: let
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 
   # macOS uses ~/Library, Linux uses XDG-standard paths
   themeDir =

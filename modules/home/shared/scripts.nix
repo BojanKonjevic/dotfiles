@@ -22,7 +22,7 @@ in {
       (mkPythonScript "ingest" ingestPython ../../../lib/scripts/ingest.py)
       (mkPythonScript "yttranscript" yttranscriptPython ../../../lib/scripts/yttranscript.py)
     ]
-    ++ lib.optionals (!pkgs.stdenv.isDarwin) [
+    ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [
       pkgs.wl-clipboard
     ];
 }

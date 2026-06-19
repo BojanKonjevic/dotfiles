@@ -7,8 +7,8 @@
     buildInputs = frameworks;
     buildPhase = ''
       swiftc -o cursor-warp "$src" \
-        -F${pkgs.darwin.apple_sdk.frameworks.AppKit}/Library/Frameworks \
-        -F${pkgs.darwin.apple_sdk.frameworks.Foundation}/Library/Frameworks
+        -framework AppKit \
+        -framework Foundation
     '';
     installPhase = ''
       mkdir -p $out/bin

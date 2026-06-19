@@ -18,6 +18,7 @@
 
   # ── Version ───────────────────────────────────────────────────────────────
   stateVersion = "25.11";
+  darwinSystemVersion = 4;
 
   # ── macOS brew prefix ──────────────────────────────────────────────────
   brewPrefix = "/opt/homebrew";
