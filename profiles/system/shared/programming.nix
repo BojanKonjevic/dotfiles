@@ -20,7 +20,7 @@ in
         nodejs
       ]
       ++ lib.optionals isDarwin [docker-client]
-      ++ lib.optionals (!isDarwin) [docker];
+      ++ lib.optionals (!isDarwin) [bruno docker];
     services.redis.servers."" = lib.mkIf (!isDarwin) {
       enable = true;
       port = 6379;
@@ -31,4 +31,5 @@ in
     programs.nix-ld.enable = true;
   }
   // lib.optionalAttrs isDarwin {
+    homebrew.casks = ["bruno" "orbstack"];
   }
