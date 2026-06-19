@@ -52,7 +52,7 @@ Each host lives in `hosts/<name>/` and has:
 - `default.nix` — the host definition, imports platform-appropriate system and home profiles.
 - NixOS hosts: `hardware.nix`, `disko.nix` — generated/declared disk layout and hardware config.
 
-Host definitions for Linux are auto-discovered under `hosts/` via flake-parts. macOS hosts are defined directly in `flake.nix`'s `darwinConfigurations`.
+All hosts under `hosts/` (except `template-nixos` and `template-macos`) are auto-discovered by `flake.nix` and flake-parts. Each host's `default.nix` defines its own entry — `nixosConfigurations` for NixOS or `darwinConfigurations` for macOS — using the hostname from its `config.nix`.
 
 Currently defined hosts:
 
@@ -151,7 +151,17 @@ gi <owner/repo>      # copy a GitHub repo's full content to clipboard (for LLMs)
 
 > Run these steps after the first successful boot into the installed system from bootstrap.
 
-### 1. Restore agenix secrets
+### 1. Copy SSH key from existing machine
+
+Use the same key everywhere. Copy it from any existing machine:
+
+```bash
+scp existing-machine:~/.ssh/id_ed25519* ~/.ssh/
+chmod 600 ~/.ssh/id_ed25519
+chmod 644 ~/.ssh/id_ed25519.pub
+```
+
+### 2. Register the new host with agenix
 
 The new host SSH key was printed at the end of bootstrap. Add it to `secrets/secrets.nix`, then:
 
@@ -159,16 +169,7 @@ The new host SSH key was printed at the end of bootstrap. Add it to `secrets/sec
 agenix -r -i ~/.ssh/id_ed25519
 ```
 
-### 2. Fix SSH key permissions
-
-```bash
-chmod 600 ~/.ssh/id_ed25519
-chmod 644 ~/.ssh/id_ed25519.pub
-```
-
 ### 3. Connect to GitHub
-
-Add the new SSH public key to your GitHub account, then verify:
 
 ```bash
 ssh -T git@github.com
@@ -241,9 +242,17 @@ Set `bootstrapMode = false` in `hosts/<hostname>/config.nix`, then `nr`.
 
 > Run these steps after `bootstrap-macos.sh` completes.
 
-### 1. Restore agenix secrets
+### 1. Copy SSH key from existing machine
 
-Generate an SSH key, add it to GitHub, add the public key to `secrets/secrets.nix`, then re-encrypt:
+Use the same key everywhere. Copy it from any existing machine:
+
+```bash
+scp existing-machine:~/.ssh/id_ed25519* ~/.ssh/
+chmod 600 ~/.ssh/id_ed25519
+chmod 644 ~/.ssh/id_ed25519.pub
+```
+
+Then register your public key in `secrets/secrets.nix` (it probably already is — same key) and re-encrypt:
 
 ```bash
 agenix -r -i ~/.ssh/id_ed25519

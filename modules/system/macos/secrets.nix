@@ -12,11 +12,6 @@
       owner = userConfig.username;
       mode = "0400";
     };
-    ssh-private-key = {
-      file = "${self}/secrets/ssh-private-key.age";
-      owner = userConfig.username;
-      mode = "0600";
-    };
     pypi-key = {
       file = "${self}/secrets/pypi-key.age";
       owner = userConfig.username;

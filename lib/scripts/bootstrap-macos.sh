@@ -80,6 +80,13 @@ CONFIGNIX
   echo "→ Config written to hosts/$HOSTNAME/config.nix."
 fi
 
+if [ -f "hosts/$HOSTNAME/default.nix" ]; then
+  echo "→ hosts/$HOSTNAME/default.nix already exists, leaving it alone."
+else
+  echo "→ Copying default.nix from template-macos…"
+  cp "hosts/template-macos/default.nix" "hosts/$HOSTNAME/default.nix"
+fi
+
 # ── 5. First build (bootstrap mode — no secrets) ──────────────────
 echo "→ First build (bootstrapMode = true)..."
 nix run github:lnl7/nix-darwin -- switch --flake ".#$HOSTNAME" 2>&1 | tee /tmp/darwin-rebuild.log

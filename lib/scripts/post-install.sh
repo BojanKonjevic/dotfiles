@@ -80,8 +80,8 @@ if [[ -f "$HOME/.ssh/id_ed25519" ]]; then
   chmod 600 "$HOME/.ssh/id_ed25519"
   ok "id_ed25519 → 600"
 else
-  warn "~/.ssh/id_ed25519 not found — agenix secret may not be decrypted yet."
-  warn "This will be fixed after bootstrapMode is disabled and you rebuild."
+  warn "~/.ssh/id_ed25519 not found — copy your SSH key from an existing machine."
+  warn "  scp existing-machine:~/.ssh/id_ed25519* ~/.ssh/"
 fi
 
 if [[ -f "$HOME/.ssh/id_ed25519.pub" ]]; then

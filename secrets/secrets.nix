@@ -3,7 +3,6 @@ let
   me = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA8WKB45Qb5CqZPlE7LWKjkaCikJbjA87sVQwJWDTAB4 konjevicbojan1@gmail.com";
 in {
   "cachix-token.age".publicKeys = [desktop me];
-  "ssh-private-key.age".publicKeys = [desktop me];
   "pypi-key.age".publicKeys = [desktop me];
   "tailscale.age".publicKeys = [desktop me];
   "ttyd.age".publicKeys = [desktop me];

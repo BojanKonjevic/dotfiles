@@ -6,7 +6,7 @@
   networking.hostName = userConfig.hostname;
   time.timeZone = userConfig.timezone;
   system.defaults.NSGlobalDomain.AppleICUForce24HourTime = true;
-  security.pam.enableSudoTouchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
   nix = {
     enable = true;
     settings = {
