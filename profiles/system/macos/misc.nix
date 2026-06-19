@@ -7,7 +7,6 @@
     "qlmarkdown"
     "quicklook-json"
     "qlvideo"
-    "tailscale"
     "the-unarchiver"
   ];
 }
