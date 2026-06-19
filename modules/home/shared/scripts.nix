@@ -1,8 +1,4 @@
-{
-  pkgs,
-  lib,
-  ...
-}: let
+{pkgs, ...}: let
   ingestPython = pkgs.python3.withPackages (ps: [ps.gitingest]);
   yttranscriptPython = pkgs.python3.withPackages (ps: [ps.youtube-transcript-api]);
   mkPythonScript = name: python: src:
@@ -16,13 +12,9 @@
       '';
     };
 in {
-  home.packages =
-    [
-      pkgs.gitingest
-      (mkPythonScript "ingest" ingestPython ../../../lib/scripts/ingest.py)
-      (mkPythonScript "yttranscript" yttranscriptPython ../../../lib/scripts/yttranscript.py)
-    ]
-    ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [
-      pkgs.wl-clipboard
-    ];
+  home.packages = [
+    pkgs.gitingest
+    (mkPythonScript "ingest" ingestPython ../../../lib/scripts/ingest.py)
+    (mkPythonScript "yttranscript" yttranscriptPython ../../../lib/scripts/yttranscript.py)
+  ];
 }

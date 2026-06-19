@@ -15,7 +15,6 @@
   environment.systemPackages = with pkgs; [
     gamemode
     gamescope
-    mangohud
     steam-run
   ];
 

@@ -21,7 +21,7 @@
   users.users.${userConfig.username}.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA8WKB45Qb5CqZPlE7LWKjkaCikJbjA87sVQwJWDTAB4 konjevicbojan1@gmail.com"
   ];
-  environment.systemPackages = with pkgs; [mosh tailscale];
+  environment.systemPackages = with pkgs; [mosh];
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "client";

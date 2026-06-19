@@ -2,7 +2,6 @@
   pkgs,
   lib,
   userConfig,
-  inputs,
   ...
 }: let
   isDarwin = userConfig.system == "aarch64-darwin";
@@ -20,7 +19,7 @@ in
         nodejs
       ]
       ++ lib.optionals isDarwin [docker-client]
-      ++ lib.optionals (!isDarwin) [bruno docker tableplus];
+      ++ lib.optionals (!isDarwin) [docker];
   }
   // lib.optionalAttrs (!isDarwin) {
     services.redis.servers."" = {

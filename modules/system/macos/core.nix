@@ -41,7 +41,6 @@
   nixpkgs.config.allowUnfree = true;
   programs.zsh.enable = true;
   environment.shells = [pkgs.zsh];
-  environment.systemPackages = [pkgs.vim];
   system.defaults.dock = {
     autohide = true;
     autohide-delay = 999999;

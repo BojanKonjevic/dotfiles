@@ -120,8 +120,6 @@ in {
     pkgs.wl-clipboard
     pkgs.cliphist
     pkgs.awww
-    pkgs.pulseaudio
-    pkgs.pipewire
     pkgs.jq
 
     # ── Bar helpers ──────────────────────────────────────────────────────

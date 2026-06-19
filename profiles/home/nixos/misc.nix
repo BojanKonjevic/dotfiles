@@ -8,5 +8,7 @@
     pavucontrol
     networkmanagerapplet
     pinta
+    bruno
+    tableplus
   ];
 }

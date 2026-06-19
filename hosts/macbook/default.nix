@@ -59,6 +59,7 @@ in {
         ../../profiles/system/macos/media.nix
         ../../profiles/system/macos/misc.nix
         ../../profiles/system/shared/programming.nix
+        #../../profiles/system/macos/gaming.nix
       ]
       ++ extraModules;
   };
