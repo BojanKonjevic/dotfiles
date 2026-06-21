@@ -9,8 +9,8 @@
     ...
   }: let
     agenix = inputs.agenix.packages.${system}.default;
-    isLinux = system == "x86_64-linux";
-    isDarwin = system == "aarch64-darwin";
+    isLinux = pkgs.stdenv.hostPlatform.isLinux;
+    isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   in {
     apps = (
       {

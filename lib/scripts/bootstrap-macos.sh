@@ -7,21 +7,8 @@ GIT_REPO="https://github.com/BojanKonjevic/dotfiles"
 USERNAME="${USER:-bojan}"
 HOME_DIR="${HOME:-/Users/$USERNAME}"
 HOSTNAME="${1:-macbook}"
-DETECTED_ARCH="$(uname -m)"
-case "$DETECTED_ARCH" in
-arm64)
-  SYSTEM="aarch64-darwin"
-  BREW_PREFIX="/opt/homebrew"
-  ;;
-x86_64)
-  SYSTEM="x86_64-darwin"
-  BREW_PREFIX="/usr/local"
-  ;;
-*)
-  SYSTEM="aarch64-darwin"
-  BREW_PREFIX="/opt/homebrew"
-  ;;
-esac
+SYSTEM="aarch64-darwin"
+BREW_PREFIX="/opt/homebrew"
 DOTFILES_DIR="${HOME_DIR}/dotfiles"
 
 echo "═══════════════════════════════════════════════"

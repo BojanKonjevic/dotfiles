@@ -1,10 +1,9 @@
 {
   pkgs,
   lib,
-  userConfig,
   ...
 }: let
-  isDarwin = userConfig.system == "aarch64-darwin";
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 in
   {
     environment.systemPackages = with pkgs;
