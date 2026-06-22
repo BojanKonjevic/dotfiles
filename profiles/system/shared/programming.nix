@@ -1,9 +1,10 @@
 {
   pkgs,
   lib,
+  userConfig,
   ...
 }: let
-  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+  isDarwin = userConfig.system == "aarch64-darwin";
 in
   {
     environment.systemPackages = with pkgs;
@@ -17,8 +18,8 @@ in
         pnpm
         nodejs
       ]
-      ++ lib.optionals isDarwin [docker-client]
-      ++ lib.optionals (!isDarwin) [docker];
+      ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [docker-client]
+      ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [docker];
   }
   // lib.optionalAttrs (!isDarwin) {
     services.redis.servers."" = {
