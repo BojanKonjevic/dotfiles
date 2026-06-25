@@ -117,7 +117,8 @@ in {
       yt = "yttranscript";
       gi = "ingest";
       nr = nhSwitch;
-      gc = "nh clean all --keep 10";
+      ngc = "nh clean all --keep 10";
+      gp = "git push";
     };
     initContent = ''
       export PATH="${userConfig.homeDirectory}/.local/bin:$PATH"
@@ -144,9 +145,8 @@ in {
       }
       }
 
-      ship() {
+      gc() {
         git commit -m "$*"
-        git push
       }
 
       zstyle ':completion:*' menu select
@@ -160,8 +160,8 @@ in {
       setopt PUSHD_IGNORE_DUPS
       setopt PUSHD_SILENT
 
-      export NH_OS_FLAKE="${userConfig.osFlakePath}"
-      export NH_DARWIN_FLAKE="${userConfig.osFlakePath}"
+      export NH_OS_FLAKE="${userConfig.dotfilesDir}"
+      export NH_DARWIN_FLAKE="${userConfig.dotfilesDir}"
       export STARSHIP_VI_MODE=1
 
       zvm_after_init() {

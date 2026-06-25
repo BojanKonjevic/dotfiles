@@ -47,15 +47,11 @@ else
 {
   hostname = "$HOSTNAME";
   system = "$SYSTEM";
-  brewPrefix = "$BREW_PREFIX";
-
   homeDirectory  = "$HOME_DIR";
   dotfilesDir    = "$DOTFILES_DIR";
   wallpaperDir   = "$HOME_DIR/Pictures/wallpapers";
   screenshotsDir = "$HOME_DIR/Pictures/Screenshots";
   notesFile      = "$HOME_DIR/Documents/notes.txt";
-
-  osFlakePath = "$DOTFILES_DIR";
 
   stateVersion = "25.11";
   darwinSystemVersion = 4;

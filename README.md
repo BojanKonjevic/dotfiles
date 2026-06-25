@@ -48,7 +48,7 @@ I prefer explicit imports over auto-discovery, even though auto-discovery reduce
 
 Each host lives in `hosts/<name>/` and has:
 
-- `config.nix` — a plain Nix attrset with all machine-specific values: hostname, disk devices, paths, state version, platform-specific settings (e.g. `darwinSystemVersion`, `brewPrefix`). This is the single source of truth for anything per-machine. It gets merged with `user.nix` and passed everywhere as `userConfig`.
+- `config.nix` — a plain Nix attrset with all machine-specific values: hostname, disk devices, paths, state version. This is the single source of truth for anything per-machine. It gets merged with `user.nix` and passed everywhere as `userConfig`.
 - `default.nix` — the host definition, imports platform-appropriate system and home profiles.
 - NixOS hosts: `hardware.nix`, `disko.nix` — generated/declared disk layout and hardware config.
 

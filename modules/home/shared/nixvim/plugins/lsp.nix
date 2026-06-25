@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  flakePath = userConfig.osFlakePath;
+  flakePath = userConfig.dotfilesDir;
   nixOptions = {
     enable = true;
     target = {

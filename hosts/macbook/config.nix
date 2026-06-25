@@ -13,15 +13,9 @@
   screenshotsDir = "/Users/bojan/Pictures/Screenshots";
   notesFile = "/Users/bojan/Documents/notes.txt";
 
-  # ── nh flake paths (used by NH_OS_FLAKE / NH_HOME_FLAKE env vars) ─────────
-  osFlakePath = "/Users/bojan/dotfiles";
-
   # ── Version ───────────────────────────────────────────────────────────────
   stateVersion = "25.11";
   darwinSystemVersion = 4;
-
-  # ── macOS brew prefix ──────────────────────────────────────────────────
-  brewPrefix = "/opt/homebrew";
 
   # ── Bootstrap flag ────────────────────────────────────────────────────────
   # Disables agenix secrets that aren't available yet.

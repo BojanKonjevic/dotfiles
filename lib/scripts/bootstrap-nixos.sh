@@ -248,8 +248,6 @@ cat >"$HOST_DIR/config.nix" <<CONFIGNIX
   screenshotsDir = "/home/$USERNAME/Pictures/Screenshots";
   notesFile      = "/home/$USERNAME/Documents/notes.txt";
 
-  osFlakePath = "$DOTFILESDIR";
-
   stateVersion = "$DETECTED_STATE";
 
   # Disables agenix secrets that aren't available yet

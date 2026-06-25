@@ -14,9 +14,6 @@
   screenshotsDir = "/home/bojan/Pictures/Screenshots";
   notesFile = "/home/bojan/Documents/notes.txt";
 
-  # ── nh flake paths (used by NH_OS_FLAKE / NH_HOME_FLAKE env vars) ─────────
-  osFlakePath = "/home/bojan/dotfiles";
-
   # ── Version ───────────────────────────────────────────────────────────────
   stateVersion = "25.11";
 

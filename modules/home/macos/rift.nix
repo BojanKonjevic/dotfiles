@@ -6,7 +6,7 @@
   userConfig,
   ...
 }: let
-  brewPrefix = userConfig.brewPrefix;
+  brewPrefix = "/opt/homebrew";
   activeBorder = "0xff${lib.removePrefix "#" theme.mauve}";
   inactiveBorder = "0xff${lib.removePrefix "#" theme.surface1}";
 in {
