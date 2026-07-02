@@ -104,7 +104,6 @@ in {
     "mod + V" = "toggle_window_floating"
     "mod + F" = "toggle_fullscreen"
     "mod + Slash" = "toggle_orientation"
-    "mod + Comma" = "switch_to_last_workspace"
     "mod + Enter" = { exec = ["kitty"] }
     "mod + Backslash" = { exec = ["mic-toggle"] }
     "modShift + Enter" = { exec = ["kitty"] }

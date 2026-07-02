@@ -76,44 +76,12 @@
     NSAutomaticWindowAnimationsEnabled = false;
     NSWindowShouldDragOnGesture = true;
   };
-  system.keyboard = {
-    enableKeyMapping = true;
-    remapCapsLockToControl = true;
-  };
   system.defaults.trackpad = {
     Clicking = true;
     TrackpadRightClick = true;
     TrackpadThreeFingerDrag = true;
   };
   system.defaults.universalaccess.reduceTransparency = false;
-
-  # ── Keyboard Consistency (60% external + MacBook built-in) ─────────────────
-  # Goal: Rift modifier (⌥) is always the thumb key next to spacebar.
-  #
-  # Layouts before swapping:
-  #
-  #   60% (left of spacebar):      Ctrl  |  Win        |  Alt  |  ← thumb
-  #   MacBook (left of spacebar):  Fn    |  Ctrl       |  ⌥    |  ⌘    ← thumb
-  #
-  #   60% key → macOS maps as:     Ctrl  →  Ctrl
-  #                                Win   →  ⌘
-  #                                Alt   →  ⌥   ← thumb, Rift modifier
-  #
-  # Problem: on the MacBook built-in, the thumb key is ⌘, not ⌥.
-  # Fix: swap ⌥ ↔ ⌘ for the internal keyboard only.
-  #
-  # After swapping:
-  #
-  #   60%:                        Ctrl  |  Win  (⌘)  |  Alt  (⌥)  |  ← thumb (⌥)
-  #   MacBook built-in:           Fn    |  Ctrl       |  ⌘          |  ⌥     ← thumb (⌥)
-  #
-  #   Ctrl is corner on 60%, position 2 on MacBook — close enough.
-  #   Win/⌘ is middle on both. Copy/paste muscle memory matches.
-  #   Thumb = ⌥ = Rift modifier on both keyboards. ✓
-  #
-  # System Settings → Keyboard → Modifier Keys → select "MacBook Air Keyboard" →
-  #   swap Option (⌥) ↔ Command (⌘)
-  # ────────────────────────────────────────────────────────────────────────────
 
   system.defaults.WindowManager = {
     EnableStandardClickToShowDesktop = false;
