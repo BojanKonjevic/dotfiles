@@ -46,6 +46,26 @@
     '';
   };
   nixpkgs.config.allowUnfree = true;
+
+  # nix-darwin's doc/manual/default.nix still passes --toc-depth/--chunk-toc-depth,
+  # which nixos-render-docs removed in commit ad97f55. Shim out the old flags.
+  nixpkgs.overlays = [
+    (final: prev: {
+      nixos-render-docs = prev.writeShellScriptBin "nixos-render-docs" ''
+        args=(); skip=0
+        for a in "$@"; do
+          if [ "$skip" = 1 ]; then skip=0; continue; fi
+          case "$a" in
+            --toc-depth|--chunk-toc-depth|--section-toc-depth) skip=1 ;;
+            --toc-depth=*|--chunk-toc-depth=*|--section-toc-depth=*) ;;
+            *) args+=("$a") ;;
+          esac
+        done
+        exec ${prev.nixos-render-docs}/bin/nixos-render-docs "''${args[@]}"
+      '';
+    })
+  ];
+
   programs.zsh.enable = true;
   environment.shells = [pkgs.zsh];
   system.defaults.dock = {
