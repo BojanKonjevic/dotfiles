@@ -47,24 +47,6 @@
   };
   nixpkgs.config.allowUnfree = true;
 
-  # nix-darwin's doc/manual/default.nix still passes --toc-depth/--chunk-toc-depth,
-  # which nixos-render-docs removed in favour of --sidebar-depth (ad97f55).
-  # Patch the source to make deprecated flags a silent no-op instead of a hard error.
-  nixpkgs.overlays = [
-    (final: prev: {
-      nixos-render-docs = prev.nixos-render-docs.overrideAttrs (old: {
-        postPatch =
-          (old.postPatch or "")
-          + ''
-            substituteInPlace nixos_render_docs/manual.py \
-              --replace-fail \
-                'parser.error(f"{option_string} has been removed, use --sidebar-depth instead")' \
-                'pass'
-          '';
-      });
-    })
-  ];
-
   programs.zsh.enable = true;
   environment.shells = [pkgs.zsh];
   system.defaults.dock = {
