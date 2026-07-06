@@ -1,6 +1,7 @@
 {
   pkgs,
   userConfig,
+  inputs,
   ...
 }: {
   system.primaryUser = userConfig.username;
@@ -45,26 +46,33 @@
       keep-derivations = true
     '';
   };
-  nixpkgs.config.allowUnfree = true;
+  # Bake the --toc-depth shim into the pkgs import directly so that
+  # nix-darwin's buildPackages.nixos-render-docs (used by doc/manual)
+  # also gets the wrapped version. nixpkgs.overlays only applies to pkgs,
+  # but buildPackages needs it too.
+  nixpkgs.pkgs = import inputs.nixpkgs {
+    inherit (userConfig) system;
+    config.allowUnfree = true;
+    overlays = [
+      (final: prev: {
+        nixos-render-docs = prev.writeShellScriptBin "nixos-render-docs" ''
+          args=(); skip=0
+          for a in "$@"; do
+            if [ "$skip" = 1 ]; then skip=0; continue; fi
+            case "$a" in
+              --toc-depth|--chunk-toc-depth|--section-toc-depth) skip=1 ;;
+              --toc-depth=*|--chunk-toc-depth=*|--section-toc-depth=*) ;;
+              *) args+=("$a") ;;
+            esac
+          done
+          exec ${prev.nixos-render-docs}/bin/nixos-render-docs "''${args[@]}"
+        '';
+      })
+    ];
+  };
 
-  # nix-darwin still passes --toc-depth/--chunk-toc-depth to nixos-render-docs,
-  # which now rejects them (_DeprecatedDepthFlag). Wrap it to strip those flags.
-  nixpkgs.overlays = [
-    (final: prev: {
-      nixos-render-docs = prev.writeShellScriptBin "nixos-render-docs" ''
-        args=(); skip=0
-        for a in "$@"; do
-          if [ "$skip" = 1 ]; then skip=0; continue; fi
-          case "$a" in
-            --toc-depth|--chunk-toc-depth|--section-toc-depth) skip=1 ;;
-            --toc-depth=*|--chunk-toc-depth=*|--section-toc-depth=*) ;;
-            *) args+=("$a") ;;
-          esac
-        done
-        exec ${prev.nixos-render-docs}/bin/nixos-render-docs "''${args[@]}"
-      '';
-    })
-  ];
+  # nixpkgs.config is ignored when nixpkgs.pkgs is set; the config is
+  # passed directly to the import above.
 
   programs.zsh.enable = true;
   environment.shells = [pkgs.zsh];
@@ -141,7 +149,7 @@
     defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadPinchGesture -int 0
   '';
 
-  # Exclude /nix from indexing — saves Raycast from
+  # Exclude /nix from indexing — saves from searching through the massive nix store
   system.activationScripts.excludeNixFromSpotlight.text = ''
     touch /nix/.metadata_never_index 2>/dev/null || true
   '';
