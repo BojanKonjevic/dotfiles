@@ -45,6 +45,7 @@
       keep-derivations = true
     '';
   };
+  nixpkgs.config.allowUnfree = true;
   programs.zsh.enable = true;
   environment.shells = [pkgs.zsh];
   system.defaults.dock = {
