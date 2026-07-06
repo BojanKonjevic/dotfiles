@@ -3,6 +3,7 @@
   userConfig,
   ...
 }: {
+  system.primaryUser = userConfig.username;
   networking.hostName = userConfig.hostname;
   time.timeZone = userConfig.timezone;
   system.defaults.NSGlobalDomain.AppleICUForce24HourTime = true;
