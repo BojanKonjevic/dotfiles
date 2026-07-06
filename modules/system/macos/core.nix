@@ -112,6 +112,15 @@
     touch /nix/.metadata_never_index 2>/dev/null || true
   '';
 
+  # Cachix substituter — nix.enable = false (Determinate Nix manages nix daemon),
+  # so nix.settings doesn't apply. Determinate Nix !include's nix.custom.conf
+  # from its managed nix.conf, so we write the substituter config there.
+  environment.etc."nix/nix.custom.conf".text = ''
+    # bojan-dotfiles cachix
+    extra-substituters = https://bojan-dotfiles.cachix.org
+    extra-trusted-public-keys = bojan-dotfiles.cachix.org-1:35eXWoN9Ob91Tn6cEhgLJ+6a09KMnZfRzKHbkQrPOX0=
+  '';
+
   system.defaults.loginwindow = {
     GuestEnabled = false;
     SHOWFULLNAME = true;
