@@ -6,7 +6,12 @@
   system.primaryUser = userConfig.username;
   networking.hostName = userConfig.hostname;
   time.timeZone = userConfig.timezone;
-  documentation.enable = false;
+  documentation = {
+    enable = false;
+    doc.enable = false;
+    man.enable = false;
+    info.enable = false;
+  };
   system.defaults.NSGlobalDomain.AppleICUForce24HourTime = true;
   security.pam.services.sudo_local.touchIdAuth = true;
   nix = {
