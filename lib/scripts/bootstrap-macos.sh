@@ -72,4 +72,4 @@ fi
 
 # ── 5. First build (bootstrap mode — no secrets) ──────────────────
 echo "→ First build (bootstrapMode = true)..."
-nix run github:lnl7/nix-darwin -- switch --flake ".#$HOSTNAME" 2>&1 | tee /tmp/darwin-rebuild.log
+sudo nix run github:lnl7/nix-darwin -- switch --flake ".#$HOSTNAME" 2>&1 | tee /tmp/darwin-rebuild.log
