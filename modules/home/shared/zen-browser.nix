@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   theme,
   ...
@@ -55,68 +56,78 @@ in {
       };
     };
   };
-  home.file."${zenBase}/profiles.ini".text = ''
-    [Profile0]
-    Name=${config.home.username}
-    IsRelative=1
-    Path=${zenProfile}
-    Default=1
+  home.activation.zenInjectConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    base="$HOME/${zenBase}"
+    mkdir -p "$base"
 
-    [General]
-    StartWithLastProfile=1
-    Version=2
+    userjs_store="${pkgs.writeText "user.js" ''
+      user_pref("font.name.monospace.x-western", "${theme.fontName}");
+      user_pref("font.name.sans-serif.x-western", "${theme.fontName}");
+      user_pref("font.name.serif.x-western", "${theme.fontName}");
+      user_pref("font.size.variable.x-western", 14);
+      user_pref("layout.css.prefers-color-scheme.content-override", 0);
+      user_pref("browser.display.document_color_use", 0);
+      user_pref("layers.acceleration.force-enabled", true);
+      user_pref("general.smoothScroll", true);
+      user_pref("general.autoScroll", true);
+      user_pref("network.dns.disablePrefetch", true);
+      user_pref("network.prefetch-next", false);
+      user_pref("network.http.speculative-parallel-limit", 0);
+      user_pref("signon.rememberSignons", false);
+      user_pref("privacy.globalprivacycontrol.was_ever_enabled", true);
+      user_pref("privacy.clearOnShutdown_v2.formdata", true);
+      user_pref("browser.tabs.allow_transparent_browser", true);
+      user_pref("browser.link.open_newwindow.restriction", 0);
+      user_pref("browser.shell.checkDefaultBrowser", false);
+      user_pref("browser.warnOnQuitShortcut", false);
+      user_pref("browser.aboutConfig.showWarning", false);
+      user_pref("browser.search.separatePrivateDefault", false);
+      user_pref("browser.newtabpage.activity-stream.showSearch", false);
+      user_pref("browser.newtabpage.activity-stream.feeds.topsites", true);
+      user_pref("accessibility.typeaheadfind.flashBar", 0);
+      user_pref("devtools.responsive.reloadNotification.enabled", false);
+      user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+      user_pref("extensions.autoDisableScopes", 0);
+      user_pref("zen.tabs.vertical.right-side", true);
+      user_pref("zen.tabs.show-newtab-vertical", false);
+      user_pref("zen.view.compact.hide-tabbar", true);
+      user_pref("zen.view.compact.hide-toolbar", true);
+      user_pref("zen.view.compact.show-sidebar-and-toolbar-on-hover", true);
+      user_pref("zen.view.compact.toolbar-flash-popup", false);
+      user_pref("zen.view.compact.sidebar-keep-hover-duration", 150);
+      user_pref("zen.view.show-newtab-button-top", false);
+      user_pref("zen.workspaces.continue-where-left-off", true);
+      user_pref("intl.locale.requested", "en-US");
+      user_pref("browser.search.region", "US");
+      user_pref("browser.search.detectCurrentRegion", false);
+      user_pref("browser.search.geoSpecificDefaults", false);
+      user_pref("browser.search.geoip.url", "");
+      user_pref("geo.enabled", false);
+      user_pref("geo.provider.network.url", "");
+      user_pref("geo.provider.use_gpsd", false);
+      user_pref("geo.provider.use_geoclue", false);
+    ''}"
 
-    [Install15B76BAA26BA15E7]
-    Default=${zenProfile}
-    Locked=1
-  '';
+    # Inject our config into every profile Zen has (both bojan.default
+    # and any auto-created Profiles/*). Zen manages its own profiles;
+    # we just make sure our preferences and chrome CSS are present.
+    for profile_dir in "$base"/*.default/ "$base"/Profiles/*/; do
+      [ -d "$profile_dir" ] || continue
 
-  home.file."${zenBase}/${zenProfile}/user.js".text = ''
-    user_pref("font.name.monospace.x-western", "${theme.fontName}");
-    user_pref("font.name.sans-serif.x-western", "${theme.fontName}");
-    user_pref("font.name.serif.x-western", "${theme.fontName}");
-    user_pref("font.size.variable.x-western", 14);
-    user_pref("layout.css.prefers-color-scheme.content-override", 0);
-    user_pref("browser.display.document_color_use", 0);
-    user_pref("layers.acceleration.force-enabled", true);
-    user_pref("general.smoothScroll", true);
-    user_pref("general.autoScroll", true);
-    user_pref("network.dns.disablePrefetch", true);
-    user_pref("network.prefetch-next", false);
-    user_pref("network.http.speculative-parallel-limit", 0);
-    user_pref("signon.rememberSignons", false);
-    user_pref("privacy.globalprivacycontrol.was_ever_enabled", true);
-    user_pref("privacy.clearOnShutdown_v2.formdata", true);
-    user_pref("browser.tabs.allow_transparent_browser", true);
-    user_pref("browser.link.open_newwindow.restriction", 0);
-    user_pref("browser.shell.checkDefaultBrowser", false);
-    user_pref("browser.warnOnQuitShortcut", false);
-    user_pref("browser.aboutConfig.showWarning", false);
-    user_pref("browser.search.separatePrivateDefault", false);
-    user_pref("browser.newtabpage.activity-stream.showSearch", false);
-    user_pref("browser.newtabpage.activity-stream.feeds.topsites", true);
-    user_pref("accessibility.typeaheadfind.flashBar", 0);
-    user_pref("devtools.responsive.reloadNotification.enabled", false);
-    user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
-    user_pref("extensions.autoDisableScopes", 0);
-    user_pref("zen.tabs.vertical.right-side", true);
-    user_pref("zen.tabs.show-newtab-vertical", false);
-    user_pref("zen.view.compact.hide-tabbar", true);
-    user_pref("zen.view.compact.hide-toolbar", true);
-    user_pref("zen.view.compact.show-sidebar-and-toolbar-on-hover", true);
-    user_pref("zen.view.compact.toolbar-flash-popup", false);
-    user_pref("zen.view.compact.sidebar-keep-hover-duration", 150);
-    user_pref("zen.view.show-newtab-button-top", false);
-    user_pref("zen.workspaces.continue-where-left-off", true);
-    user_pref("intl.locale.requested", "en-US");
-    user_pref("browser.search.region", "US");
-    user_pref("browser.search.detectCurrentRegion", false);
-    user_pref("browser.search.geoSpecificDefaults", false);
-    user_pref("browser.search.geoip.url", "");
-    user_pref("geo.enabled", false);
-    user_pref("geo.provider.network.url", "");
-    user_pref("geo.provider.use_gpsd", false);
-    user_pref("geo.provider.use_geoclue", false);
+      # user.js — applied on every startup
+      cp -f "$userjs_store" "$profile_dir/user.js"
+      chmod 644 "$profile_dir/user.js"
+
+      # chrome/ CSS — copy from the home-manager managed originals,
+      # skipping self (same profile dir) to avoid cp error and abort.
+      mkdir -p "$profile_dir/chrome"
+      for css in userChrome.css userContent.css; do
+        src="$base/${zenProfile}/chrome/$css"
+        if [ -f "$src" ] && [ "$profile_dir" != "$base/${zenProfile}/" ]; then
+          cp -fL "$src" "$profile_dir/chrome/$css"
+        fi
+      done
+    done
   '';
 
   home.file."${zenBase}/${zenProfile}/chrome/userChrome.css".text = ''

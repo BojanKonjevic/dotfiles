@@ -416,6 +416,22 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1782995780,
+        "narHash": "sha256-E/nRjAdt6JZT5fZ+iwJPEdzHKZM+qV8enxQteEMZaeA=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "36a55c2bbae35b02b148f0556c02df7daabad0e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "36a55c2",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-apple-sdk": {
+      "locked": {
         "lastModified": 1783224372,
         "narHash": "sha256-8i/87eeoqiGE4yOTjwSA3Eh/ziJRQEmd/unYU+K27sk=",
         "owner": "NixOS",
@@ -425,8 +441,8 @@
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-unstable",
         "repo": "nixpkgs",
+        "rev": "d407951447dcd00442e97087bf374aad70c04cea",
         "type": "github"
       }
     },
@@ -540,6 +556,7 @@
         "nix-homebrew": "nix-homebrew",
         "nix-search-tv": "nix-search-tv",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-apple-sdk": "nixpkgs-apple-sdk",
         "nixpkgs-nvidia": "nixpkgs-nvidia",
         "nixvim": "nixvim",
         "quickshell": "quickshell",

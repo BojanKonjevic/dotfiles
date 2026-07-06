@@ -1,8 +1,23 @@
 {
   pkgs,
   userConfig,
+  inputs,
   ...
 }: {
+  # `nixpkgs` is pinned pre-ad97f55 to keep the darwin manual build working
+  # (see flake.nix), but that pin's apple-sdk_15 lacks working Swift module
+  # maps for DarwinFoundation/Darwin. Overlay just that package back in from
+  # a newer nixpkgs so Swift-based home-manager modules (cursor-warp,
+  # mic-status-bar) still build.
+  nixpkgs.overlays = [
+    (final: prev: let
+      applePkgs = inputs.nixpkgs-apple-sdk.legacyPackages.${prev.system};
+    in {
+      apple-sdk_15 = applePkgs.apple-sdk_15;
+      swift = applePkgs.swift;
+    })
+  ];
+
   system.primaryUser = userConfig.username;
   networking.hostName = userConfig.hostname;
   time.timeZone = userConfig.timezone;
@@ -14,37 +29,7 @@
   };
   system.defaults.NSGlobalDomain.AppleICUForce24HourTime = true;
   security.pam.services.sudo_local.touchIdAuth = true;
-  nix = {
-    enable = true;
-    settings = {
-      experimental-features = "nix-command flakes";
-      auto-optimise-store = true;
-      trusted-users = [userConfig.username];
-      substituters = [
-        "https://cache.nixos.org"
-        "https://bojan-dotfiles.cachix.org"
-      ];
-      trusted-public-keys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "bojan-dotfiles.cachix.org-1:35eXWoN9Ob91Tn6cEhgLJ+6a09KMnZfRzKHbkQrPOX0="
-      ];
-      download-buffer-size = 1073741824;
-      max-jobs = "auto";
-    };
-    gc = {
-      automatic = true;
-      interval = {
-        Weekday = 7;
-        Hour = 3;
-        Minute = 0;
-      };
-      options = "--delete-older-than 14d";
-    };
-    extraOptions = ''
-      keep-outputs = true
-      keep-derivations = true
-    '';
-  };
+
   nixpkgs.config.allowUnfree = true;
   programs.zsh.enable = true;
   environment.shells = [pkgs.zsh];
@@ -88,7 +73,8 @@
     TrackpadRightClick = true;
     TrackpadThreeFingerDrag = true;
   };
-  system.defaults.universalaccess.reduceTransparency = false;
+  #system.defaults.universalaccess.reduceTransparency = false;
+  nix.enable=false;
 
   system.defaults.WindowManager = {
     EnableStandardClickToShowDesktop = false;

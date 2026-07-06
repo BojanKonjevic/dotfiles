@@ -18,5 +18,8 @@ result-*
 *.qcow2
 OVMF_VARS.fd
 
+# macOS metadata
+.DS_Store
+
 #AI
 AGENTS.md

@@ -2,7 +2,20 @@
   description = "NixOS + nix-darwin + Home Manager configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Pinned to the commit just before ad97f55 (nixos-render-docs: --toc-depth
+    # removed in favor of --sidebar-depth). nix-darwin (a1fa429) still passes
+    # --toc-depth/--chunk-toc-depth/--section-toc-depth when building the darwin
+    # manual, which breaks `darwin-rebuild switch` on nixos-unstable past that
+    # commit — even with documentation.enable = false, since nix-darwin's
+    # documentation module evaluates the manual derivation unconditionally.
+    # See docs/macos-build-failure.md. This pin lacks working apple-sdk_15 Swift
+    # module maps, so apple-sdk_15 is overlaid back to a newer nixpkgs for the
+    # Swift-based home-manager modules (cursor-warp, mic-status-bar) — see
+    # modules/system/macos/core.nix.
+    nixpkgs.url = "github:NixOS/nixpkgs/36a55c2";
+    # Source of a working apple-sdk_15 (post Swift/DarwinFoundation module-map
+    # fix), overlaid on top of the pinned `nixpkgs` above for Swift builds only.
+    nixpkgs-apple-sdk.url = "github:NixOS/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea";
     nixpkgs-nvidia.url = "github:NixOS/nixpkgs/46db2e09e1d3f113a13c0d7b81e2f221c63b8ce9"; # pinned for pascal
     flake-parts.url = "github:hercules-ci/flake-parts";
     lanzaboote = {
