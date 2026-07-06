@@ -6,6 +6,7 @@
   micStatusBar = pkgs.stdenv.mkDerivation {
     name = "mic-status-bar";
     src = ./MicStatusBar.swift;
+    dontUnpack = true;
     nativeBuildInputs = with pkgs; [swift];
     buildInputs = with pkgs; [apple-sdk_15];
     buildPhase = ''

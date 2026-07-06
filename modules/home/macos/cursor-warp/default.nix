@@ -2,6 +2,7 @@
   cursorWarp = pkgs.stdenv.mkDerivation {
     name = "cursor-warp";
     src = ./CursorWarp.swift;
+    dontUnpack = true;
     nativeBuildInputs = with pkgs; [swift];
     buildInputs = with pkgs; [apple-sdk_15];
     buildPhase = ''
