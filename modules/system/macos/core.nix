@@ -43,7 +43,7 @@
   environment.shells = [pkgs.zsh];
   system.defaults.dock = {
     autohide = true;
-    autohide-delay = 999999;
+    autohide-delay = 999999.0;
     autohide-time-modifier = 0.0;
     mru-spaces = false;
   };
