@@ -20,11 +20,18 @@ in {
     mouse_follows_focus = false
     mouse_hides_on_focus = true
     auto_focus_blacklist = [
-      "com.apple.dock"
-      "com.apple.systemuiserver"
-      "com.raycast.macos"
-      "com.apple.controlcenter"
+      "com.apple.dock",
+      "com.apple.systemuiserver",
+      "com.raycast.macos",
+      "com.apple.controlcenter",
     ]
+
+    [settings.ui.menu_bar]
+    enabled = true
+    show_empty = false
+    mode = "all"
+    display_style = "label"
+    active_label = "index"
 
     [settings.gestures]
     enabled = true
@@ -55,12 +62,12 @@ in {
     workspace_auto_back_and_forth = true
 
     app_rules = [
-      { title_substring = "Preferences", floating = true }
-      { title_substring = "Settings", floating = true }
-      { ax_subrole = "AXDialog", floating = true }
-      { app_name = "System Information", manage = false }
-      { app_name = "System Settings", manage = false }
-      { app_name = "About This Mac", manage = false }
+      { title_substring = "Preferences", floating = true },
+      { title_substring = "Settings", floating = true },
+      { ax_subrole = "AXDialog", floating = true },
+      { app_name = "System Information", manage = false },
+      { app_name = "System Settings", manage = false },
+      { app_name = "About This Mac", manage = false },
     ]
 
     [modifier_combinations]
@@ -68,6 +75,7 @@ in {
     modShift = "Alt + Shift"
 
     [keys]
+    "Alt + Z" = "toggle_space_activated"
     "mod + H" = { move_focus = "left" }
     "mod + J" = { move_focus = "down" }
     "mod + K" = { move_focus = "up" }
@@ -100,7 +108,7 @@ in {
     "modShift + 9" = { move_window_to_workspace = 8 }
     "modShift + 0" = { move_window_to_workspace = 9 }
 
-    "mod + Q" = "close_window"
+    "mod + Q" = { exec = ["cliclick", "kd:cmd,w"] }
     "mod + V" = "toggle_window_floating"
     "mod + F" = "toggle_fullscreen"
     "mod + Slash" = "toggle_orientation"
@@ -134,7 +142,7 @@ in {
   launchd.agents.rift = {
     enable = true;
     config = {
-      ProgramArguments = ["${brewPrefix}/bin/rift"];
+      ProgramArguments = ["${./../../../lib/bin/rift-helper}"];
       KeepAlive = true;
       RunAtLoad = true;
       StandardOutPath = "/tmp/rift.stdout.log";
