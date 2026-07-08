@@ -9,7 +9,35 @@
   brewPrefix = "/opt/homebrew";
   activeBorder = "0xff${lib.removePrefix "#" theme.mauve}";
   inactiveBorder = "0xff${lib.removePrefix "#" theme.surface1}";
+
+  ksd = pkgs.runCommandCC "keystroke-daemon" {} ''
+    mkdir -p "$out/bin"
+    clang -o "$out/bin/ksd" ${./ksd.c} \
+      -framework CoreFoundation \
+      -framework CoreGraphics \
+      -Wall -O2
+  '';
+
+  blockCmd = pkgs.runCommandCC "block-cmd" {} ''
+    mkdir -p "$out/bin"
+    clang -o "$out/bin/block-cmd" ${./block-cmd.c} \
+      -framework CoreFoundation \
+      -framework CoreGraphics \
+      -Wall -O2
+  '';
+
+  fifoPath = "/tmp/close-window.fifo";
+  fifoPathNew = "/tmp/new-window.fifo";
+
+  closeWindow = pkgs.writeShellScriptBin "close-window" ''
+    echo > "${fifoPath}"
+  '';
+
+  newWindow = pkgs.writeShellScriptBin "new-window" ''
+    echo > "${fifoPathNew}"
+  '';
 in {
+  home.packages = [closeWindow newWindow ksd blockCmd];
   xdg.configFile."rift/config.toml".text = ''
     [settings]
     animate = false
@@ -32,12 +60,7 @@ in {
     active_label = "index"
 
     [settings.gestures]
-    enabled = true
-    fingers = 3
-    consume_dock_swipe = true
-    skip_empty = true
-    haptics_enabled = true
-    haptic_pattern = "level_change"
+    enabled = false
 
     [settings.layout]
     mode = "bsp"
@@ -106,15 +129,15 @@ in {
     "modShift + 9" = { move_window_to_workspace = 8 }
     "modShift + 0" = { move_window_to_workspace = 9 }
 
-    "mod + Q" = { exec = ["cliclick", "kd:cmd,w"] }
+    "mod + Q" = { exec = ["${closeWindow}/bin/close-window"] }
     "mod + V" = "toggle_window_floating"
     "mod + F" = "toggle_fullscreen"
     "mod + Slash" = "toggle_orientation"
-    "mod + Enter" = { exec = ["kitty"] }
+    "mod + Enter" = { exec = ["ghostty"] }
     "mod + Backslash" = { exec = ["mic-toggle"] }
-    "modShift + Enter" = { exec = ["kitty"] }
+    "modShift + Enter" = { exec = ["ghostty"] }
     "mod + E" = { exec = ["open", "-n", "/System/Library/CoreServices/Finder.app"] }
-    "mod + N" = { exec = ["open", "-n", "-a", "Zen Browser", "--args", "--private-window"] }
+    "mod + N" = { exec = ["new-window"] }
     "mod + Space" = { exec = ["open", "-n", "/Applications/Raycast.app"] }
     "Ctrl + Escape" = { exec = ["cliclick", "c:."] }
     "mod + Minus" = "resize_window_shrink"
@@ -162,6 +185,48 @@ in {
       EnvironmentVariables = {
         XDG_CONFIG_HOME = "${config.xdg.configHome}";
         PATH = "${config.home.profileDirectory}/bin:/run/current-system/sw/bin:${brewPrefix}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+      };
+    };
+  };
+
+  launchd.agents.close-window = {
+    enable = true;
+    config = {
+      ProgramArguments = ["${ksd}/bin/ksd" "${fifoPath}" "13"];
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/ksd-close.stdout.log";
+      StandardErrorPath = "/tmp/ksd-close.stderr.log";
+      EnvironmentVariables = {
+        PATH = "/usr/bin:/bin";
+      };
+    };
+  };
+
+  launchd.agents.new-window = {
+    enable = true;
+    config = {
+      ProgramArguments = ["${ksd}/bin/ksd" "${fifoPathNew}" "45"];
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/ksd-new.stdout.log";
+      StandardErrorPath = "/tmp/ksd-new.stderr.log";
+      EnvironmentVariables = {
+        PATH = "/usr/bin:/bin";
+      };
+    };
+  };
+
+  launchd.agents.block-cmd = {
+    enable = true;
+    config = {
+      ProgramArguments = ["${blockCmd}/bin/block-cmd"];
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/block-cmd.stdout.log";
+      StandardErrorPath = "/tmp/block-cmd.stderr.log";
+      EnvironmentVariables = {
+        PATH = "/usr/bin:/bin";
       };
     };
   };

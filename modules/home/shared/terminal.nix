@@ -2,6 +2,7 @@
   theme,
   config,
   pkgs,
+  lib,
   inputs,
   userConfig,
   ...
@@ -42,43 +43,43 @@ in {
       diff.colorMoved = "default";
     };
   };
-  programs.kitty = {
+  programs.ghostty = {
     enable = true;
+    package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin null;
     settings = {
-      scrollback_lines = 5000;
-      enable_audio_bell = "no";
-      open_url_with = "default";
-      url_style = "single";
-      copy_on_select = "yes";
-      confirm_os_window_close = 0;
-      shell_integration = "disabled";
-      clipboard_control = "write-clipboard write-primary read-clipboard-ask read-primary-ask";
+      font-family = theme.fontName;
+      font-family-bold = theme.fontName;
+      font-family-italic = theme.fontName;
+      font-family-bold-italic = theme.fontName;
+
+      cursor-style = "block";
+      cursor-style-blink = false;
+
+      window-decoration = false;
+
+      window-padding-x = "10,10";
+      window-padding-y = "0,10";
+
+      font-style = "Bold";
+      font-style-bold = "Bold";
+      font-style-italic = "Bold Italic";
+      font-style-bold-italic = "Bold Italic";
+
+      copy-on-select = false;
+      clipboard-read = "allow";
+      clipboard-write = "allow";
+      clipboard-paste-protection = false;
+
+      shell-integration = "zsh";
+
+      confirm-close-surface = false;
+
+      theme = "catppuccin-mocha";
+
+      background-opacity = 0.90;
+      background-opacity-cells = true;
+      background-blur = true;
     };
-    keybindings = {
-      "ctrl+shift+c" = "copy_to_clipboard";
-      "ctrl+shift+v" = "paste_from_clipboard";
-      "ctrl+shift+h" = "show_scrollback";
-    };
-    extraConfig = ''
-      scrollback_pager bash -c "ansifilter | nvim -c 'set ft=sh | $' -"
-      scrollback_pager_history_size 0
-      font_family      family='${theme.fontName}' style=Bold
-      bold_font        family='${theme.fontName}' style=Bold
-      italic_font      family='${theme.fontName}' style='Bold Italic'
-      bold_italic_font family='${theme.fontName}' style='Bold Italic'
-
-      cursor_shape block
-      cursor_blink_interval 0
-
-      window_padding_width 0 10 10 10
-      window_decorations none
-      modify_font underline_position 150%
-      modify_font cell_height 100%
-
-      repaint_delay 5
-      input_delay 0
-      sync_to_monitor yes
-    '';
   };
   programs.zsh = {
     enable = true;
@@ -243,4 +244,5 @@ in {
       hide_env_diff = true;
     };
   };
+  home.file.".hushlogin".text = "";
 }

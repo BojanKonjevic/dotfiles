@@ -36,7 +36,7 @@ secrets/        agenix-encrypted secrets
 user.nix        identity shared across all hosts (name, email, timezone, etc.)
 ```
 
-**Modules** are primitives. Each one is responsible for a single program (`hyprland.nix`, `kitty`, `zathura`) or a tight cluster that always goes together (`terminal.nix`). They don't know about each other.
+**Modules** are primitives. Each one is responsible for a single program (`hyprland.nix`, `ghostty`, `zathura`) or a tight cluster that always goes together (`terminal.nix`). They don't know about each other.
 
 **Profiles** are categories that you choose to import per host — `desktop.nix`, `media.nix`, `programming.nix`. They're what you actually compose when defining a machine. This makes it easy to imagine a headless server host that only imports `base.nix` and nothing else.
 
@@ -80,7 +80,7 @@ The reason is cohesion. One language, one renderer, one visual style, rather tha
 
 **Hyprland** is the compositor, with **Hyprlock** for the lockscreen and **Hypridle** for idle management.
 
-Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, kitty, vesktop, qBittorrent, zen-browser, hyprlock, the Quickshell UI... The full palette is defined once in `modules/home/shared/theme.nix` and injected into Quickshell as a generated `Colours.qml` singleton at build time, so nothing is hardcoded in QML. Everything not explicitly themed is either automatic with the Catppuccin nixos module or doesn't have it available.
+Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, ghostty, vesktop, qBittorrent, zen-browser, hyprlock, the Quickshell UI... The full palette is defined once in `modules/home/shared/theme.nix` and injected into Quickshell as a generated `Colours.qml` singleton at build time, so nothing is hardcoded in QML. Everything not explicitly themed is either automatic with the Catppuccin nixos module or doesn't have it available.
 
 ## the macbook (macOS)
 

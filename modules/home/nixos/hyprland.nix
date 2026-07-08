@@ -18,7 +18,7 @@
 
     settings = {
       "$mainMod" = "SUPER";
-      "$terminal" = "kitty";
+      "$terminal" = "ghostty";
       "$fileManager" = "thunar";
       "$menu" = "qs -c launcher";
       "$privateWindow" = "zen-beta --no-remote --private-window";
@@ -40,7 +40,7 @@
         (opacityRule subtle "zen-beta")
         (opacityRule medium "org.qbittorrent.qBittorrent")
         (opacityRule medium "nm-connection-editor")
-        (opacityRule terminal "kitty")
+        (opacityRule terminal "Ghostty")
         "opacity 1.0 override 1.0 override, match:fullscreen 1"
       ];
 

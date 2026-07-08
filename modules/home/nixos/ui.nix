@@ -12,8 +12,8 @@
     EDITOR = "nvim";
     VISUAL = "nvim";
     SUDO_EDITOR = "nvim";
-    TERMINAL = "kitty";
-    XDG_TERMINAL = "kitty";
+    TERMINAL = "ghostty";
+    XDG_TERMINAL = "ghostty";
     SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
   };
   xdg = {
@@ -23,21 +23,21 @@
         name = "Neovim";
         genericName = "Text Editor";
         comment = "Edit text files in Neovim inside Kitty terminal";
-        exec = "kitty nvim %F";
+        exec = "ghostty nvim %F";
         terminal = false;
         type = "Application";
         icon = "nvim";
         categories = ["Development" "TextEditor" "Utility"];
         startupNotify = true;
       };
-      kitty = {
-        name = "Kitty";
+      ghostty = {
+        name = "Ghostty";
         genericName = "Terminal Emulator";
         comment = "Fast, feature-rich, GPU based terminal";
-        exec = "kitty";
+        exec = "ghostty";
         terminal = false;
         type = "Application";
-        icon = "kitty";
+        icon = "ghostty";
         categories = ["System" "TerminalEmulator"];
         startupNotify = true;
       };

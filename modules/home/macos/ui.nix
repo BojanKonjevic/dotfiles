@@ -10,8 +10,8 @@
     EDITOR = "nvim";
     VISUAL = "nvim";
     SUDO_EDITOR = "nvim";
-    TERMINAL = "kitty";
-    XDG_TERMINAL = "kitty";
+    TERMINAL = "ghostty";
+    XDG_TERMINAL = "ghostty";
   };
 
   xdg.enable = true;

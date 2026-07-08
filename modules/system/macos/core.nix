@@ -90,22 +90,22 @@
     "com.apple.assistant.support"."Assistant Enabled" = false;
     "com.apple.Siri".VoiceTriggerUserEnabled = false;
     "NSGlobalDomain".AppleLocale = userConfig.locale;
+    "NSGlobalDomain".AppleEnableSwipeNavigateWithScrolls = false;
+    "com.apple.AppleMultitouchTrackpad".TrackpadThreeFingerHorizSwipeGesture = 0;
+    "com.apple.AppleMultitouchTrackpad".TrackpadThreeFingerVertSwipeGesture = 0;
+    "com.apple.AppleMultitouchTrackpad".TrackpadPinchGesture = 0;
+    "com.apple.AppleMultitouchTrackpad".TrackpadFourFingerHorizSwipeGesture = 0;
+    "com.apple.AppleMultitouchTrackpad".TrackpadFourFingerVertSwipeGesture = 0;
+    "com.apple.AppleMultitouchTrackpad".TrackpadFiveFingerPinchGesture = 0;
+    "com.apple.dock".showMissionControlGestureEnabled = false;
+    "com.apple.dock".showAppExposeGestureEnabled = false;
+    "com.apple.dock".showLaunchpadGestureEnabled = false;
+    "com.apple.dock".showDesktopGestureEnabled = false;
+    # Driver-level trackpad prefs (override the user-level domain on modern macOS)
+    "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadThreeFingerHorizSwipeGesture = 0;
+    "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadThreeFingerVertSwipeGesture = 0;
+    "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadPinchGesture = 0;
   };
-
-  # Kill Spotlight completely — icon hidden, keyboard shortcuts disabled
-  # Raycast replaces Cmd+Space, indexing stays on (Raycast and other apps need it)
-  system.activationScripts.extraUser.text = ''
-    defaults -currentHost write com.apple.Spotlight MenuItemHidden -int 1
-    /usr/libexec/PlistBuddy -c "Set AppleSymbolicHotKeys:64:enabled false" \
-      ~/Library/Preferences/com.apple.symbolichotkeys.plist 2>/dev/null || true
-    /usr/libexec/PlistBuddy -c "Set AppleSymbolicHotKeys:65:enabled false" \
-      ~/Library/Preferences/com.apple.symbolichotkeys.plist 2>/dev/null || true
-
-    # Kill Mission Control gestures — 3-finger swipe up/down/spread
-    defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerVertSwipeGesture -int 0
-    defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerHorizSwipeGesture -int 0
-    defaults -currentHost write com.apple.AppleMultitouchTrackpad TrackpadPinchGesture -int 0
-  '';
 
   # Exclude /nix from indexing — saves from searching through the massive nix store
   system.activationScripts.excludeNixFromSpotlight.text = ''

@@ -8,6 +8,6 @@
       "acsandmann/tap/rift"
       "FelixKratz/formulae/borders"
     ];
-    casks = ["raycast"];
+    casks = ["ghostty" "raycast"];
   };
 }
