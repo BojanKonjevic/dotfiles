@@ -1,20 +1,12 @@
 {pkgs, ...}: let
-  cursorWarp = pkgs.stdenv.mkDerivation {
-    name = "cursor-warp";
-    src = ./CursorWarp.swift;
-    dontUnpack = true;
-    nativeBuildInputs = with pkgs; [swift];
-    buildInputs = with pkgs; [apple-sdk_15];
-    buildPhase = ''
-      swiftc -o cursor-warp "$src" \
-        -framework AppKit \
-        -framework Foundation
-    '';
-    installPhase = ''
-      mkdir -p $out/bin
-      cp cursor-warp $out/bin/
-    '';
-  };
+  cursorWarp = pkgs.runCommandCC "cursor-warp" {} ''
+    mkdir -p "$out/bin"
+    clang -o "$out/bin/cursor-warp" ${./cursor-warp.m} \
+      -framework AppKit \
+      -framework CoreFoundation \
+      -framework CoreGraphics \
+      -Wall -O2
+  '';
 in {
   home.packages = [cursorWarp];
 
@@ -24,6 +16,7 @@ in {
       ProgramArguments = ["${cursorWarp}/bin/cursor-warp"];
       KeepAlive = true;
       RunAtLoad = true;
+      StandardErrorPath = "/tmp/cursor-warp.stderr.log";
     };
   };
 }

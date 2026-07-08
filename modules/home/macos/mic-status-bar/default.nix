@@ -3,22 +3,18 @@
   config,
   ...
 }: let
-  micStatusBar = pkgs.stdenv.mkDerivation {
-    name = "mic-status-bar";
-    src = ./MicStatusBar.swift;
-    dontUnpack = true;
-    nativeBuildInputs = with pkgs; [swift];
-    buildInputs = with pkgs; [apple-sdk_15];
-    buildPhase = ''
-      swiftc -o mic-status-bar "$src" \
-        -framework AppKit \
-        -framework Foundation
-    '';
-    installPhase = ''
-      mkdir -p $out/bin
-      cp mic-status-bar $out/bin/
-    '';
-  };
+  micStatusBar = pkgs.runCommandCC "mic-status-bar" {} ''
+    mkdir -p "$out/bin"
+    clang -o "$out/bin/mic-status-bar" ${./mic-status-bar.m} \
+      -framework AppKit \
+      -framework CoreAudio \
+      -framework Carbon \
+      -framework AudioUnit \
+      -framework Foundation \
+      -Wall -O2
+    cp ${../../../../lib/mute.mp3} "$out/bin/mute.mp3"
+    cp ${../../../../lib/unmute.mp3} "$out/bin/unmute.mp3"
+  '';
 in {
   home.packages = [micStatusBar];
 
@@ -26,11 +22,9 @@ in {
     enable = true;
     config = {
       ProgramArguments = ["${micStatusBar}/bin/mic-status-bar"];
-      EnvironmentVariables = {
-        MIC_TOGGLE_PATH = "${config.home.profileDirectory}/bin/mic-toggle";
-      };
       KeepAlive = true;
       RunAtLoad = true;
+      StandardErrorPath = "/tmp/mic-status-bar.stderr.log";
     };
   };
 }

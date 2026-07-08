@@ -1,18 +1,12 @@
 {pkgs, ...}: let
-  micToggle = pkgs.writeShellScriptBin "mic-toggle" ''
-    CURRENT=$(osascript -e "input volume of (get volume settings)")
-    if [ "$CURRENT" -eq 0 ]; then
-      PREV=$(cat /tmp/qs-mic-prev-volume 2>/dev/null || echo "100")
-      osascript -e "set volume input volume $PREV"
-      echo "unmuted" > /tmp/qs-mic-state.tmp
-      mv /tmp/qs-mic-state.tmp /tmp/qs-mic-state
-    else
-      echo "$CURRENT" > /tmp/qs-mic-prev-volume.tmp
-      mv /tmp/qs-mic-prev-volume.tmp /tmp/qs-mic-prev-volume
-      osascript -e "set volume input volume 0"
-      echo "muted" > /tmp/qs-mic-state.tmp
-      mv /tmp/qs-mic-state.tmp /tmp/qs-mic-state
-    fi
+  micToggle = pkgs.runCommandCC "mic-toggle" {} ''
+    mkdir -p "$out/bin"
+    clang -o "$out/bin/mic-toggle" ${./mic-toggle.m} \
+      -framework CoreAudio \
+      -framework Foundation \
+      -Wall -O2
+    cp ${../../../lib/mute.mp3} "$out/bin/mute.mp3"
+    cp ${../../../lib/unmute.mp3} "$out/bin/unmute.mp3"
   '';
 in {
   home.packages = [micToggle];

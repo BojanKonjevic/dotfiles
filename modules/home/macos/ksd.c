@@ -1,12 +1,12 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreGraphics/CoreGraphics.h>
+#include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <signal.h>
+#include <unistd.h>
 
 static void send_key(CGKeyCode code, CGEventFlags flags) {
   CGEventRef d = CGEventCreateKeyboardEvent(NULL, code, true);
@@ -34,7 +34,8 @@ int main(int argc, char **argv) {
 
   for (;;) {
     int fd = open(fifo, O_RDONLY);
-    if (fd < 0) continue;
+    if (fd < 0)
+      continue;
     char buf[64];
     while (read(fd, buf, sizeof(buf)) > 0) {
       send_key(kc, kCGEventFlagMaskCommand);

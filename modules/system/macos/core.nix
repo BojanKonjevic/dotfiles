@@ -1,23 +1,8 @@
 {
   pkgs,
   userConfig,
-  inputs,
   ...
 }: {
-  # `nixpkgs` is pinned pre-ad97f55 to keep the darwin manual build working
-  # (see flake.nix), but that pin's apple-sdk_15 lacks working Swift module
-  # maps for DarwinFoundation/Darwin. Overlay just that package back in from
-  # a newer nixpkgs so Swift-based home-manager modules (cursor-warp,
-  # mic-status-bar) still build.
-  nixpkgs.overlays = [
-    (final: prev: let
-      applePkgs = inputs.nixpkgs-apple-sdk.legacyPackages.${prev.system};
-    in {
-      apple-sdk_15 = applePkgs.apple-sdk_15;
-      swift = applePkgs.swift;
-    })
-  ];
-
   system.primaryUser = userConfig.username;
   networking.hostName = userConfig.hostname;
   time.timeZone = userConfig.timezone;

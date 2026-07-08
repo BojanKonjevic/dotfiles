@@ -3,7 +3,6 @@
   lib,
   pkgs,
   theme,
-  userConfig,
   ...
 }: let
   brewPrefix = "/opt/homebrew";
@@ -26,6 +25,15 @@
       -Wall -O2
   '';
 
+  cursorHide = pkgs.runCommandCC "cursor-hide" {} ''
+    mkdir -p "$out/bin"
+    clang -o "$out/bin/cursor-hide" ${./cursor-hide.m} \
+      -framework AppKit \
+      -framework CoreFoundation \
+      -framework CoreGraphics \
+      -Wall -O2
+  '';
+
   fifoPath = "/tmp/close-window.fifo";
   fifoPathNew = "/tmp/new-window.fifo";
 
@@ -37,7 +45,7 @@
     echo > "${fifoPathNew}"
   '';
 in {
-  home.packages = [closeWindow newWindow ksd blockCmd];
+  home.packages = [closeWindow newWindow ksd blockCmd cursorHide];
   xdg.configFile."rift/config.toml".text = ''
     [settings]
     animate = false
@@ -80,7 +88,7 @@ in {
     default_workspace_count = 10
     auto_assign_windows = true
     preserve_focus_per_workspace = true
-    workspace_auto_back_and_forth = true
+    workspace_auto_back_and_forth = false
 
     app_rules = [
       { title_substring = "Preferences", floating = true },
@@ -134,7 +142,6 @@ in {
     "mod + F" = "toggle_fullscreen"
     "mod + Slash" = "toggle_orientation"
     "mod + Enter" = { exec = ["ghostty"] }
-    "mod + Backslash" = { exec = ["mic-toggle"] }
     "modShift + Enter" = { exec = ["ghostty"] }
     "mod + E" = { exec = ["open", "-n", "/System/Library/CoreServices/Finder.app"] }
     "mod + N" = { exec = ["new-window"] }
@@ -225,6 +232,20 @@ in {
       RunAtLoad = true;
       StandardOutPath = "/tmp/block-cmd.stdout.log";
       StandardErrorPath = "/tmp/block-cmd.stderr.log";
+      EnvironmentVariables = {
+        PATH = "/usr/bin:/bin";
+      };
+    };
+  };
+
+  launchd.agents.cursor-hide = {
+    enable = true;
+    config = {
+      ProgramArguments = ["${cursorHide}/bin/cursor-hide"];
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/cursor-hide.stdout.log";
+      StandardErrorPath = "/tmp/cursor-hide.stderr.log";
       EnvironmentVariables = {
         PATH = "/usr/bin:/bin";
       };
