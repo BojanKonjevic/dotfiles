@@ -12,9 +12,7 @@
 in {
   xdg.configFile."rift/config.toml".text = ''
     [settings]
-    animate = true
-    animation_duration = 0.2
-    animation_fps = 60
+    animate = false
     hot_reload = true
     focus_follows_mouse = true
     mouse_follows_focus = false
