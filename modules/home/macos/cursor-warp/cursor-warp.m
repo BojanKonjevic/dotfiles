@@ -1,178 +1,89 @@
 #import <AppKit/AppKit.h>
 #import <CoreGraphics/CoreGraphics.h>
 
-#define WARP_WINDOW_MS 0.5
-
-static CGEventRef eventTapCallback(CGEventTapProxy proxy, CGEventType type,
-                                   CGEventRef event, void *refcon) {
-  if (type == kCGEventTapDisabledByTimeout) {
-    fprintf(stderr, "cursor-warp: event tap disabled by timeout\n");
-    return NULL;
-  }
-  if (type != kCGEventKeyDown)
-    return event;
-
-  CGEventFlags flags = CGEventGetFlags(event);
-  if (!(flags & kCGEventFlagMaskAlternate))
-    return event;
-
-  uint16_t key = CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
-  BOOL isFocusDir = (key == 4 || key == 38 || key == 40 || key == 37);
-  BOOL isMoveToWS = (key >= 18 && key <= 29) && (flags & kCGEventFlagMaskShift);
-
-  if (isFocusDir || isMoveToWS) {
-    fprintf(stderr, "cursor-warp: scheduling warp\n");
-    [(__bridge id)refcon performSelector:@selector(scheduleWarp)];
-  }
-  return event;
-}
-
-static void axObserverCallback(AXObserverRef observer, AXUIElementRef element,
-                               CFStringRef notification, void *refcon) {
-  [(__bridge id)refcon performSelector:@selector(onFocusChanged)];
-}
+#define POLL_MS 0.05
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
-@property BOOL pendingWarp;
-@property(strong) NSTimer *warpTimer;
+@property CGRect lastBounds;
+@property BOOL ready;
 @end
 
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)note {
   fprintf(stderr, "cursor-warp: started\n");
+  self.lastBounds = CGRectNull;
+  self.ready = NO;
 
-  if (!AXIsProcessTrusted()) {
-    fprintf(stderr, "cursor-warp: accessibility permission not granted\n");
-    return;
-  }
-  fprintf(stderr, "cursor-warp: accessibility granted\n");
-  [self setupEventTap];
-  [self setupAXObserver];
+  [self performSelector:@selector(onReady) withObject:nil afterDelay:0.5];
 
-  dispatch_after(
-      dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)),
-      dispatch_get_main_queue(), ^{
-        fprintf(stderr, "cursor-warp: initial warp\n");
-        [self warpToFocusedWindow];
-      });
+  [NSTimer scheduledTimerWithTimeInterval:POLL_MS repeats:YES block:^(NSTimer *t) {
+    [self poll];
+  }];
 }
 
-- (void)scheduleWarp {
-  self.pendingWarp = YES;
-  [self.warpTimer invalidate];
-  self.warpTimer = [NSTimer scheduledTimerWithTimeInterval:WARP_WINDOW_MS
-                                                   repeats:NO
-                                                     block:^(NSTimer *t) {
-                                                       self.pendingWarp = NO;
-                                                     }];
+- (void)onReady {
+  self.ready = YES;
+  CGWarpMouseCursorPosition(CGPointMake(200, 200));
 }
 
-- (void)onFocusChanged {
-  if (!self.pendingWarp)
-    return;
-  self.pendingWarp = NO;
-  [self.warpTimer invalidate];
-  [self warpToFocusedWindow];
+- (CGPoint)mouseLocation {
+  CGEventRef e = CGEventCreate(NULL);
+  CGPoint loc = CGEventGetLocation(e);
+  CFRelease(e);
+  return loc;
 }
 
-- (void)setupEventTap {
-  CGEventMask mask = CGEventMaskBit(kCGEventKeyDown);
-  CFMachPortRef tap = CGEventTapCreate(
-      kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask,
-      eventTapCallback, (__bridge void *)self);
-  if (!tap || !CFMachPortIsValid(tap)) {
-    NSLog(@"CursorWarp: failed to create event tap");
-    return;
+- (void)poll {
+  if (!self.ready) return;
+
+  pid_t pid = NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier;
+  if (!pid) return;
+
+  CFArrayRef list = CGWindowListCopyWindowInfo(
+      kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
+      kCGNullWindowID);
+  if (!list) return;
+
+  CFIndex count = CFArrayGetCount(list);
+  CGRect target = CGRectNull;
+
+  for (CFIndex i = 0; i < count; i++) {
+    NSDictionary *info = (__bridge NSDictionary *)CFArrayGetValueAtIndex(list, i);
+    NSNumber *owner = info[(__bridge NSString *)kCGWindowOwnerPID];
+    if (!owner || owner.intValue != pid) continue;
+    NSNumber *layer = info[(__bridge NSString *)kCGWindowLayer];
+    if (!layer || layer.intValue != 0) continue;
+    NSDictionary *bounds = info[(__bridge NSString *)kCGWindowBounds];
+    if (!bounds) continue;
+    CGRect rect;
+    CGRectMakeWithDictionaryRepresentation((__bridge CFDictionaryRef)bounds, &rect);
+    if (CGRectIsNull(rect) || CGRectIsEmpty(rect)) continue;
+    target = rect;
+    break;
   }
-  CFRunLoopAddSource(CFRunLoopGetCurrent(),
-                     CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0),
-                     kCFRunLoopDefaultMode);
-}
+  CFRelease(list);
 
-- (void)setupAXObserver {
-  AXObserverRef observer;
-  if (AXObserverCreate(getpid(), axObserverCallback, &observer) !=
-      kAXErrorSuccess) {
-    NSLog(@"CursorWarp: failed to create AX observer");
-    return;
-  }
+  if (CGRectIsNull(target)) return;
 
-  AXUIElementRef systemWide = AXUIElementCreateSystemWide();
-  AXError err = AXObserverAddNotification(observer, systemWide,
-                                          CFSTR("AXFocusedWindowChanged"),
-                                          (__bridge void *)self);
-  CFRelease(systemWide);
-
-  if (err != kAXErrorSuccess) {
-    NSLog(@"CursorWarp: AXObserverAddNotification failed (%d)", err);
-    CFRelease(observer);
-    return;
-  }
-
-  CFRunLoopAddSource(CFRunLoopGetCurrent(),
-                     AXObserverGetRunLoopSource(observer),
-                     kCFRunLoopDefaultMode);
-}
-
-- (void)warpToFocusedWindow {
-  NSRunningApplication *frontApp =
-      NSWorkspace.sharedWorkspace.frontmostApplication;
-  if (!frontApp)
-    return;
-
-  AXUIElementRef appElement =
-      AXUIElementCreateApplication(frontApp.processIdentifier);
-  CFTypeRef focusedWindow;
-  AXError err = AXUIElementCopyAttributeValue(
-      appElement, CFSTR("AXFocusedWindow"), &focusedWindow);
-  CFRelease(appElement);
-  if (err != kAXErrorSuccess)
-    return;
-
-  AXUIElementRef window = focusedWindow;
-
-  CFTypeRef positionRef;
-  CFTypeRef sizeRef;
-  AXUIElementCopyAttributeValue(window, CFSTR("AXPosition"), &positionRef);
-  AXUIElementCopyAttributeValue(window, CFSTR("AXSize"), &sizeRef);
-  CFRelease(window);
-
-  if (!positionRef || !sizeRef) {
-    if (positionRef)
-      CFRelease(positionRef);
-    if (sizeRef)
-      CFRelease(sizeRef);
+  if (CGRectIsNull(self.lastBounds)) {
+    self.lastBounds = target;
     return;
   }
 
-  CGPoint position;
-  CGSize size;
-  Boolean ok = AXValueGetValue(positionRef, kAXValueCGPointType, &position);
-  if (!ok) {
-    CFRelease(positionRef);
-    CFRelease(sizeRef);
-    return;
-  }
-  ok = AXValueGetValue(sizeRef, kAXValueCGSizeType, &size);
-  if (!ok) {
-    CFRelease(positionRef);
-    CFRelease(sizeRef);
-    return;
-  }
-  CFRelease(positionRef);
-  CFRelease(sizeRef);
+  if (CGRectEqualToRect(target, self.lastBounds)) return;
 
-  CGPoint center =
-      CGPointMake(position.x + size.width / 2, position.y + size.height / 2);
+  self.lastBounds = target;
 
-  CGWarpMouseCursorPosition(center);
-  CGEventRef moveEvent = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
-                                                 center, kCGMouseButtonLeft);
-  if (moveEvent) {
-    CGEventPost(kCGHIDEventTap, moveEvent);
-    CFRelease(moveEvent);
-  }
+  CGPoint mouse = [self mouseLocation];
+  if (CGRectContainsPoint(target, mouse)) return;
+
+  CFTimeInterval mouseAge = CGEventSourceSecondsSinceLastEventType(
+      kCGEventSourceStateCombinedSessionState, kCGEventMouseMoved);
+  if (mouseAge < 0.1) return;
+
+  CGWarpMouseCursorPosition(CGPointMake(
+      CGRectGetMidX(target), CGRectGetMidY(target)));
 }
 
 @end
