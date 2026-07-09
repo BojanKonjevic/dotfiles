@@ -99,7 +99,25 @@
 
   themePath = "${qbtheme}";
 in {
-  home.packages = [pkgs.qbittorrent];
+  home.packages = [
+    # cctools ld crashes (SIGTRAP) on Tahoe; use LLVM's ld64.lld instead
+    (pkgs.qbittorrent.overrideAttrs (old: {
+      cmakeFlags =
+        (old.cmakeFlags or [])
+        ++ [
+          "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=${pkgs.llvmPackages.bintools-unwrapped}/bin/ld64.lld"
+          "-DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=${pkgs.llvmPackages.bintools-unwrapped}/bin/ld64.lld"
+          "-DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=${pkgs.llvmPackages.bintools-unwrapped}/bin/ld64.lld"
+        ];
+      # qBittorrent bundles a Qt plugin that collides with the Nix-wrapped one
+      dontWrapQtApps = true;
+      postFixup =
+        ''
+          wrapQtAppsHook() { :; }
+        ''
+        + (old.postFixup or "");
+    }))
+  ];
 
   home.file."${themeDir}/qBittorrent/themes/catppuccin-mocha-mauve.qbtheme".source = themePath;
 

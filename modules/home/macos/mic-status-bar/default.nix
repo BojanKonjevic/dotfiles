@@ -3,9 +3,10 @@
   config,
   ...
 }: let
-  micStatusBar = pkgs.runCommandCC "mic-status-bar" {} ''
+  micStatusBar = pkgs.runCommand "mic-status-bar" {} ''
+    unset SDKROOT DEVELOPER_DIR
     mkdir -p "$out/bin"
-    clang -o "$out/bin/mic-status-bar" ${./mic-status-bar.m} \
+    /usr/bin/clang -o "$out/bin/mic-status-bar" ${./mic-status-bar.m} \
       -framework AppKit \
       -framework CoreAudio \
       -framework Carbon \

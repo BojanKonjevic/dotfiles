@@ -20,6 +20,7 @@
 
   programs.nixvim = {
     enable = true;
+    enableMan = false;
     nixpkgs.source = inputs.nixpkgs;
 
     globals = {

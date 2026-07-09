@@ -6,4 +6,5 @@ in {
   "pypi-key.age".publicKeys = [desktop me];
   "tailscale.age".publicKeys = [desktop me];
   "ttyd.age".publicKeys = [desktop me];
+  "github-token.age".publicKeys = [desktop me];
 }

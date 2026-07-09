@@ -122,9 +122,13 @@ in {
       gp = "git push";
     };
     initContent = ''
+      export HOMEBREW_NO_AUTO_UPDATE=1
+      export HOMEBREW_NO_ENV_HINTS=1
+      export HOMEBREW_NO_VERIFY_ATTESTATIONS=1
       export PATH="${userConfig.homeDirectory}/.local/bin:$PATH"
       export CACHIX_AUTH_TOKEN="$(cat /run/agenix/cachix-token 2>/dev/null)"
       export UV_PUBLISH_TOKEN="$(cat /run/agenix/pypi-key 2>/dev/null)"
+      export GITHUB_TOKEN="$(cat /run/agenix/github-token 2>/dev/null)"
 
       nu() {
         ${
@@ -133,7 +137,6 @@ in {
         else "nh os switch -u"
       } \
           && cachix push bojan-dotfiles /run/current-system \
-          && cachix push bojan-dotfiles "$HOME/.local/state/nix/profiles/home-manager" \
           ${
         if pkgs.stdenv.hostPlatform.isDarwin
         then ''
@@ -198,6 +201,10 @@ in {
   };
   programs.starship = {
     enable = true;
+    # cctools ld crashes (SIGTRAP) on Tahoe; use LLVM's ld64.lld instead
+    package = pkgs.starship.overrideAttrs (old: {
+      RUSTFLAGS = (old.RUSTFLAGS or "") + " -C link-arg=-fuse-ld=${pkgs.llvmPackages.bintools-unwrapped}/bin/ld64.lld";
+    });
     settings = {
       add_newline = true;
       format = ''

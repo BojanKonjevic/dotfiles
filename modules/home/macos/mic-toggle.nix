@@ -1,7 +1,8 @@
 {pkgs, ...}: let
-  micToggle = pkgs.runCommandCC "mic-toggle" {} ''
+  micToggle = pkgs.runCommand "mic-toggle" {} ''
+    unset SDKROOT DEVELOPER_DIR
     mkdir -p "$out/bin"
-    clang -o "$out/bin/mic-toggle" ${./mic-toggle.m} \
+    /usr/bin/clang -o "$out/bin/mic-toggle" ${./mic-toggle.m} \
       -framework CoreAudio \
       -framework Foundation \
       -Wall -O2

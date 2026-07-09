@@ -16,6 +16,9 @@
   security.pam.services.sudo_local.touchIdAuth = true;
 
   nixpkgs.config.allowUnfree = true;
+
+  nixpkgs.overlays = [];
+
   programs.zsh.enable = true;
   environment.shells = [pkgs.zsh];
   system.defaults.dock = {
@@ -58,8 +61,7 @@
     TrackpadRightClick = true;
     TrackpadThreeFingerDrag = true;
   };
-  #system.defaults.universalaccess.reduceTransparency = false;
-  nix.enable=false;
+  nix.enable = false;
 
   system.defaults.WindowManager = {
     EnableStandardClickToShowDesktop = false;
@@ -104,6 +106,9 @@
     # bojan-dotfiles cachix
     extra-substituters = https://bojan-dotfiles.cachix.org
     extra-trusted-public-keys = bojan-dotfiles.cachix.org-1:35eXWoN9Ob91Tn6cEhgLJ+6a09KMnZfRzKHbkQrPOX0=
+
+    # Silence "Git tree has uncommitted changes" warning
+    warn-dirty = false
   '';
 
   system.defaults.loginwindow = {

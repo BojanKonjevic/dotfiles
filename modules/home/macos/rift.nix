@@ -9,25 +9,28 @@
   activeBorder = "0xff${lib.removePrefix "#" theme.mauve}";
   inactiveBorder = "0xff${lib.removePrefix "#" theme.surface1}";
 
-  ksd = pkgs.runCommandCC "keystroke-daemon" {} ''
+  ksd = pkgs.runCommand "keystroke-daemon" {} ''
+    unset SDKROOT DEVELOPER_DIR
     mkdir -p "$out/bin"
-    clang -o "$out/bin/ksd" ${./ksd.c} \
+    /usr/bin/clang -o "$out/bin/ksd" ${./ksd.c} \
       -framework CoreFoundation \
       -framework CoreGraphics \
       -Wall -O2
   '';
 
-  blockCmd = pkgs.runCommandCC "block-cmd" {} ''
+  blockCmd = pkgs.runCommand "block-cmd" {} ''
+    unset SDKROOT DEVELOPER_DIR
     mkdir -p "$out/bin"
-    clang -o "$out/bin/block-cmd" ${./block-cmd.c} \
+    /usr/bin/clang -o "$out/bin/block-cmd" ${./block-cmd.c} \
       -framework CoreFoundation \
       -framework CoreGraphics \
       -Wall -O2
   '';
 
-  cursorHide = pkgs.runCommandCC "cursor-hide" {} ''
+  cursorHide = pkgs.runCommand "cursor-hide" {} ''
+    unset SDKROOT DEVELOPER_DIR
     mkdir -p "$out/bin"
-    clang -o "$out/bin/cursor-hide" ${./cursor-hide.m} \
+    /usr/bin/clang -o "$out/bin/cursor-hide" ${./cursor-hide.m} \
       -framework AppKit \
       -framework CoreFoundation \
       -framework CoreGraphics \

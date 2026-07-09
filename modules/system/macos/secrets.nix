@@ -17,6 +17,11 @@
       owner = userConfig.username;
       mode = "0400";
     };
+    github-token = {
+      file = "${self}/secrets/github-token.age";
+      owner = userConfig.username;
+      mode = "0400";
+    };
     tailscale = {
       file = "${self}/secrets/tailscale.age";
       owner = "root";
