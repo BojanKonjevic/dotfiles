@@ -39,6 +39,7 @@
 
   fifoPath = "/tmp/close-window.fifo";
   fifoPathNew = "/tmp/new-window.fifo";
+  fifoPathQuit = "/tmp/quit-app.fifo";
 
   closeWindow = pkgs.writeShellScriptBin "close-window" ''
     echo > "${fifoPath}"
@@ -46,6 +47,10 @@
 
   newWindow = pkgs.writeShellScriptBin "new-window" ''
     echo > "${fifoPathNew}"
+  '';
+
+  quitApp = pkgs.writeShellScriptBin "quit-app" ''
+    echo > "${fifoPathQuit}"
   '';
 
   bringWindow = pkgs.writeShellScriptBin "bring-window" ''
@@ -62,7 +67,7 @@
       -Wall -O2
   '';
 in {
-  home.packages = [closeWindow newWindow bringWindow workspaceIndicator ksd blockCmd cursorHide];
+  home.packages = [closeWindow newWindow quitApp bringWindow workspaceIndicator ksd blockCmd cursorHide];
   xdg.configFile."rift/config.toml".text = ''
     [settings]
     animate = false
@@ -151,6 +156,7 @@ in {
     "modShift + 0" = { exec = ["${bringWindow}/bin/bring-window", "9"] }
 
     "mod + Q" = { exec = ["${closeWindow}/bin/close-window"] }
+    "modShift + Q" = { exec = ["${quitApp}/bin/quit-app"] }
     "mod + V" = "toggle_window_floating"
     "mod + F" = "toggle_fullscreen"
     "mod + Slash" = "toggle_orientation"
@@ -205,6 +211,20 @@ in {
       EnvironmentVariables = {
         XDG_CONFIG_HOME = "${config.xdg.configHome}";
         PATH = "${config.home.profileDirectory}/bin:/run/current-system/sw/bin:${brewPrefix}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+      };
+    };
+  };
+
+  launchd.agents.quit-app = {
+    enable = true;
+    config = {
+      ProgramArguments = ["${ksd}/bin/ksd" "${fifoPathQuit}" "12"];
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/ksd-quit.stdout.log";
+      StandardErrorPath = "/tmp/ksd-quit.stderr.log";
+      EnvironmentVariables = {
+        PATH = "/usr/bin:/bin";
       };
     };
   };
