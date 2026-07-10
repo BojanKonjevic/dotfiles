@@ -1,5 +1,4 @@
 {
-  config,
   pkgs,
   lib,
   ...
@@ -16,7 +15,7 @@
 
   xdg.enable = true;
 
-  home.activation.setDefaultApps = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.setBrowserDefaults = lib.hm.dag.entryAfter ["writeBoundary"] ''
     duti_bin="${pkgs.duti}/bin/duti"
     $duti_bin -s app.zen-browser.zen public.html 2>/dev/null || true
     $duti_bin -s app.zen-browser.zen public.url  2>/dev/null || true
