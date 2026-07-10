@@ -49,14 +49,8 @@
   '';
 
   bringWindow = pkgs.writeShellScriptBin "bring-window" ''
-    ws="$1"
-    ${brewPrefix}/bin/rift-cli execute workspace move-window "$ws"
-    case "$ws" in
-      0) key="1" ;; 1) key="2" ;; 2) key="3" ;; 3) key="4" ;;
-      4) key="5" ;; 5) key="6" ;; 6) key="7" ;; 7) key="8" ;;
-      8) key="9" ;; 9) key="0" ;;
-    esac
-    ${brewPrefix}/bin/cliclick kd:alt kp:"$key" ku:alt
+    ${brewPrefix}/bin/rift-cli execute workspace move-window "$1"
+    ${brewPrefix}/bin/rift-cli execute workspace switch "$1"
   '';
 
   workspaceIndicator = pkgs.runCommand "workspace-indicator" {} ''
