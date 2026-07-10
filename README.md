@@ -86,7 +86,7 @@ Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, ghostty, veskto
 
 **Rift** is the tiling window manager — BSP layout, instant virtual workspaces (10 by default), gesture support, animations. Same keybindings as Hyprland (mod = ⌥, h/j/k/l for focus, Shift to move, numbers for workspaces). **JankyBorders** adds Catppuccin-themed window borders via CGS private APIs (no SIP required, installed from Homebrew, managed as a launchd agent).
 
-**Raycast** replaces the Quickshell panels (launcher, clipboard, system controls) — its config is seeded on first launch via `home.activation`. A native **mic status bar** agent shows mic state via SF Symbols in the menu bar, click to toggle. A **cursor warp agent** warps the cursor to the center of the focused window via event tap and AX observer, mimicking Hyprland's `cursor_warp_to_center`.
+**Raycast** replaces the Quickshell panels (launcher, clipboard, system controls) — its config is seeded on first launch via `home.activation`. A native **mic status bar** agent shows mic state via SF Symbols in the menu bar, click to toggle.
 
 macOS default annoyances removed: Dock permanently hidden (999999s delay), Siri fully disabled, Spotlight icon + keyboard shortcuts killed, Mission Control gestures disabled, desktop icons hidden, Stage Manager and native window tiling off, click-wallpaper-reveal-desktop off, spaces never auto-rearrange. The shelf is empty.
 
@@ -272,7 +272,6 @@ Several background agents need Accessibility permission, and some need additiona
 
 - **Rift** — window management, keyboard event tap (Accessibility)
 - **borders** — observes window events for border updates (Accessibility)
-- **cursor-warp** — event tap + AX observer for cursor warping on focus changes (**Accessibility + Input Monitoring**)
 - **mic-status-bar** — reads mic state from `/tmp/qs-mic-state` (Accessibility)
 - **mic-toggle** — controls input volume via `osascript`, may prompt for **Automation** permission to control System Events
 

@@ -88,6 +88,15 @@
     "com.apple.dock".showAppExposeGestureEnabled = false;
     "com.apple.dock".showLaunchpadGestureEnabled = false;
     "com.apple.dock".showDesktopGestureEnabled = false;
+    # Disable all Hot Corners
+    "com.apple.dock"."wvous-tl-corner" = 0;
+    "com.apple.dock"."wvous-tl-modifier" = 0;
+    "com.apple.dock"."wvous-tr-corner" = 0;
+    "com.apple.dock"."wvous-tr-modifier" = 0;
+    "com.apple.dock"."wvous-bl-corner" = 0;
+    "com.apple.dock"."wvous-bl-modifier" = 0;
+    "com.apple.dock"."wvous-br-corner" = 0;
+    "com.apple.dock"."wvous-br-modifier" = 0;
     # Driver-level trackpad prefs (override the user-level domain on modern macOS)
     "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadThreeFingerHorizSwipeGesture = 0;
     "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadThreeFingerVertSwipeGesture = 0;
