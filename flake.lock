@@ -55,6 +55,22 @@
         "type": "github"
       }
     },
+    "boring-notch-brew": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1782631121,
+        "narHash": "sha256-32ZXrwMQkSAw6siCCr7eamf+P2Opv0mCW/n8ot9TXtc=",
+        "owner": "TheBoredTeam",
+        "repo": "homebrew-boring-notch",
+        "rev": "79fde426c1f48d9464b0c9cba0389df15fba3a88",
+        "type": "github"
+      },
+      "original": {
+        "owner": "TheBoredTeam",
+        "repo": "homebrew-boring-notch",
+        "type": "github"
+      }
+    },
     "brew-src": {
       "flake": false,
       "locked": {
@@ -703,6 +719,7 @@
         "FelixKratz-formulae": "FelixKratz-formulae",
         "acsandmann-tap": "acsandmann-tap",
         "agenix": "agenix",
+        "boring-notch-brew": "boring-notch-brew",
         "catppuccin": "catppuccin",
         "disko": "disko",
         "flake-parts": "flake-parts",

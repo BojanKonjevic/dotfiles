@@ -1,10 +1,14 @@
 {config, ...}: {
+  imports = [
+    ../../../modules/system/macos/boring-notch.nix
+  ];
+
   homebrew = {
-    taps = builtins.attrNames config.nix-homebrew.taps;
     brews = [
       "acsandmann/tap/rift"
       "FelixKratz/formulae/borders"
     ];
+    taps = builtins.attrNames config.nix-homebrew.taps;
     casks = ["ghostty" "raycast"];
   };
 }

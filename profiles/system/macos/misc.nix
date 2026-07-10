@@ -6,8 +6,7 @@
   homebrew.casks = [
     "localsend"
     "qlmarkdown"
-    "quicklook-json"
-    "qlvideo"
+    "quicklook-video"
     "the-unarchiver"
   ];
 }
