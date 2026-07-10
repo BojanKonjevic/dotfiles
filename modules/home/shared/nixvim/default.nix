@@ -87,32 +87,57 @@
     keymaps = [
       {
         mode = "n";
-        key = "<C-h>";
+        key = "<D-h>";
         action = "<C-w><C-h>";
         options.desc = "Move focus left";
       }
       {
         mode = "n";
-        key = "<C-l>";
+        key = "<D-l>";
         action = "<C-w><C-l>";
         options.desc = "Move focus right";
       }
       {
         mode = "n";
-        key = "<C-j>";
+        key = "<D-j>";
         action = "<C-w><C-j>";
         options.desc = "Move focus down";
       }
       {
         mode = "n";
-        key = "<C-k>";
+        key = "<D-k>";
         action = "<C-w><C-k>";
         options.desc = "Move focus up";
       }
 
       {
         mode = "n";
-        key = "<C-s>";
+        key = "<D-S-j>";
+        action = ":m .+1<CR>==";
+        options = {desc = "Move line down";};
+      }
+      {
+        mode = "n";
+        key = "<D-S-k>";
+        action = ":m .-2<CR>==";
+        options = {desc = "Move line up";};
+      }
+      {
+        mode = "v";
+        key = "<D-S-j>";
+        action = ":m '>+1<CR>gv=gv";
+        options = {desc = "Move selection down";};
+      }
+      {
+        mode = "v";
+        key = "<D-S-k>";
+        action = ":m '<-2<CR>gv=gv";
+        options = {desc = "Move selection up";};
+      }
+
+      {
+        mode = "n";
+        key = "<D-s>";
         action = ":w<CR>";
         options = {
           noremap = true;
@@ -121,18 +146,8 @@
       }
       {
         mode = "i";
-        key = "<C-s>";
+        key = "<D-s>";
         action = "<Esc>:w<CR>a";
-        options = {
-          noremap = true;
-          silent = true;
-        };
-      }
-
-      {
-        mode = "n";
-        key = "<C-q>";
-        action = ":qa<CR>";
         options = {
           noremap = true;
           silent = true;
@@ -143,6 +158,12 @@
         mode = "n";
         key = "<Esc>";
         action = "<cmd>nohlsearch<CR>";
+      }
+      {
+        mode = "n";
+        key = "<D-r>";
+        action = "<C-r>";
+        options.desc = "Redo";
       }
     ];
   };

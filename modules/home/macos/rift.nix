@@ -180,6 +180,7 @@ in {
         active_color=${activeBorder}
         inactive_color=${inactiveBorder}
         order=above
+        blacklist="zen"
       )
       borders "''${options[@]}"
     '';

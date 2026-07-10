@@ -74,6 +74,11 @@ in {
 
       confirm-close-surface = false;
 
+      keybind = [
+        "super+shift+j=unbind"
+        "super+ctrl+shift+j=unbind"
+      ];
+
       theme = "catppuccin-mocha";
 
       background-opacity = 0.90;

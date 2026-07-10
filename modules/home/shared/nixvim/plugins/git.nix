@@ -55,7 +55,7 @@
       # Lazygit
       {
         mode = "n";
-        key = "<C-g>";
+        key = "<D-g>";
         action = "<cmd>LazyGit<CR>";
         options.desc = "Toggle Lazygit";
       }
