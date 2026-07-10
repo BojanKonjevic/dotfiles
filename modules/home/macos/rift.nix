@@ -194,13 +194,11 @@ in {
     "mod + V" = "toggle_window_floating"
     "mod + F" = "toggle_fullscreen"
     "mod + Slash" = "toggle_orientation"
-    "mod + Enter" = { exec = ["ghostty"] }
-    "modShift + Enter" = { exec = ["ghostty"] }
     "mod + E" = { exec = ["open", "-n", "/System/Library/CoreServices/Finder.app"] }
     "mod + N" = { exec = ["new-window"] }
     "mod + Space" = { exec = ["open", "-n", "/Applications/Raycast.app"] }
-    "Alt + O" = { exec = ["notes-window"] }
-    "Ctrl + Escape" = { exec = ["cliclick", "c:."] }
+    "mod + O" = { exec = ["notes-window"] }
+    "mod + Escape" = { exec = ["cliclick", "c:."] }
     "mod + Minus" = "resize_window_shrink"
     "mod + Equal" = "resize_window_grow"
   '';
