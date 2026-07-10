@@ -1,5 +1,8 @@
 {...}: {
-  homebrew.brews = ["cliclick"];
+  homebrew.brews = [
+    "cliclick"
+    "rmtrash"
+  ];
   homebrew.casks = [
     "localsend"
     "qlmarkdown"

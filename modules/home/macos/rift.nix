@@ -3,6 +3,7 @@
   lib,
   pkgs,
   theme,
+  userConfig,
   ...
 }: let
   brewPrefix = "/opt/homebrew";
@@ -58,6 +59,38 @@
     ${brewPrefix}/bin/rift-cli execute workspace switch "$1"
   '';
 
+  notesWindow = pkgs.writeShellScriptBin "notes-window" ''
+    open -n -a Ghostty --args \
+      --title="notes-scratch" \
+      --window-save-state=never \
+      -e /bin/zsh -c 'exec nvim "${userConfig.notesFile}"'
+
+    for i in $(seq 1 10); do
+      sleep 0.05
+      /usr/bin/osascript -e '
+        set W to 960
+        set H to 540
+        tell application "Finder"
+          set {0, 0, sW, sH} to bounds of window of desktop
+        end tell
+        set x to (sW - W) / 2
+        set y to (sH - H) / 2.5
+        tell application "System Events"
+          tell process "Ghostty"
+            try
+              set win to first window whose title contains "notes-scratch"
+              set position of win to {x, y}
+              set size of win to {W, H}
+              return true
+            on error
+              return false
+            end try
+          end tell
+        end tell
+      ' 2>/dev/null | grep -q true && break
+    done
+  '';
+
   workspaceIndicator = pkgs.runCommand "workspace-indicator" {} ''
     unset SDKROOT DEVELOPER_DIR
     mkdir -p "$out/bin"
@@ -67,7 +100,7 @@
       -Wall -O2
   '';
 in {
-  home.packages = [closeWindow newWindow quitApp bringWindow workspaceIndicator ksd blockCmd cursorHide];
+  home.packages = [closeWindow newWindow quitApp bringWindow notesWindow workspaceIndicator ksd blockCmd cursorHide];
   xdg.configFile."rift/config.toml".text = ''
     [settings]
     animate = false
@@ -112,6 +145,7 @@ in {
       { title_substring = "Preferences", floating = true },
       { title_substring = "Settings", floating = true },
       { ax_subrole = "AXDialog", floating = true },
+      { app_id = "com.mitchellh.ghostty", title_substring = "notes-scratch", floating = true },
       { app_name = "System Information", manage = false },
       { app_name = "System Settings", manage = false },
       { app_name = "About This Mac", manage = false },
@@ -165,6 +199,7 @@ in {
     "mod + E" = { exec = ["open", "-n", "/System/Library/CoreServices/Finder.app"] }
     "mod + N" = { exec = ["new-window"] }
     "mod + Space" = { exec = ["open", "-n", "/Applications/Raycast.app"] }
+    "Alt + O" = { exec = ["notes-window"] }
     "Ctrl + Escape" = { exec = ["cliclick", "c:."] }
     "mod + Minus" = "resize_window_shrink"
     "mod + Equal" = "resize_window_grow"

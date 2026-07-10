@@ -34,6 +34,7 @@
     FXPreferredViewStyle = "clmv";
     FXEnableExtensionChangeWarning = false;
     QuitMenuItem = true;
+    NewWindowTarget = "Home";
   };
   system.defaults.screencapture = {
     location = userConfig.screenshotsDir;
@@ -97,6 +98,7 @@
     "com.apple.dock"."wvous-bl-modifier" = 0;
     "com.apple.dock"."wvous-br-corner" = 0;
     "com.apple.dock"."wvous-br-modifier" = 0;
+    "com.apple.finder".NewWindowTargetPath = "file://${userConfig.homeDirectory}/";
     # Driver-level trackpad prefs (override the user-level domain on modern macOS)
     "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadThreeFingerHorizSwipeGesture = 0;
     "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadThreeFingerVertSwipeGesture = 0;
