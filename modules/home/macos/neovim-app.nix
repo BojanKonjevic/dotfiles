@@ -83,7 +83,74 @@
             "public.json",
             "public.yaml",
             "public.xml",
-            "net.daringfireball.markdown"
+            "net.daringfireball.markdown",
+            "public.c-source",
+            "public.objective-c-source",
+            "public.c-plus-plus-source",
+            "public.assembly",
+            "public.makefile",
+            "public.ruby-script",
+            "public.python-script",
+            "public.perl-script",
+            "public.javascript"
+          ],
+          "CFBundleTypeExtensions": [
+            "c",
+            "m",
+            "mm",
+            "h",
+            "nix",
+            "lock",
+            "rs",
+            "go",
+            "rb",
+            "py",
+            "js",
+            "ts",
+            "jsx",
+            "tsx",
+            "toml",
+            "plist",
+            "proto",
+            "css",
+            "scss",
+            "less",
+
+            "svelte",
+            "vue",
+            "tex",
+            "lua",
+            "zig",
+            "kt",
+            "kts",
+            "swift",
+            "scala",
+            "clj",
+            "cljs",
+            "cljc",
+            "edn",
+            "el",
+            "ex",
+
+            "erl",
+            "hs",
+            "ml",
+            "mli",
+            "php",
+            "pl",
+            "r",
+            "sql",
+            "cfg",
+            "conf",
+            "ini",
+            "env",
+            "gitignore",
+            "gitattributes",
+            "editorconfig",
+            "sh",
+            "bash",
+            "zsh",
+            "fish"
           ]
         }
         ]' "$out/Contents/Info.plist"
@@ -125,5 +192,55 @@ in {
     $duti_bin -s nvim public.yaml 2>/dev/null || true
     $duti_bin -s nvim public.xml 2>/dev/null || true
     $duti_bin -s nvim net.daringfireball.markdown 2>/dev/null || true
+    $duti_bin -s nvim .c all 2>/dev/null || true
+    $duti_bin -s nvim .m all 2>/dev/null || true
+    $duti_bin -s nvim .mm all 2>/dev/null || true
+    $duti_bin -s nvim .h all 2>/dev/null || true
+    $duti_bin -s nvim .nix all 2>/dev/null || true
+    $duti_bin -s nvim .lock all 2>/dev/null || true
+    $duti_bin -s nvim .rs all 2>/dev/null || true
+    $duti_bin -s nvim .go all 2>/dev/null || true
+    $duti_bin -s nvim .rb all 2>/dev/null || true
+    $duti_bin -s nvim .py all 2>/dev/null || true
+    $duti_bin -s nvim .js all 2>/dev/null || true
+    $duti_bin -s nvim .ts all 2>/dev/null || true
+    $duti_bin -s nvim .jsx all 2>/dev/null || true
+    $duti_bin -s nvim .tsx all 2>/dev/null || true
+    $duti_bin -s nvim .toml all 2>/dev/null || true
+    $duti_bin -s nvim .plist all 2>/dev/null || true
+    $duti_bin -s nvim .proto all 2>/dev/null || true
+    $duti_bin -s nvim .css all 2>/dev/null || true
+    $duti_bin -s nvim .scss all 2>/dev/null || true
+    $duti_bin -s nvim .less all 2>/dev/null || true
+    $duti_bin -s nvim .svelte all 2>/dev/null || true
+    $duti_bin -s nvim .vue all 2>/dev/null || true
+    $duti_bin -s nvim .tex all 2>/dev/null || true
+    $duti_bin -s nvim .lua all 2>/dev/null || true
+    $duti_bin -s nvim .zig all 2>/dev/null || true
+    $duti_bin -s nvim .kt all 2>/dev/null || true
+    $duti_bin -s nvim .kts all 2>/dev/null || true
+    $duti_bin -s nvim .swift all 2>/dev/null || true
+    $duti_bin -s nvim .scala all 2>/dev/null || true
+    $duti_bin -s nvim .clj all 2>/dev/null || true
+    $duti_bin -s nvim .cljs all 2>/dev/null || true
+    $duti_bin -s nvim .cljc all 2>/dev/null || true
+    $duti_bin -s nvim .edn all 2>/dev/null || true
+    $duti_bin -s nvim .el all 2>/dev/null || true
+    $duti_bin -s nvim .ex all 2>/dev/null || true
+    $duti_bin -s nvim .erl all 2>/dev/null || true
+    $duti_bin -s nvim .hs all 2>/dev/null || true
+    $duti_bin -s nvim .ml all 2>/dev/null || true
+    $duti_bin -s nvim .mli all 2>/dev/null || true
+    $duti_bin -s nvim .php all 2>/dev/null || true
+    $duti_bin -s nvim .pl all 2>/dev/null || true
+    $duti_bin -s nvim .r all 2>/dev/null || true
+    $duti_bin -s nvim .sql all 2>/dev/null || true
+    $duti_bin -s nvim .cfg all 2>/dev/null || true
+    $duti_bin -s nvim .conf all 2>/dev/null || true
+    $duti_bin -s nvim .ini all 2>/dev/null || true
+    $duti_bin -s nvim .env all 2>/dev/null || true
+    $duti_bin -s nvim .gitignore all 2>/dev/null || true
+    $duti_bin -s nvim .gitattributes all 2>/dev/null || true
+    $duti_bin -s nvim .editorconfig all 2>/dev/null || true
   '';
 }
