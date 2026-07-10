@@ -47,8 +47,13 @@
   newWindow = pkgs.writeShellScriptBin "new-window" ''
     echo > "${fifoPathNew}"
   '';
+
+  bringWindow = pkgs.writeShellScriptBin "bring-window" ''
+    ${brewPrefix}/bin/rift-cli execute workspace move-window "$1"
+    ${brewPrefix}/bin/rift-cli execute workspace switch "$1"
+  '';
 in {
-  home.packages = [closeWindow newWindow ksd blockCmd cursorHide];
+  home.packages = [closeWindow newWindow bringWindow ksd blockCmd cursorHide];
   xdg.configFile."rift/config.toml".text = ''
     [settings]
     animate = false
@@ -129,16 +134,16 @@ in {
     "mod + 9" = { switch_to_workspace = 8 }
     "mod + 0" = { switch_to_workspace = 9 }
 
-    "modShift + 1" = { move_window_to_workspace = 0 }
-    "modShift + 2" = { move_window_to_workspace = 1 }
-    "modShift + 3" = { move_window_to_workspace = 2 }
-    "modShift + 4" = { move_window_to_workspace = 3 }
-    "modShift + 5" = { move_window_to_workspace = 4 }
-    "modShift + 6" = { move_window_to_workspace = 5 }
-    "modShift + 7" = { move_window_to_workspace = 6 }
-    "modShift + 8" = { move_window_to_workspace = 7 }
-    "modShift + 9" = { move_window_to_workspace = 8 }
-    "modShift + 0" = { move_window_to_workspace = 9 }
+    "modShift + 1" = { exec = ["${bringWindow}/bin/bring-window", "0"] }
+    "modShift + 2" = { exec = ["${bringWindow}/bin/bring-window", "1"] }
+    "modShift + 3" = { exec = ["${bringWindow}/bin/bring-window", "2"] }
+    "modShift + 4" = { exec = ["${bringWindow}/bin/bring-window", "3"] }
+    "modShift + 5" = { exec = ["${bringWindow}/bin/bring-window", "4"] }
+    "modShift + 6" = { exec = ["${bringWindow}/bin/bring-window", "5"] }
+    "modShift + 7" = { exec = ["${bringWindow}/bin/bring-window", "6"] }
+    "modShift + 8" = { exec = ["${bringWindow}/bin/bring-window", "7"] }
+    "modShift + 9" = { exec = ["${bringWindow}/bin/bring-window", "8"] }
+    "modShift + 0" = { exec = ["${bringWindow}/bin/bring-window", "9"] }
 
     "mod + Q" = { exec = ["${closeWindow}/bin/close-window"] }
     "mod + V" = "toggle_window_floating"
