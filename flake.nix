@@ -9,12 +9,10 @@
       url = "github:nix-community/lanzaboote";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # mac-app-util disabled: sbcl build failure (system-cl-interpol SBCL readtable bug)
-    # Re-enable when https://github.com/hraban/mac-app-util/issues/42 is resolved
-    # mac-app-util = {
-    #   url = "github:hraban/mac-app-util";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -37,6 +35,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    FelixKratz-formulae = {
+      url = "github:FelixKratz/homebrew-formulae";
+      flake = false;
+    };
+    acsandmann-tap = {
+      url = "github:acsandmann/homebrew-tap";
+      flake = false;
+    };
     nix-search-tv = {
       url = "github:3timeslazy/nix-search-tv";
       inputs.nixpkgs.follows = "nixpkgs";
