@@ -49,11 +49,26 @@
   '';
 
   bringWindow = pkgs.writeShellScriptBin "bring-window" ''
-    ${brewPrefix}/bin/rift-cli execute workspace move-window "$1"
-    ${brewPrefix}/bin/rift-cli execute workspace switch "$1"
+    ws="$1"
+    ${brewPrefix}/bin/rift-cli execute workspace move-window "$ws"
+    case "$ws" in
+      0) key="1" ;; 1) key="2" ;; 2) key="3" ;; 3) key="4" ;;
+      4) key="5" ;; 5) key="6" ;; 6) key="7" ;; 7) key="8" ;;
+      8) key="9" ;; 9) key="0" ;;
+    esac
+    ${brewPrefix}/bin/cliclick kd:alt kp:"$key" ku:alt
+  '';
+
+  workspaceIndicator = pkgs.runCommand "workspace-indicator" {} ''
+    unset SDKROOT DEVELOPER_DIR
+    mkdir -p "$out/bin"
+    /usr/bin/clang -o "$out/bin/rift-ws-indicator" ${./rift-ws-indicator.m} \
+      -framework AppKit \
+      -fobjc-arc \
+      -Wall -O2
   '';
 in {
-  home.packages = [closeWindow newWindow bringWindow ksd blockCmd cursorHide];
+  home.packages = [closeWindow newWindow bringWindow workspaceIndicator ksd blockCmd cursorHide];
   xdg.configFile."rift/config.toml".text = ''
     [settings]
     animate = false
@@ -69,11 +84,7 @@ in {
     ]
 
     [settings.ui.menu_bar]
-    enabled = true
-    show_empty = false
-    mode = "all"
-    display_style = "label"
-    active_label = "index"
+    enabled = false
 
     [settings.gestures]
     enabled = false
@@ -256,6 +267,20 @@ in {
       StandardErrorPath = "/tmp/cursor-hide.stderr.log";
       EnvironmentVariables = {
         PATH = "/usr/bin:/bin";
+      };
+    };
+  };
+
+  launchd.agents.workspace-indicator = {
+    enable = true;
+    config = {
+      ProgramArguments = ["${workspaceIndicator}/bin/rift-ws-indicator"];
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/tmp/ws-indicator.stdout.log";
+      StandardErrorPath = "/tmp/ws-indicator.stderr.log";
+      EnvironmentVariables = {
+        PATH = "${brewPrefix}/bin:/usr/bin:/bin";
       };
     };
   };
