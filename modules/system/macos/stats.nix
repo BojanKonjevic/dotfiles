@@ -70,8 +70,6 @@ in {
 
   system.activationScripts.postActivation.text = lib.mkAfter ''
     echo "Applying Stats settings..." >&2
-    sudo -u "${userConfig.username}" defaults import "${bundleId}" "${settingsPlist}"
-    sudo -u "${userConfig.username}" killall cfprefsd >/dev/null 2>&1 || true
-    sudo -u "${userConfig.username}" killall Stats >/dev/null 2>&1 || true
+    sudo -u "${userConfig.username}" /usr/bin/defaults import "${bundleId}" "${settingsPlist}"
   '';
 }

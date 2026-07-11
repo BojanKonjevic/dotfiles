@@ -125,8 +125,8 @@ in {
 
   system.activationScripts.postActivation.text = lib.mkAfter ''
     echo "Applying Boring Notch settings..." >&2
-    sudo -u "${userConfig.username}" defaults import "${bundleId}" "${settingsPlist}"
-    sudo -u "${userConfig.username}" killall cfprefsd >/dev/null 2>&1 || true
-    sudo -u "${userConfig.username}" killall boringNotch >/dev/null 2>&1 || true
+    sudo -u "${userConfig.username}" /usr/bin/defaults import "${bundleId}" "${settingsPlist}"
+    sudo -u "${userConfig.username}" /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
+    sudo -u "${userConfig.username}" /usr/bin/killall boringNotch >/dev/null 2>&1 || true
   '';
 }
