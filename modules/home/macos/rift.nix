@@ -220,7 +220,7 @@ in {
     "mod + Slash" = "toggle_orientation"
     "mod + E" = { exec = ["open", "-n", "/System/Library/CoreServices/Finder.app"] }
     "mod + N" = { exec = ["new-window"] }
-    "mod + Space" = { exec = ["open", "-n", "/Applications/Raycast.app"] }
+    "mod + Space" = { exec = ["open", "-a", "/Applications/Raycast.app"] }
     "mod + O" = { exec = ["notes-window"] }
     "mod + Escape" = { exec = ["cliclick", "c:."] }
     "mod + Minus" = "resize_window_shrink"
