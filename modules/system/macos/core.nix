@@ -1,6 +1,7 @@
 {
   pkgs,
   userConfig,
+  lib,
   ...
 }: {
   system.primaryUser = userConfig.username;
@@ -71,7 +72,7 @@
     trackpad = {
       Clicking = true;
       TrackpadRightClick = true;
-      TrackpadThreeFingerDrag = true;
+      TrackpadThreeFingerDrag = false;
       TrackpadThreeFingerTapGesture = 0;
     };
 
@@ -142,6 +143,21 @@
   # Exclude /nix from indexing — saves from searching through the massive nix store
   system.activationScripts.excludeNixFromSpotlight.text = ''
     touch /nix/.metadata_never_index 2>/dev/null || true
+  '';
+
+  # Centralized preferences-daemon reload, run after all app modules'
+  # postActivation blocks, as a fallback for anything that doesn't manage
+  # its own reload (e.g. Raycast, which writes prefs but is never
+  # killed/relaunched — it just needs cfprefsd refreshed eventually).
+  #
+  # Apps that relaunch a fresh process in the same activation pass (Boring
+  # Notch, Stats, LinearMouse, MiddleClick) do their OWN local
+  # `killall cfprefsd` + app kill before their `open -a` step — otherwise
+  # the freshly-launched process reads stale cached prefs, since this
+  # centralized kill runs last (lib.mkOrder 2000).
+  system.activationScripts.postActivation.text = lib.mkOrder 2000 ''
+    echo "Reloading preferences daemon..." >&2
+    sudo -u "${userConfig.username}" /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
   '';
 
   # Cachix substituter — nix.enable = false (Determinate Nix manages nix daemon),

@@ -1,10 +1,11 @@
 {
-  inputs,
   userConfig,
   pkgs,
   lib,
   ...
-}: let
+}
+: let
+  reloadAppPrefs = import ./reload-app-prefs.nix {inherit userConfig;};
   bundleId = "com.lujjjh.LinearMouse";
 
   settingsJson = pkgs.writeText "linearmouse.json" ''
@@ -69,28 +70,60 @@
       ]
     }
   '';
+
+  settingsPlist = pkgs.writeText "linearmouse-prefs.plist" ''
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>autoSwitchToActiveDevice</key>
+      <false/>
+      <key>menuBarVisibilityMode</key>
+      <string>&quot;never&quot;</string>
+      <key>selectedDevice</key>
+      <string>{"category":"mouse"}</string>
+      <key>showInDock</key>
+      <false/>
+      <key>showInMenuBar</key>
+      <false/>
+      <key>SUEnableAutomaticChecks</key>
+      <false/>
+    </dict>
+    </plist>
+  '';
+
+  middleClickBundleId = "art.ginzburg.MiddleClick";
+
+  middleClickPlist = pkgs.writeText "middleclick-prefs.plist" ''
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>NSStatusItem VisibleCC Item-0</key>
+      <false/>
+    </dict>
+    </plist>
+  '';
 in {
   homebrew.casks = ["linearmouse" "middleclick"];
 
   system.activationScripts.postActivation.text = lib.mkAfter ''
-    echo "Applying LinearMouse settings..." >&2
-
     CONFIG_DIR="${userConfig.homeDirectory}/.config/linearmouse"
     mkdir -p "$CONFIG_DIR"
-    cp "${settingsJson}" "$CONFIG_DIR/linearmouse.json"
-    chown "${userConfig.username}" "$CONFIG_DIR/linearmouse.json"
+    if ! /usr/bin/cmp -s "${settingsJson}" "$CONFIG_DIR/linearmouse.json" 2>/dev/null; then
+      cp "${settingsJson}" "$CONFIG_DIR/linearmouse.json"
+      chown "${userConfig.username}" "$CONFIG_DIR/linearmouse.json"
+    fi
 
-    sudo -u "${userConfig.username}" /usr/bin/defaults write "${bundleId}" autoSwitchToActiveDevice -bool false
-    sudo -u "${userConfig.username}" /usr/bin/defaults write "${bundleId}" menuBarVisibilityMode -string '"never"'
-    sudo -u "${userConfig.username}" /usr/bin/defaults write "${bundleId}" selectedDevice -string '{"category":"mouse"}'
-    sudo -u "${userConfig.username}" /usr/bin/defaults write "${bundleId}" showInDock -bool false
-    sudo -u "${userConfig.username}" /usr/bin/defaults write "${bundleId}" showInMenuBar -bool false
-    sudo -u "${userConfig.username}" /usr/bin/defaults write "${bundleId}" SUEnableAutomaticChecks -bool false
-    sudo -u "${userConfig.username}" /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
+    ${reloadAppPrefs {
+      inherit bundleId settingsPlist;
+      appName = "LinearMouse";
+    }}
 
-    echo "Applying MiddleClick settings..." >&2
-    sudo -u "${userConfig.username}" /usr/bin/defaults write art.ginzburg.MiddleClick "NSStatusItem VisibleCC Item-0" -bool false
-    sudo -u "${userConfig.username}" /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
-    sudo -u "${userConfig.username}" /usr/bin/killall MiddleClick >/dev/null 2>&1 || true
+    ${reloadAppPrefs {
+      bundleId = middleClickBundleId;
+      settingsPlist = middleClickPlist;
+      appName = "MiddleClick";
+    }}
   '';
 }

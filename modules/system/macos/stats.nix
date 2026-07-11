@@ -5,6 +5,7 @@
   lib,
   ...
 }: let
+  reloadAppPrefs = import ./reload-app-prefs.nix {inherit userConfig;};
   bundleId = "eu.exelban.Stats";
 
   settingsPlist = pkgs.writeText "stats-settings.plist" ''
@@ -67,9 +68,10 @@
   '';
 in {
   homebrew.casks = ["stats"];
-
-  system.activationScripts.postActivation.text = lib.mkAfter ''
-    echo "Applying Stats settings..." >&2
-    sudo -u "${userConfig.username}" /usr/bin/defaults import "${bundleId}" "${settingsPlist}"
-  '';
+  system.activationScripts.postActivation.text = lib.mkAfter (
+    reloadAppPrefs {
+      inherit bundleId settingsPlist;
+      appName = "Stats";
+    }
+  );
 }

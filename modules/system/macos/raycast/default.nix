@@ -51,13 +51,11 @@ in {
     disableSpotlightHotkey = ''
       target="$HOME/Library/Preferences/com.apple.symbolichotkeys.plist"
       /usr/libexec/PlistBuddy -c "Merge ${spotlightPlist}" "$target" 2>/dev/null || true
-      /usr/bin/killall cfprefsd 2>/dev/null || true
     '';
 
     raycastPrefs = ''
       target="$HOME/Library/Preferences/com.raycast.macos.plist"
       /usr/bin/defaults import com.raycast.macos "${raycastPrefsPlist}"
-      /usr/bin/killall cfprefsd 2>/dev/null || true
     '';
   };
 }
