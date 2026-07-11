@@ -23,10 +23,12 @@ in {
     specialArgs = {inherit inputs userConfig self;};
     modules =
       [
+        inputs.mac-app-util.darwinModules.default
         inputs.home-manager.darwinModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
+          home-manager.sharedModules = [inputs.mac-app-util.homeManagerModules.default];
           home-manager.extraSpecialArgs = {inherit inputs userConfig;};
           home-manager.users.${userConfig.username} = {
             inputs,

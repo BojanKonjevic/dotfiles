@@ -279,6 +279,7 @@ in {
       ProgramArguments = ["${ksd}/bin/ksd" "${fifoPathQuit}" "12"];
       KeepAlive = true;
       RunAtLoad = true;
+      ThrottleInterval = 10;
       StandardOutPath = "/tmp/ksd-quit.stdout.log";
       StandardErrorPath = "/tmp/ksd-quit.stderr.log";
       EnvironmentVariables = {
@@ -293,6 +294,7 @@ in {
       ProgramArguments = ["${ksd}/bin/ksd" "${fifoPath}" "13"];
       KeepAlive = true;
       RunAtLoad = true;
+      ThrottleInterval = 10;
       StandardOutPath = "/tmp/ksd-close.stdout.log";
       StandardErrorPath = "/tmp/ksd-close.stderr.log";
       EnvironmentVariables = {
@@ -307,6 +309,7 @@ in {
       ProgramArguments = ["${ksd}/bin/ksd" "${fifoPathNew}" "45"];
       KeepAlive = true;
       RunAtLoad = true;
+      ThrottleInterval = 10;
       StandardOutPath = "/tmp/ksd-new.stdout.log";
       StandardErrorPath = "/tmp/ksd-new.stderr.log";
       EnvironmentVariables = {
@@ -335,6 +338,7 @@ in {
       ProgramArguments = ["${cursorHide}/bin/cursor-hide"];
       KeepAlive = true;
       RunAtLoad = true;
+      ThrottleInterval = 10;
       StandardOutPath = "/tmp/cursor-hide.stdout.log";
       StandardErrorPath = "/tmp/cursor-hide.stderr.log";
       EnvironmentVariables = {
@@ -349,6 +353,7 @@ in {
       ProgramArguments = ["${workspaceIndicator}/Applications/RiftWSIndicator.app/Contents/MacOS/RiftWSIndicator"];
       KeepAlive = true;
       RunAtLoad = true;
+      ThrottleInterval = 10;
       StandardOutPath = "/tmp/ws-indicator.stdout.log";
       StandardErrorPath = "/tmp/ws-indicator.stderr.log";
       EnvironmentVariables = {
