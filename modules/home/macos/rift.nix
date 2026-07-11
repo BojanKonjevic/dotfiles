@@ -219,9 +219,9 @@ in {
     "mod + F" = "toggle_fullscreen"
     "mod + Slash" = "toggle_orientation"
     "mod + E" = { exec = ["open", "-n", "/System/Library/CoreServices/Finder.app"] }
-    "mod + N" = { exec = ["new-window"] }
+    "mod + N" = { exec = ["${newWindow}/bin/new-window"] }
     "mod + Space" = { exec = ["open", "-a", "/Applications/Raycast.app"] }
-    "mod + O" = { exec = ["notes-window"] }
+    "mod + O" = { exec = ["${notesWindow}/bin/notes-window"] }
     "mod + Escape" = { exec = ["cliclick", "c:."] }
     "mod + Minus" = "resize_window_shrink"
     "mod + Equal" = "resize_window_grow"
