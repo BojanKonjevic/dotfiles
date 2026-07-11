@@ -4,8 +4,6 @@
   lib,
   ...
 }: let
-  raycastConfigPath = "Library/Application Support/com.raycast.macOS/config.json";
-
   spotlightPlist = pkgs.writeText "spotlight-plist" ''
     <?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -33,20 +31,32 @@
     </dict>
     </plist>
   '';
+
+  raycastPrefsPlist = pkgs.writeText "raycast-prefs.plist" ''
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>raycastGlobalHotkey</key>
+      <string>Command-49</string>
+      <key>raycastPreferredWindowMode</key>
+      <string>compact</string>
+    </dict>
+    </plist>
+  '';
 in {
   homebrew.casks = ["raycast"];
 
   home-manager.users.${userConfig.username}.home.activation = {
-    raycastSeed = lib.mkAfter ''
-      if [ ! -f "$HOME/${raycastConfigPath}" ]; then
-        mkdir -p "$HOME/Library/Application Support/com.raycast.macOS"
-        cp ${./config.json} "$HOME/${raycastConfigPath}"
-      fi
-    '';
-
     disableSpotlightHotkey = ''
       target="$HOME/Library/Preferences/com.apple.symbolichotkeys.plist"
       /usr/libexec/PlistBuddy -c "Merge ${spotlightPlist}" "$target" 2>/dev/null || true
+      /usr/bin/killall cfprefsd 2>/dev/null || true
+    '';
+
+    raycastPrefs = ''
+      target="$HOME/Library/Preferences/com.raycast.macos.plist"
+      /usr/bin/defaults import com.raycast.macos "${raycastPrefsPlist}"
       /usr/bin/killall cfprefsd 2>/dev/null || true
     '';
   };
