@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  userConfig,
   ...
 }: let
   bundleId = "cc.ffitch.shottr";
@@ -52,7 +53,7 @@
       <key>defaultColor</key>
       <string>#FF0C01</string>
       <key>defaultFolder</key>
-      <string>/Users/bojan/Pictures/Screenshots</string>
+      <string>${userConfig.screenshotsDir}</string>
       <key>downscaleOnSave</key>
       <false/>
       <key>enableMagicMouseZoom</key>
