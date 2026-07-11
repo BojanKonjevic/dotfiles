@@ -78,7 +78,7 @@
     "com.apple.assistant.support"."Assistant Enabled" = false;
     "com.apple.Siri".VoiceTriggerUserEnabled = false;
     "NSGlobalDomain".AppleLocale = userConfig.locale;
-    "NSGlobalDomain".AppleEnableSwipeNavigateWithScrolls = false;
+    "NSGlobalDomain".AppleEnableSwipeNavigateWithScrolls = true;
     "com.apple.AppleMultitouchTrackpad".TrackpadThreeFingerHorizSwipeGesture = 0;
     "com.apple.AppleMultitouchTrackpad".TrackpadThreeFingerVertSwipeGesture = 0;
     "com.apple.AppleMultitouchTrackpad".TrackpadPinchGesture = 0;
