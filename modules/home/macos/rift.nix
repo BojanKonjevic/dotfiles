@@ -93,11 +93,35 @@
 
   workspaceIndicator = pkgs.runCommand "workspace-indicator" {} ''
     unset SDKROOT DEVELOPER_DIR
-    mkdir -p "$out/bin"
-    /usr/bin/clang -o "$out/bin/rift-ws-indicator" ${./rift-ws-indicator.m} \
+    mkdir -p "$out/Applications/RiftWSIndicator.app/Contents/MacOS"
+    /usr/bin/clang -o "$out/Applications/RiftWSIndicator.app/Contents/MacOS/RiftWSIndicator" ${./rift-ws-indicator.m} \
       -framework AppKit \
       -fobjc-arc \
       -Wall -O2
+
+    mkdir -p "$out/Applications/RiftWSIndicator.app/Contents/Resources"
+    cat > "$out/Applications/RiftWSIndicator.app/Contents/Info.plist" <<EOF
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>CFBundleExecutable</key>
+      <string>RiftWSIndicator</string>
+      <key>CFBundleIdentifier</key>
+      <string>org.nix-community.RiftWSIndicator</string>
+      <key>CFBundleName</key>
+      <string>Rift Workspace Indicator</string>
+      <key>CFBundlePackageType</key>
+      <string>APPL</string>
+      <key>LSUIElement</key>
+      <true/>
+    </dict>
+    </plist>
+    EOF
+    /usr/bin/plutil -convert binary1 "$out/Applications/RiftWSIndicator.app/Contents/Info.plist"
+
+    mkdir -p "$out/bin"
+    ln -s "$out/Applications/RiftWSIndicator.app/Contents/MacOS/RiftWSIndicator" "$out/bin/rift-ws-indicator"
   '';
 in {
   home.packages = [closeWindow newWindow quitApp bringWindow notesWindow workspaceIndicator ksd blockCmd cursorHide];
@@ -322,7 +346,7 @@ in {
   launchd.agents.workspace-indicator = {
     enable = true;
     config = {
-      ProgramArguments = ["${workspaceIndicator}/bin/rift-ws-indicator"];
+      ProgramArguments = ["${workspaceIndicator}/Applications/RiftWSIndicator.app/Contents/MacOS/RiftWSIndicator"];
       KeepAlive = true;
       RunAtLoad = true;
       StandardOutPath = "/tmp/ws-indicator.stdout.log";

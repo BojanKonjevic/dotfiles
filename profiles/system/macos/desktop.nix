@@ -1,6 +1,7 @@
 {config, ...}: {
   imports = [
     ../../../modules/system/macos/boring-notch.nix
+    ../../../modules/system/macos/ice.nix
   ];
 
   homebrew = {
