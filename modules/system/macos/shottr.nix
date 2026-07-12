@@ -1,9 +1,11 @@
 {
+  inputs,
+  userConfig,
   pkgs,
   lib,
-  userConfig,
   ...
 }: let
+  reloadAppPrefs = import ./reload-app-prefs.nix {inherit userConfig;};
   bundleId = "cc.ffitch.shottr";
 
   settingsPlist = pkgs.writeText "shottr-settings.plist" ''
@@ -96,10 +98,11 @@
     </plist>
   '';
 in {
-  home.packages = [pkgs.shottr];
-
-  home.activation.shottrSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    echo "Applying Shottr settings..." >&2
-    /usr/bin/defaults import "${bundleId}" "${settingsPlist}"
-  '';
+  homebrew.casks = ["shottr"];
+  system.activationScripts.postActivation.text = lib.mkAfter (
+    reloadAppPrefs {
+      inherit bundleId settingsPlist;
+      appName = "Shottr";
+    }
+  );
 }

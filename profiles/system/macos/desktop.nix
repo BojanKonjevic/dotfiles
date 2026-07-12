@@ -3,6 +3,7 @@
     ../../../modules/system/macos/boring-notch.nix
     ../../../modules/system/macos/mouse.nix
     ../../../modules/system/macos/raycast
+    ../../../modules/system/macos/shottr.nix
     ../../../modules/system/macos/stats.nix
   ];
 
