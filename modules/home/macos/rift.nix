@@ -19,15 +19,6 @@
       -Wall -O2
   '';
 
-  blockCmd = pkgs.runCommand "block-cmd" {} ''
-    unset SDKROOT DEVELOPER_DIR
-    mkdir -p "$out/bin"
-    /usr/bin/clang -o "$out/bin/block-cmd" ${./block-cmd.c} \
-      -framework CoreFoundation \
-      -framework CoreGraphics \
-      -Wall -O2
-  '';
-
   cursorHide = pkgs.runCommand "cursor-hide" {} ''
     unset SDKROOT DEVELOPER_DIR
     mkdir -p "$out/bin"
@@ -124,7 +115,7 @@
     ln -s "$out/Applications/RiftWSIndicator.app/Contents/MacOS/RiftWSIndicator" "$out/bin/rift-ws-indicator"
   '';
 in {
-  home.packages = [closeWindow newWindow quitApp bringWindow notesWindow workspaceIndicator ksd blockCmd cursorHide];
+  home.packages = [closeWindow newWindow quitApp bringWindow notesWindow workspaceIndicator ksd cursorHide];
   xdg.configFile."rift/config.toml".text = ''
     [settings]
     animate = false
@@ -312,20 +303,6 @@ in {
       ThrottleInterval = 10;
       StandardOutPath = "/tmp/ksd-new.stdout.log";
       StandardErrorPath = "/tmp/ksd-new.stderr.log";
-      EnvironmentVariables = {
-        PATH = "/usr/bin:/bin";
-      };
-    };
-  };
-
-  launchd.agents.block-cmd = {
-    enable = true;
-    config = {
-      ProgramArguments = ["${blockCmd}/bin/block-cmd"];
-      KeepAlive = true;
-      RunAtLoad = true;
-      StandardOutPath = "/tmp/block-cmd.stdout.log";
-      StandardErrorPath = "/tmp/block-cmd.stderr.log";
       EnvironmentVariables = {
         PATH = "/usr/bin:/bin";
       };

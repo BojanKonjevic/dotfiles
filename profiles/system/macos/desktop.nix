@@ -16,6 +16,6 @@
     # dependent, so boring-notch.nix adding a third tap after this line works
     # correctly without reordering.
     taps = builtins.attrNames config.nix-homebrew.taps;
-    casks = ["ghostty"];
+    casks = ["ghostty" "karabiner-elements"];
   };
 }
