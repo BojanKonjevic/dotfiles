@@ -36,16 +36,6 @@
             ''
           );
         };
-        post-install = {
-          meta.description = "Post-install setup for a freshly bootstrapped system";
-          type = "app";
-          program = toString (
-            pkgs.writeShellScript "post-install" ''
-              export PATH="${pkgs.git}/bin:${agenix}/bin:${pkgs.neovim}/bin:${pkgs.nh}/bin:${pkgs.sbctl}/bin:$PATH"
-              exec ${pkgs.bash}/bin/bash ${./scripts/post-install.sh} "$@"
-            ''
-          );
-        };
       }
     );
   };

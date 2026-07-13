@@ -2,7 +2,7 @@
   description = "NixOS + nix-darwin + Home Manager configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-nvidia.url = "github:NixOS/nixpkgs/46db2e09e1d3f113a13c0d7b81e2f221c63b8ce9"; # pinned for pascal
     flake-parts.url = "github:hercules-ci/flake-parts";
     lanzaboote = {

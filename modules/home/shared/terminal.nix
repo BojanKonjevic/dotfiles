@@ -132,9 +132,15 @@ in {
       export HOMEBREW_NO_ENV_HINTS=1
       export HOMEBREW_NO_VERIFY_ATTESTATIONS=1
       export PATH="${userConfig.homeDirectory}/.local/bin:$PATH"
-      export CACHIX_AUTH_TOKEN="$(cat /run/agenix/cachix-token 2>/dev/null)"
-      export UV_PUBLISH_TOKEN="$(cat /run/agenix/pypi-key 2>/dev/null)"
-      export GITHUB_TOKEN="$(cat /run/agenix/github-token 2>/dev/null)"
+      # Lazy-loaded on first prompt so child processes of non-interactive shells
+      # don't inherit tokens they never use.
+      __lazy_agenix() {
+        [[ -n "''${GITHUB_TOKEN-}" ]] || export GITHUB_TOKEN="$(</run/agenix/github-token 2>/dev/null || true)"
+        [[ -n "''${CACHIX_AUTH_TOKEN-}" ]] || export CACHIX_AUTH_TOKEN="$(</run/agenix/cachix-token 2>/dev/null || true)"
+        [[ -n "''${UV_PUBLISH_TOKEN-}" ]] || export UV_PUBLISH_TOKEN="$(</run/agenix/pypi-key 2>/dev/null || true)"
+        precmd_functions=(''${precmd_functions:#__lazy_agenix})
+      }
+      precmd_functions+=(__lazy_agenix)
 
       nu() {
         ${

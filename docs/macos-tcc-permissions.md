@@ -21,9 +21,8 @@ Still manual (you click through each prompt), just collapses the ad-hoc
 - Grouped by TCC service, so you're not context-switching mid-service.
 - Each entry should actually exercise the codepath that triggers the
   prompt — some apps only ask on first real use of the API, not on launch.
-- Gate it behind a manual command (e.g. `just tcc-warmup`), not
-  `system.activationScripts` — it's interactive, so it shouldn't fire
-  during an unattended `darwin-rebuild switch`.
+- Gate it behind a manual command, not `system.activationScripts` — it's
+  interactive, so it shouldn't fire during an unattended `darwin-rebuild switch`.
 - Worth adding an idempotency check later (skip apps already granted) if
   re-runs become annoying — TCC.db can be read (not written) with
   `sqlite3` for many services if you have Full Disk Access yourself.

@@ -376,6 +376,7 @@ else
   ok "Host key already exists, reusing."
 fi
 NEW_HOST_PUBKEY="$(cat /mnt/persist/etc/ssh/ssh_host_ed25519_key.pub)"
+info "Host pubkey: $NEW_HOST_PUBKEY"
 
 # ── Hardware config ────────────────────────────────────────────────
 header "Generating hardware configuration…"

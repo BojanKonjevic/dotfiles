@@ -1,7 +1,7 @@
-{
+{userConfig, ...}: {
   disko.devices.disk = {
     main = {
-      device = "/dev/sdb";
+      device = userConfig.mainDisk;
       type = "disk";
       content = {
         type = "gpt";
@@ -55,7 +55,7 @@
       };
     };
     home = {
-      device = "/dev/sda";
+      device = userConfig.homeDisk;
       type = "disk";
       content = {
         type = "gpt";

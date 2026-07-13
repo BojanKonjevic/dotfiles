@@ -4,7 +4,6 @@
     ngens = "sudo nix-env --list-generations --profile /nix/var/nix/profiles/system";
     vmi = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh install";
     vmr = "cd ${userConfig.dotfilesDir} && ./lib/iso/vm.sh run";
-    postinstall = "cd ${userConfig.dotfilesDir} && nix run .#post-install";
     buildiso = "cd ${userConfig.dotfilesDir} && nix build .#iso";
   };
 

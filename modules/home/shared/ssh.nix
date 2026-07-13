@@ -20,20 +20,6 @@
         User = "git";
         IdentityFile = "~/.ssh/id_ed25519";
       };
-
-      "home" = {
-        Hostname = "desktop.tail5d8060.ts.net";
-        User = "bojan";
-        Port = 22;
-        StrictHostKeyChecking = "no";
-        ServerAliveInterval = 60;
-        ServerAliveCountMax = 5;
-      };
-      "home-tailscale" = {
-        Hostname = "100.95.213.119";
-        User = "bojan";
-        StrictHostKeyChecking = "no";
-      };
     };
   };
 

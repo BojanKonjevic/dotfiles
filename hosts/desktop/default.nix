@@ -64,7 +64,9 @@ in {
         ../../profiles/system/nixos/misc.nix
         ../../profiles/system/nixos/nvidia.nix
         ../../profiles/system/shared/programming.nix
-        #../../profiles/system/nixos/gaming.nix
+      ]
+      ++ inputs.nixpkgs.lib.optionals (userConfig.gaming.enable or false) [
+        ../../profiles/system/nixos/gaming.nix
       ]
       ++ extraModules;
   };
