@@ -1,16 +1,16 @@
-# bojan's dotfiles
+# My dotfiles
 
-NixOS + nix-darwin + Home Manager configuration. Hyprland/Quickshell desktop on Linux, Rift/Raycast on macOS. Built to feel clean, cohesive, and easy to reinstall from scratch.
+NixOS + nix-darwin + Home Manager configuration. Hyprland/Quickshell on Linux, Rift/Raycast on macOS. Built to feel clean, cohesive, and easy to reinstall from scratch.
 
 ---
 
 ## philosophy
 
-The main idea is that the system should be fully described by the config — no hidden state, no manual steps after a fresh install, no "I remember I had to tweak that one thing." Everything declarative, at least as much as possible.
+The system should be described by the config as much as possible — no hidden state, no "I remember I had to tweak that one thing." A handful of things stay manual by necessity (Raycast extension config, TCC permission prompts, OAuth logins) rather than by choice, and those exceptions are called out where they come up instead of pretending they don't exist.
 
-Impermanence is a big part of this. The root filesystem is wiped on every boot by restoring a blank btrfs snapshot. Only things explicitly listed in the config survive reboots. This isn't primarily a security measure — it's about having a clean, predictable system and knowing exactly what's in it. Security is just a nice side effect.
+Impermanence is a big part of this on the NixOS side. The root filesystem is wiped on every boot by restoring a blank btrfs snapshot. Only things explicitly listed in the config survive reboots. This isn't primarily a security measure — it's about having a clean, predictable system and knowing exactly what's in it. Security is just a nice side effect. Secure Boot via lanzaboote is similar: it was easy to add, there's no downside, so why not.
 
-Secure Boot via lanzaboote is similar: it was easy to add, there's no downside, so why not.
+Secrets are managed with **agenix**, encrypted to host SSH keys and decrypted at activation, identically on both platforms.
 
 ---
 
@@ -33,12 +33,13 @@ profiles/       compositions of modules, imported selectively per host
   system/macos/   nix-darwin system profiles
 lib/            flake tooling, scripts, ISO builder
 secrets/        agenix-encrypted secrets
+docs/           deeper write-ups (fresh install, TCC permissions, adding apps)
 user.nix        identity shared across all hosts (name, email, timezone, etc.)
 ```
 
 **Modules** are primitives. Each one is responsible for a single program (`hyprland.nix`, `ghostty`, `zathura`) or a tight cluster that always goes together (`terminal.nix`). They don't know about each other.
 
-**Profiles** are categories that you choose to import per host — `desktop.nix`, `media.nix`, `programming.nix`. They're what you actually compose when defining a machine. This makes it easy to imagine a headless server host that only imports `base.nix` and nothing else.
+**Profiles** are categories you choose to import per host — `desktop.nix`, `media.nix`, `programming.nix`. They're what you actually compose when defining a machine. This makes it easy to imagine a headless server host that only imports `base.nix` and nothing else.
 
 I prefer explicit imports over auto-discovery, even though auto-discovery reduces boilerplate. It's easier to reason about what's actually loaded when you can just read the import list.
 
@@ -57,18 +58,7 @@ All hosts under `hosts/` (except `template-nixos` and `template-macos`) are auto
 Currently defined hosts:
 
 - **desktop** — NixOS, Hyprland/Quickshell
-- **macbook** — macOS, Rift/Raycast
-
----
-
-## bootstrap
-
-Platform-specific bootstrap scripts live in `lib/scripts/`:
-
-- `bootstrap-nixos.sh` — installs NixOS from scratch: partitions and formats disks with disko, sets up btrfs + LUKS + impermanence, handles Secure Boot, runs `nixos-install`. Interactive prompts for hostname, disk selection, etc.
-- `bootstrap-macos.sh` — installs nix-darwin and Home Manager on a fresh macOS machine. Auto-detects architecture, user, and home directory. Optional first argument sets the hostname (default: `macbook`).
-
-The NixOS bootstrap reads `user.nix` from the repo for identity values (username, email, timezone); the macOS bootstrap auto-detects everything from the running session. There's also a custom ISO (`nix build .#iso`) with the bootstrap-nixos script baked in, usable as a USB installer.
+- **macbook** — macOS, Rift/Raycast (daily driver)
 
 ---
 
@@ -86,232 +76,27 @@ Theming is **Catppuccin Mocha** everywhere — Hyprland, Neovim, ghostty, veskto
 
 **Rift** is the tiling window manager — BSP layout, instant virtual workspaces (10 by default), gesture support, animations. Same keybindings as Hyprland (mod = ⌥, h/j/k/l for focus, Shift to move, numbers for workspaces). **JankyBorders** adds Catppuccin-themed window borders via CGS private APIs (no SIP required, installed from Homebrew, managed as a launchd agent).
 
-**Raycast** replaces the Quickshell panels (launcher, clipboard, system controls) — its config is seeded on first launch via `home.activation`. A native **mic status bar** agent shows mic state via SF Symbols in the menu bar, click to toggle.
+Global key-blocking (Cmd+Q/W/N/M/H reclaimed for Rift's own bindings) runs through **Karabiner-Elements**, configured declaratively via Nix rather than a hand-written daemon — per-app exceptions and blocked keys are just data in `modules/home/macos/karabiner.nix`. Rift's own synthetic key events bypass Karabiner's HID-level grabber, so its bindings keep working even for keys it blocks globally.
+
+**Raycast** replaces the Quickshell panels (launcher, clipboard, system controls) — its config is seeded on first launch via `home.activation`. Extension setup and hotkey configuration beyond that base config are done by hand, then the config is dumped back into the repo to persist. A native **mic status bar** agent shows mic state via SF Symbols in the menu bar, click to toggle.
 
 macOS default annoyances removed: Dock permanently hidden (999999s delay), Siri fully disabled, Spotlight icon + keyboard shortcuts killed, Mission Control gestures disabled, desktop icons hidden, Stage Manager and native window tiling off, click-wallpaper-reveal-desktop off, spaces never auto-rearrange. The shelf is empty.
 
 ---
 
-## editor
+## bootstrap
 
-Neovim, configured entirely through **nixvim**. The goal is to have everything expressed in nixvim's options, with `extraPlugins`/`extraFiles` as a bridge for plugins that don't have native nixvim support yet.
+Platform-specific bootstrap scripts live in `lib/scripts/`:
 
-LSP is set up for Nix (nixd, with full flake-aware options completion), Python (pyright + ruff), and Lua.
+- `bootstrap-nixos.sh` — installs NixOS from scratch: partitions and formats disks with disko, sets up btrfs + LUKS + impermanence, handles Secure Boot, runs `nixos-install`. Interactive prompts for hostname, disk selection, etc. There's also a custom ISO (`nix build .#iso`) with this script baked in, usable as a USB installer.
+- `bootstrap-macos.sh` — installs nix-darwin and Home Manager on a fresh macOS machine. Auto-detects architecture, user, and home directory. Optional first argument sets the hostname (default: `macbook`).
 
----
-
-## secrets
-
-Managed with **agenix**. Secrets are encrypted to host SSH keys and decrypted at activation. Works identically on Linux and macOS. The `bootstrapMode` flag in `config.nix` disables secret decryption during initial install (since the host key doesn't exist in `secrets.nix` yet). After first boot, you add the new host key, re-encrypt, and flip the flag.
+Full post-install walkthroughs (SSH keys, agenix registration, disabling bootstrap mode, TCC permissions, etc.) live in `docs/`, not here.
 
 ---
 
-## storage layout
-
-Example with a separate home drive:
-
-```
-/dev/sdx  →  main SSD (root disk)
-              ├── /boot        (ESP, vfat)
-              └── cryptroot    (LUKS2)
-                    └── btrfs
-                          ├── @          →  /          (wiped on boot)
-                          ├── @nix       →  /nix
-                          ├── @persist   →  /persist   (survives wipes)
-                          ├── @swap      →  /swap
-                          └── @snapshots →  /.snapshots
-
-/dev/sdy  →  home HDD
-              └── crypthome   (LUKS2)
-                    └── btrfs
-                          └── @home      →  /home
-```
-
-Bootstrap supports both single-disk and dual-disk setups.
-
-TPM2 is enrolled for LUKS so the passphrase isn't needed on every boot (normal boots unlock automatically; the passphrase remains as a fallback).
-
----
-
-## useful commands
-
-```bash
-nr                   # rebuild and switch OS (nh os switch)
-nu                   # full update: OS + HM + push to cachix
-gc                   # garbage collect, keep last 10 generations
-ngens                # list OS generations
-
-ns                   # nix package search with fzf preview
-gi <owner/repo>      # copy a GitHub repo's full content to clipboard (for LLMs)
-```
-
----
-
-## post-install guide (NixOS)
-
-> Run these steps after the first successful boot into the installed system from bootstrap.
-
-### 1. Copy SSH key from existing machine
-
-Use the same key everywhere. Copy it from any existing machine:
-
-```bash
-scp existing-machine:~/.ssh/id_ed25519* ~/.ssh/
-chmod 600 ~/.ssh/id_ed25519
-chmod 644 ~/.ssh/id_ed25519.pub
-```
-
-### 2. Register the new host with agenix
-
-The new host SSH key was printed at the end of bootstrap. Add it to `secrets/secrets.nix`, then:
-
-```bash
-agenix -r -i ~/.ssh/id_ed25519
-```
-
-### 3. Connect to GitHub
-
-```bash
-ssh -T git@github.com
-```
-
-### 4. Switch git remote to SSH
-
-```bash
-git remote set-url origin git@github.com:BojanKonjevic/dotfiles.git
-```
-
-### 5. Disable bootstrap mode
-
-In `hosts/<hostname>/config.nix`, set:
-
-```nix
-bootstrapMode = false;
-```
-
-Then rebuild:
-
-```bash
-nr
-```
-
-### 6. Push new host to git
-
-Commit and push the new host config and updated `secrets/secrets.nix`.
-
----
-
-### Physical machines only
-
-**Secure Boot**
-
-If keys could not be auto-enrolled during install, enter your firmware, enable Setup Mode, then run:
-
-```bash
-sbctl enroll-keys --microsoft
-```
-
-**TPM2 LUKS enrollment**
-
-Bind the LUKS key to this machine's TPM (after Secure Boot is active):
-
-```bash
-sudo systemd-cryptenroll \
-  --tpm2-device=auto \
-  --tpm2-pcrs=0+7 \
-  /dev/disk/by-partlabel/disk-main-root
-```
-
-Your passphrase remains as a fallback. Re-enroll after UEFI firmware updates or if you move the drive to another machine.
-
----
-
-### VM only
-
-Remove the bootstrap override and rebuild:
-
-```bash
-rm hosts/<hostname>/bootstrap-override.nix
-```
-
-Set `bootstrapMode = false` in `hosts/<hostname>/config.nix`, then `nr`.
-
----
-
-## post-install guide (macOS)
-
-> Run these steps after `bootstrap-macos.sh` completes.
-
-### 1. Copy SSH key from existing machine
-
-Use the same key everywhere. Copy it from any existing machine:
-
-```bash
-scp existing-machine:~/.ssh/id_ed25519* ~/.ssh/
-chmod 600 ~/.ssh/id_ed25519
-chmod 644 ~/.ssh/id_ed25519.pub
-```
-
-Then register your public key in `secrets/secrets.nix` (it probably already is — same key) and re-encrypt:
-
-```bash
-agenix -r -i ~/.ssh/id_ed25519
-```
-
-### 2. Disable bootstrap mode
-
-In `hosts/macbook/config.nix`, set `bootstrapMode = false`, then rebuild:
-
-```bash
-darwin-rebuild switch --flake .#macbook
-```
-
-### 3. Grant accessibility, input monitoring, and automation permissions
-
-Several background agents need Accessibility permission, and some need additional permissions. On first build, macOS will prompt for each. Grant all:
-
-- **Rift** — window management, keyboard event tap (Accessibility)
-- **borders** — observes window events for border updates (Accessibility)
-- **mic-status-bar** — reads mic state from `/tmp/qs-mic-state` (Accessibility)
-- **mic-toggle** — controls input volume via `osascript`, may prompt for **Automation** permission to control System Events
-
-If you miss the prompts, add them manually in System Settings → Privacy & Security → Accessibility, Input Monitoring, and Automation.
-
-**Don't panic if Rift/borders don't appear immediately after first boot.** The Homebrew formulae install in parallel with launchd loading the agents. If launchd tries to start them before `brew` finishes, they'll fail once — `KeepAlive` retries automatically. A second `darwin-rebuild switch` or a reboot resolves it.
-
-### 4. Verify default browser associations
-
-The post-install activation sets Zen Browser as the default for HTTP/HTTPS and HTML files via `duti`. Verify it took:
-
-```bash
-duti -x html
-```
-
-Expected output: `app.zen-browser.zen` (or whatever the flake's actual bundle ID is). If it's different, update the bundle ID in `modules/home/macos/ui.nix`.
-
-### 5. Configure Raycast (optional)
-
-Raycast is seeded with a base config on first launch. After installing extensions and configuring hotkeys, dump the updated config to the repo to persist it:
-
-```bash
-cp ~/Library/Application\ Support/com.raycast.macOS/config.json \
-  modules/home/macos/raycast/config.json
-```
-
-### 6. Push to git
-
-Commit and push the new host config and updated `secrets/secrets.nix`.
-
----
-
-### Verify impermanence (NixOS only)
-
-```bash
-journalctl -b -u wipe-root       # confirm wipe ran on boot
-findmnt | grep persist            # confirm bind-mounts are active
-touch /test-impermanence && reboot  # file should be gone after reboot
-```
-
-> `/` is wiped on every boot via btrfs `@blank` snapshot restore.
-> `/home`, `/nix`, and `/persist` are never wiped.
-> Persistent state is bind-mounted from `/persist` on each boot.
+## see also
+
+- `docs/macos-fresh-install.md` — step-by-step post-bootstrap setup for macOS
+- `docs/macos-tcc-permissions.md` — batching Accessibility/Input Monitoring/etc. approval prompts
+- `docs/macos-new-apps.md` — the add/trust/setup/check workflow for folding a new third-party app into Nix

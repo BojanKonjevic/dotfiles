@@ -58,9 +58,16 @@ in {
   system.activationScripts.setup-homebrew.text = lib.mkBefore ''
     TRUST_DIR="${userConfig.homeDirectory}/.config/homebrew"
     mkdir -p "$TRUST_DIR"
+
+    mkdir -p "${userConfig.homeDirectory}/.homebrew"
     rm -f "${userConfig.homeDirectory}/.homebrew/trust.json"
     ln -sf "$TRUST_DIR/trust.json" "${userConfig.homeDirectory}/.homebrew/trust.json"
+
     cp ${trustJson} "$TRUST_DIR/trust.json"
     chmod 644 "$TRUST_DIR/trust.json"
+
+    chown "${userConfig.username}:staff" "$TRUST_DIR" "$TRUST_DIR/trust.json"
+    chown "${userConfig.username}:staff" "${userConfig.homeDirectory}/.homebrew"
+    chown -h "${userConfig.username}:staff" "${userConfig.homeDirectory}/.homebrew/trust.json"
   '';
 }

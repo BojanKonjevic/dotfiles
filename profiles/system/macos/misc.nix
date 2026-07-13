@@ -8,5 +8,6 @@
     "qlmarkdown"
     "quicklook-video"
     "the-unarchiver"
+    "readdle-spark"
   ];
 }
