@@ -1,11 +1,8 @@
 {
-  inputs,
-  userConfig,
   pkgs,
   lib,
   ...
 }: let
-  reloadAppPrefs = import ./reload-app-prefs.nix {inherit userConfig;};
   bundleId = "theboringteam.boringnotch";
 
   settingsPlist = pkgs.writeText "boringnotch-settings.plist" ''
@@ -114,18 +111,19 @@
     </dict>
     </plist>
   '';
+
+  appName = "Boring Notch";
 in {
-  nix-homebrew.taps."TheBoredTeam/boring-notch" = inputs.boring-notch-brew;
-  nix-homebrew.trust = {
-    taps = ["TheBoredTeam/boring-notch"];
-    casks = ["TheBoredTeam/boring-notch/boring-notch"];
-  };
-  homebrew.casks = ["boring-notch"];
-  system.activationScripts.postActivation.text = lib.mkAfter (
-    reloadAppPrefs {
-      inherit bundleId settingsPlist;
-      appName = "boringNotch";
-      label = "Boring Notch";
-    }
-  );
+  home.activation.boringNotchSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    echo "Applying ${appName} settings..." >&2
+    CURRENT_HASH=$(/usr/bin/defaults read "${bundleId}" 2>/dev/null | /usr/bin/openssl md5)
+    /usr/bin/defaults import "${bundleId}" "${settingsPlist}"
+    NEW_HASH=$(/usr/bin/defaults read "${bundleId}" 2>/dev/null | /usr/bin/openssl md5)
+    if [ "$CURRENT_HASH" != "$NEW_HASH" ]; then
+      /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
+      /usr/bin/killall -9 "${appName}" >/dev/null 2>&1 || true
+      sleep 0.5
+      open -a "${appName}"
+    fi
+  '';
 }

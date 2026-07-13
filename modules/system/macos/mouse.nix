@@ -1,10 +1,9 @@
 {
-  userConfig,
   pkgs,
   lib,
+  userConfig,
   ...
-}
-: let
+}: let
   reloadAppPrefs = import ./reload-app-prefs.nix {inherit userConfig;};
   bundleId = "com.lujjjh.LinearMouse";
 

@@ -1,11 +1,9 @@
 {
-  inputs,
-  userConfig,
   pkgs,
   lib,
+  userConfig,
   ...
 }: let
-  reloadAppPrefs = import ./reload-app-prefs.nix {inherit userConfig;};
   bundleId = "cc.ffitch.shottr";
 
   settingsPlist = pkgs.writeText "shottr-settings.plist" ''
@@ -97,12 +95,19 @@
     </dict>
     </plist>
   '';
+
+  appName = "Shottr";
 in {
-  homebrew.casks = ["shottr"];
-  system.activationScripts.postActivation.text = lib.mkAfter (
-    reloadAppPrefs {
-      inherit bundleId settingsPlist;
-      appName = "Shottr";
-    }
-  );
+  home.activation.shottrSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    echo "Applying ${appName} settings..." >&2
+    CURRENT_HASH=$(/usr/bin/defaults read "${bundleId}" 2>/dev/null | /usr/bin/openssl md5)
+    /usr/bin/defaults import "${bundleId}" "${settingsPlist}"
+    NEW_HASH=$(/usr/bin/defaults read "${bundleId}" 2>/dev/null | /usr/bin/openssl md5)
+    if [ "$CURRENT_HASH" != "$NEW_HASH" ]; then
+      /usr/bin/killall cfprefsd >/dev/null 2>&1 || true
+      /usr/bin/killall -9 "${appName}" >/dev/null 2>&1 || true
+      sleep 0.5
+      open -a "${appName}"
+    fi
+  '';
 }
