@@ -77,6 +77,7 @@ in {
       keybind = [
         "super+shift+j=unbind"
         "super+ctrl+shift+j=unbind"
+        "super+q=unbind"
       ];
 
       theme = "catppuccin-mocha";

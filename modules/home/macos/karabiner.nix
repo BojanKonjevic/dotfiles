@@ -13,6 +13,7 @@
   appExceptions = [];
 
   finderBundleId = "^com\\.apple\\.finder$";
+  terminalBundleId = "^com\\.mitchellh\\.ghostty$";
 
   # ── Keys to block when pressed with Cmd ─────────────────────────────────────
   # "excludeFinder = true" is used for keys that Finder also wants to reclaim
@@ -23,6 +24,7 @@
       key = "q";
       desc = "Disable Cmd+Q (quit) — use Rift mod+Shift+Q instead";
       excludeFinder = false;
+      excludeTerminal = true;
     }
     {
       key = "w";
@@ -55,6 +57,7 @@
       key,
       desc,
       excludeFinder,
+      excludeTerminal ? false,
     }: let
       manipulator = {
         type = "basic";
@@ -68,7 +71,8 @@
       };
       excludedBundleIds =
         appExceptions
-        ++ lib.optionals excludeFinder [finderBundleId];
+        ++ lib.optionals excludeFinder [finderBundleId]
+        ++ lib.optionals excludeTerminal [terminalBundleId];
       hasAnyExclusions = builtins.length excludedBundleIds > 0;
       conditions = lib.optionals hasAnyExclusions [
         {

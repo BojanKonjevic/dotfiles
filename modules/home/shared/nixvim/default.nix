@@ -165,6 +165,15 @@
         action = "<C-r>";
         options.desc = "Redo";
       }
+      {
+        mode = "n";
+        key = "<D-q>";
+        action = ":qa<CR>";
+        options = {
+          noremap = true;
+          silent = true;
+        };
+      }
     ];
   };
 }
