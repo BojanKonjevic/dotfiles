@@ -57,7 +57,7 @@
       AppleShowAllExtensions = true;
       AppleShowAllFiles = true;
       ShowPathbar = true;
-      FXPreferredViewStyle = "clmv";
+      FXPreferredViewStyle = "icnv";
       FXEnableExtensionChangeWarning = false;
       QuitMenuItem = true;
       NewWindowTarget = "Home";
@@ -135,6 +135,9 @@
       "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadThreeFingerHorizSwipeGesture = 0;
       "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadThreeFingerVertSwipeGesture = 0;
       "com.apple.driver.AppleBluetoothMultitouch.trackpad".TrackpadPinchGesture = 0;
+      "com.apple.finder".NSUserKeyEquivalents = {
+        "Open" = "\U0d"; # Return/Enter key
+      };
     };
   };
 

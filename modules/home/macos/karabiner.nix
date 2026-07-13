@@ -12,39 +12,49 @@
   # which bypasses Karabiner's HID-level grabber, so those still work.
   appExceptions = [];
 
+  finderBundleId = "^com\\.apple\\.finder$";
+
   # ── Keys to block when pressed with Cmd ─────────────────────────────────────
+  # "excludeFinder = true" is used for keys that Finder also wants to reclaim
+  # for its own Cmd+hjkl navigation below (currently just "h" — Cmd+M and
+  # Cmd+H would otherwise collide with the Finder-specific rules).
   blockedKeys = [
     {
       key = "q";
       desc = "Disable Cmd+Q (quit) — use Rift mod+Shift+Q instead";
+      excludeFinder = false;
     }
     {
       key = "w";
       desc = "Disable Cmd+W (close window) — use Rift mod+Q instead";
+      excludeFinder = false;
     }
     {
       key = "n";
       desc = "Disable Cmd+N (new window) — use Rift mod+N instead";
+      excludeFinder = false;
     }
     {
       key = "m";
       desc = "Disable Cmd+M (minimize) — Rift owns window management";
+      excludeFinder = false;
     }
     {
       key = "h";
       desc = "Disable Cmd+H (hide) — Rift owns window management";
+      excludeFinder = true; # Finder reclaims Cmd+H for "navigate left"
     }
   ];
 
   karabinerJson = "${config.xdg.configHome}/karabiner/karabiner.json";
-
   hasExceptions = builtins.length appExceptions > 0;
 
   # One rule per key so each is independently toggleable in Karabiner's UI
-  rules =
+  blockRules =
     map ({
       key,
       desc,
+      excludeFinder,
     }: let
       manipulator = {
         type = "basic";
@@ -56,14 +66,18 @@
           };
         };
       };
-      conditions = lib.optionals hasExceptions [
+      excludedBundleIds =
+        appExceptions
+        ++ lib.optionals excludeFinder [finderBundleId];
+      hasAnyExclusions = builtins.length excludedBundleIds > 0;
+      conditions = lib.optionals hasAnyExclusions [
         {
           type = "frontmost_application_unless";
-          bundle_identifiers = appExceptions;
+          bundle_identifiers = excludedBundleIds;
         }
       ];
       manipulatorWithConditions =
-        if hasExceptions
+        if hasAnyExclusions
         then manipulator // {inherit conditions;}
         else manipulator;
     in {
@@ -71,16 +85,94 @@
       manipulators = [manipulatorWithConditions];
     })
     blockedKeys;
+
+  # ── Finder: Enter opens instead of renaming ─────────────────────────────────
+  finderEnterOpensRule = {
+    description = "Finder: Enter opens (Cmd+Down) instead of rename";
+    manipulators = [
+      {
+        type = "basic";
+        from = {
+          key_code = "return_or_enter";
+          modifiers = {optional = ["any"];};
+        };
+        to = [
+          {
+            key_code = "down_arrow";
+            modifiers = ["command"];
+          }
+        ];
+        conditions = [
+          {
+            type = "frontmost_application_if";
+            bundle_identifiers = [finderBundleId];
+          }
+        ];
+      }
+    ];
+  };
+
+  # ── Finder: Cmd+hjkl added alongside arrow keys ─────────────────────────────
+  # These ADD Cmd+h/j/k/l as extra bindings; the physical arrow keys keep
+  # working too since nothing remaps them away.
+  finderHjklRule = {
+    description = "Finder: Cmd+hjkl navigates like arrow keys";
+    manipulators = let
+      finderCondition = [
+        {
+          type = "frontmost_application_if";
+          bundle_identifiers = [finderBundleId];
+        }
+      ];
+      mk = {
+        from_key,
+        to_key,
+      }: {
+        type = "basic";
+        from = {
+          key_code = from_key;
+          modifiers = {
+            mandatory = ["command"];
+            optional = ["any"];
+          };
+        };
+        to = [{key_code = to_key;}];
+        conditions = finderCondition;
+      };
+    in [
+      (mk {
+        from_key = "h";
+        to_key = "left_arrow";
+      })
+      (mk {
+        from_key = "j";
+        to_key = "down_arrow";
+      })
+      (mk {
+        from_key = "k";
+        to_key = "up_arrow";
+      })
+      (mk {
+        from_key = "l";
+        to_key = "right_arrow";
+      })
+    ];
+  };
+
+  rules =
+    blockRules
+    ++ [
+      finderEnterOpensRule
+      finderHjklRule
+    ];
 in {
   home.packages = [pkgs.jq];
-
   xdg.configFile."karabiner/assets/complex_modifications/nix-cmd-block.json" = {
     text = builtins.toJSON {
-      title = "Block native Cmd shortcuts (Rift owns window management via mod)";
+      title = "Block native Cmd shortcuts (Rift owns window management via mod) + Finder navigation";
       inherit rules;
     };
   };
-
   home.activation.karabinerApplySettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
     RULES_JSON=${lib.escapeShellArg (builtins.toJSON rules)}
     if [ -f "${karabinerJson}" ]; then
