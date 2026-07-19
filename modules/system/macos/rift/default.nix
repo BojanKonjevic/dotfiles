@@ -133,7 +133,7 @@
       animate = false
       hot_reload = true
       focus_follows_mouse = true
-      mouse_follows_focus = false
+      mouse_follows_focus = true
       mouse_hides_on_focus = true
       auto_focus_blacklist = [
         "com.apple.dock",
