@@ -109,13 +109,6 @@ in {
           "-DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=${pkgs.llvmPackages.bintools-unwrapped}/bin/ld64.lld"
           "-DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=${pkgs.llvmPackages.bintools-unwrapped}/bin/ld64.lld"
         ];
-      # qBittorrent bundles a Qt plugin that collides with the Nix-wrapped one
-      dontWrapQtApps = true;
-      postFixup =
-        ''
-          wrapQtAppsHook() { :; }
-        ''
-        + (old.postFixup or "");
     }))
   ];
 

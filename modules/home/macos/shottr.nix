@@ -23,7 +23,7 @@
       <key>afterGrabSave</key>
       <true/>
       <key>afterGrabShow</key>
-      <true/>
+      <false/>
       <key>allowTelemetry</key>
       <true/>
       <key>altZoomDirection</key>
