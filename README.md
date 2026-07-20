@@ -33,7 +33,7 @@ profiles/       compositions of modules, imported selectively per host
   system/macos/   nix-darwin system profiles
 lib/            flake tooling, scripts, ISO builder
 secrets/        agenix-encrypted secrets
-docs/           deeper write-ups (fresh install, TCC permissions, adding apps)
+docs/           deeper write-ups (fresh install, adding apps)
 user.nix        identity shared across all hosts (name, email, timezone, etc.)
 ```
 
@@ -91,12 +91,11 @@ Platform-specific bootstrap scripts live in `lib/scripts/`:
 - `bootstrap-nixos.sh` — installs NixOS from scratch: partitions and formats disks with disko, sets up btrfs + LUKS + impermanence, handles Secure Boot, runs `nixos-install`. Interactive prompts for hostname, disk selection, etc. There's also a custom ISO (`nix build .#iso`) with this script baked in, usable as a USB installer.
 - `bootstrap-macos.sh` — installs nix-darwin and Home Manager on a fresh macOS machine. Auto-detects architecture, user, and home directory. Optional first argument sets the hostname (default: `macbook`).
 
-Full post-install walkthroughs (SSH keys, agenix registration, disabling bootstrap mode, TCC permissions, etc.) live in `docs/`, not here.
+Full post-install walkthroughs (SSH keys, agenix registration, disabling bootstrap mode, etc.) live in `docs/`, not here.
 
 ---
 
 ## see also
 
 - `docs/macos-fresh-install.md` — step-by-step post-bootstrap setup for macOS
-- `docs/macos-tcc-permissions.md` — batching Accessibility/Input Monitoring/etc. approval prompts
 - `docs/macos-new-apps.md` — the add/trust/setup/check workflow for folding a new third-party app into Nix
