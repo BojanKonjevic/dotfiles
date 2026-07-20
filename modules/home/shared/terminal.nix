@@ -75,6 +75,7 @@ in {
       confirm-close-surface = false;
 
       keybind = [
+        "super+ctrl+alt+q=quit"
         "super+shift+j=unbind"
         "super+ctrl+shift+j=unbind"
         "super+q=unbind"

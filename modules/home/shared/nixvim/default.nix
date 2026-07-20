@@ -13,7 +13,6 @@
     ./plugins/tools.nix
     ./plugins/harpoon.nix
     ./plugins/leetcode.nix
-    ./plugins/cpp.nix
   ];
 
   home.packages = [pkgs.nixd];
@@ -87,7 +86,7 @@
     keymaps = [
       {
         mode = "n";
-        key = "<D-h>";
+        key = "<D-C-h>";
         action = "<C-w><C-h>";
         options.desc = "Move focus left";
       }

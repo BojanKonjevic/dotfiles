@@ -45,6 +45,10 @@
       key = "h";
       desc = "Disable Cmd+H (hide) — Rift owns window management";
       excludeFinder = true; # Finder reclaims Cmd+H for "navigate left"
+      # No excludeTerminal here: Ghostty's Cmd+H is handled by
+      # ghosttyCmdHRule below, which remaps it to Cmd+Ctrl+H *before*
+      # this block rule would ever see it. If that rule is ever removed,
+      # this block rule falls back to eating Cmd+H in Ghostty too.
     }
   ];
 
@@ -89,6 +93,42 @@
       manipulators = [manipulatorWithConditions];
     })
     blockedKeys;
+
+  # ── Ghostty: Cmd+H -> Cmd+Ctrl+H instead of native hide ─────────────────────
+  # Karabiner intercepts Cmd+H at the HID level before macOS ever sees it,
+  # and — only when Ghostty is frontmost — rewrites it to Cmd+Ctrl+H. Ghostty
+  # passes that through to nvim as a distinct chord nvim can bind
+  # (<D-C-h> -> <C-w><C-h>), so the native "hide application" behavior never
+  # fires and nvim still gets a usable Cmd-flavored keystroke for window nav.
+  # This must be matched before the generic "h" block rule, so it's placed
+  # first in `rules` below.
+  ghosttyCmdHRule = {
+    description = "Ghostty: Cmd+H -> Cmd+Ctrl+H (avoid native hide, let nvim bind it)";
+    manipulators = [
+      {
+        type = "basic";
+        from = {
+          key_code = "h";
+          modifiers = {
+            mandatory = ["command"];
+            optional = ["any"];
+          };
+        };
+        to = [
+          {
+            key_code = "h";
+            modifiers = ["left_command" "left_control"];
+          }
+        ];
+        conditions = [
+          {
+            type = "frontmost_application_if";
+            bundle_identifiers = [terminalBundleId];
+          }
+        ];
+      }
+    ];
+  };
 
   # ── Finder: Enter opens instead of renaming ─────────────────────────────────
   finderEnterOpensRule = {
@@ -164,7 +204,8 @@
   };
 
   rules =
-    blockRules
+    [ghosttyCmdHRule]
+    ++ blockRules
     ++ [
       finderEnterOpensRule
       finderHjklRule

@@ -279,7 +279,7 @@
     launchd.agents.quit-app = {
       enable = true;
       config = {
-        ProgramArguments = ["${ksd}/bin/ksd" "${fifoPathQuit}" "12"];
+        ProgramArguments = ["${ksd}/bin/ksd" "${fifoPathQuit}" "12" "control,option"];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
