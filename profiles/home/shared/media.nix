@@ -5,5 +5,6 @@
     ../../../modules/home/shared/qbittorrent.nix
     ../../../modules/home/shared/vesktop.nix
     ../../../modules/home/shared/zathura.nix
+    ../../../modules/home/shared/obsidian.nix
   ];
 }
