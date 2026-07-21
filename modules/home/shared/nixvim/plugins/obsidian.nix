@@ -1,15 +1,52 @@
-# plugins/obsidian.nix
-{pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
   home.file."Documents/Obsidian/Tags.md" = {
     force = false;
     text = ''
       # Allowed Tags
 
-      One tag per line. Lines starting with `#` (other than this header) or blank lines are ignored.
+      One tag per line. Lines starting with `#` or blank lines are ignored.
 
       leetcode
       daily
       journal
+    '';
+  };
+  home.file."Documents/Obsidian/Templates/Daily.md" = {
+    force = false;
+    text = ''
+
+      # {{date}}
+
+    '';
+  };
+  home.file."Documents/Obsidian/Templates/Leetcode.md" = {
+    force = false;
+    text = ''
+      ---
+      tags: [leetcode]
+      ---
+
+      # {{title}}
+
+      - **Link:**
+      - **Difficulty:**
+      - **Topics:**
+      - **Date:** {{date}}
+
+      ## Approach
+
+      ## Complexity
+
+      - Time:
+      - Space:
+
+      ## Code
+
+      ## Notes
     '';
   };
 
@@ -30,7 +67,7 @@
         daily_notes = {
           folder = nil,
           date_format = "%Y-%m-%d",
-          template = nil,
+          template = "Daily.md",
           default_tags = {"daily"},
         },
         templates = {
@@ -39,7 +76,10 @@
           time_format = "%H:%M",
         },
         note_id_func = function(title)
-          return title
+          if title ~= nil and title ~= "" then
+            return title
+          end
+          return tostring(os.time())
         end,
         frontmatter = {
           func = function(note)
@@ -62,21 +102,34 @@
     keymaps = [
       {
         mode = "n";
-        key = "<leader>oo";
-        action = "<cmd>Obsidian today<CR>";
-        options.desc = "Open daily note";
+        key = "<leader>ol";
+        action.__raw = ''
+          function()
+            local title = vim.fn.input("Problem name: ")
+            if title ~= "" then
+              vim.cmd("Obsidian new_from_template " .. title .. " Leetcode.md")
+            end
+          end
+        '';
+        options.desc = "New leetcode note";
       }
       {
         mode = "n";
-        key = "<leader>of";
-        action = "<cmd>Obsidian search<CR>";
-        options.desc = "Search vault";
+        key = "<leader>od";
+        action = "<cmd>Obsidian today<CR>";
+        options.desc = "Open daily note";
       }
       {
         mode = "n";
         key = "<leader>on";
         action = "<cmd>Obsidian new<CR>";
         options.desc = "New note";
+      }
+      {
+        mode = "n";
+        key = "<leader>of";
+        action = "<cmd>Obsidian search<CR>";
+        options.desc = "Search vault";
       }
       {
         mode = "n";
