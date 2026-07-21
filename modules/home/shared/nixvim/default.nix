@@ -13,6 +13,7 @@
     ./plugins/tools.nix
     ./plugins/harpoon.nix
     ./plugins/leetcode.nix
+    ./plugins/obsidian.nix
   ];
 
   home.packages = [pkgs.nixd];
