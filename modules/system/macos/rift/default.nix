@@ -22,6 +22,8 @@
     activeBorder = "0xff${lib.removePrefix "#" theme.mauve}";
     inactiveBorder = "0xff${lib.removePrefix "#" theme.surface1}";
 
+    ghosttyBundleId = "com.mitchellh.ghostty";
+
     ksd = pkgs.runCommand "keystroke-daemon" {} ''
       unset SDKROOT DEVELOPER_DIR
       mkdir -p "$out/bin"
@@ -41,9 +43,29 @@
         -Wall -O2
     '';
 
+    # Fast frontmost-app bundle id lookup via NSWorkspace, used by quit-app
+    # to decide routing. Sub-millisecond — unlike `osascript` + System
+    # Events, which round-trips through Apple Events and adds noticeable
+    # latency to every Alt+Shift+Q press.
+    frontmostApp = pkgs.runCommand "frontmost-app" {} ''
+      unset SDKROOT DEVELOPER_DIR
+      mkdir -p "$out/bin"
+      /usr/bin/clang -o "$out/bin/frontmost-app" ${./frontmost-app.m} \
+        -framework AppKit \
+        -fobjc-arc \
+        -Wall -O2
+    '';
+
     fifoPath = "/tmp/close-window.fifo";
     fifoPathNew = "/tmp/new-window.fifo";
     fifoPathQuit = "/tmp/quit-app.fifo";
+    # Dedicated fifo for Ghostty's force-quit. Ghostty unbinds native Cmd+Q
+    # (so it can pass Cmd+Q through to nvim for :qa), so plain synthetic
+    # Cmd+Q from the shared quit-app fifo would do nothing there. This fifo
+    # is served by a separate ksd instance that posts Cmd+Ctrl+Option+Q
+    # instead — a combo with no OS-reserved meaning — which Ghostty's own
+    # keybind config maps to its native quit action.
+    fifoPathQuitGhostty = "/tmp/quit-app-ghostty.fifo";
 
     closeWindow = pkgs.writeShellScriptBin "close-window" ''
       echo > "${fifoPath}"
@@ -53,8 +75,18 @@
       echo > "${fifoPathNew}"
     '';
 
+    # App-aware: routes to the Ghostty-specific fifo (Cmd+Ctrl+Option+Q) when
+    # Ghostty is frontmost, otherwise the normal fifo (plain Cmd+Q) for every
+    # other app. This is the only place that needs to know about the split;
+    # Rift's modShift+Q binding always calls this same script either way.
     quitApp = pkgs.writeShellScriptBin "quit-app" ''
-      echo > "${fifoPathQuit}"
+      frontmost=$(${frontmostApp}/bin/frontmost-app)
+
+      if [ "$frontmost" = "${ghosttyBundleId}" ]; then
+        echo > "${fifoPathQuitGhostty}"
+      else
+        echo > "${fifoPathQuit}"
+      fi
     '';
 
     bringWindow = pkgs.writeShellScriptBin "bring-window" ''
@@ -127,7 +159,7 @@
       ln -s "$out/Applications/RiftWSIndicator.app/Contents/MacOS/RiftWSIndicator" "$out/bin/rift-ws-indicator"
     '';
   in {
-    home.packages = [closeWindow newWindow quitApp bringWindow notesWindow workspaceIndicator ksd cursorHide];
+    home.packages = [closeWindow newWindow quitApp bringWindow notesWindow workspaceIndicator ksd cursorHide frontmostApp];
     xdg.configFile."rift/config.toml".text = ''
       [settings]
       animate = false
@@ -276,15 +308,34 @@
       };
     };
 
+    # Force-quit for every app except Ghostty: plain synthetic Cmd+Q.
     launchd.agents.quit-app = {
       enable = true;
       config = {
-        ProgramArguments = ["${ksd}/bin/ksd" "${fifoPathQuit}" "12" "control,option"];
+        ProgramArguments = ["${ksd}/bin/ksd" "${fifoPathQuit}" "12"];
         KeepAlive = true;
         RunAtLoad = true;
         ThrottleInterval = 10;
         StandardOutPath = "/tmp/ksd-quit.stdout.log";
         StandardErrorPath = "/tmp/ksd-quit.stderr.log";
+        EnvironmentVariables = {
+          PATH = "/usr/bin:/bin";
+        };
+      };
+    };
+
+    # Force-quit for Ghostty only: Cmd+Ctrl+Option+Q, which Ghostty's own
+    # keybind config maps to its native quit action ("super+ctrl+alt+q =
+    # quit"). Kept separate from Cmd+Q so nvim's <D-q> (:qa) is unaffected.
+    launchd.agents.quit-app-ghostty = {
+      enable = true;
+      config = {
+        ProgramArguments = ["${ksd}/bin/ksd" "${fifoPathQuitGhostty}" "12" "control,option"];
+        KeepAlive = true;
+        RunAtLoad = true;
+        ThrottleInterval = 10;
+        StandardOutPath = "/tmp/ksd-quit-ghostty.stdout.log";
+        StandardErrorPath = "/tmp/ksd-quit-ghostty.stderr.log";
         EnvironmentVariables = {
           PATH = "/usr/bin:/bin";
         };
