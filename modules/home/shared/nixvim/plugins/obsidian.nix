@@ -1,8 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}: {
+{pkgs, ...}: {
   home.file."Documents/Obsidian/Tags.md" = {
     force = false;
     text = ''
@@ -20,7 +16,6 @@
     text = ''
 
       # {{date}}
-
     '';
   };
   home.file."Documents/Obsidian/Templates/Leetcode.md" = {

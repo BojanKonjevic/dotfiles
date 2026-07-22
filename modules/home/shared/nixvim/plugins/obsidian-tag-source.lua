@@ -3,10 +3,6 @@ source.new = function()
 	return setmetatable({}, { __index = source })
 end
 
-function source:enabled()
-	return vim.bo.filetype == "markdown"
-end
-
 function source:get_trigger_characters()
 	return { "#" }
 end

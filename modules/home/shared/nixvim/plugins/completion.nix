@@ -36,7 +36,16 @@
             obsidian_tags = {
               name = "obsidian_tags";
               module = "obsidian-tag-source";
-              enabled = true;
+              enabled.__raw = ''
+                function()
+                  if vim.bo.filetype ~= "markdown" then
+                    return false
+                  end
+                  local vault_path = vim.fn.expand("~/Documents/Obsidian")
+                  local filepath = vim.api.nvim_buf_get_name(0)
+                  return vim.startswith(filepath, vault_path)
+                end
+              '';
             };
           };
         };
