@@ -181,6 +181,7 @@ in {
       export NH_OS_FLAKE="${userConfig.dotfilesDir}"
       export NH_DARWIN_FLAKE="${userConfig.dotfilesDir}"
       export STARSHIP_VI_MODE=1
+      ZVM_VI_INSERT_TAB_KEY=
 
       zvm_after_init() {
         eval "$(fzf --zsh)"
@@ -188,6 +189,8 @@ in {
           eval "$(direnv hook zsh)"
           export _direnv_hooked=1
         fi
+        bindkey -M viins '^I' autosuggest-accept
+        bindkey -M viins '^[[Z' menu-complete
       }
     '';
   };
