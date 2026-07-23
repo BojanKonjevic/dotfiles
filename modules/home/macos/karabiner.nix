@@ -203,8 +203,27 @@
     ];
   };
 
+  capsLockPaneNavRule = {
+    description = "Caps Lock (held) -> Ctrl+Shift, used for Zellij pane nav";
+    manipulators = [
+      {
+        type = "basic";
+        from = {
+          key_code = "caps_lock";
+          modifiers = {optional = ["any"];};
+        };
+        to = [
+          {
+            key_code = "left_control";
+            modifiers = ["left_shift"];
+          }
+        ];
+      }
+    ];
+  };
+
   rules =
-    [ghosttyCmdHRule]
+    [ghosttyCmdHRule capsLockPaneNavRule]
     ++ blockRules
     ++ [
       finderEnterOpensRule

@@ -106,6 +106,7 @@ in {
         then "nh darwin switch"
         else "nh os switch";
     in {
+      zl = "zellij";
       v = "nvim";
       lg = "lazygit";
       oc = "opencode";

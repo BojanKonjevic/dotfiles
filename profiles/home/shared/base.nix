@@ -2,6 +2,7 @@
   imports = [
     ../../../modules/home/shared/theme.nix
     ../../../modules/home/shared/terminal.nix
+    ../../../modules/home/shared/zellij.nix
     ../../../modules/home/shared/ssh.nix
     ../../../modules/home/shared/weather.nix
     ../../../modules/home/shared/scripts.nix
