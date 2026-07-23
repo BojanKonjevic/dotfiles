@@ -1,10 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  userConfig,
-  ...
-}: {
+{userConfig, ...}: {
   homebrew.brews = [
     "acsandmann/tap/rift"
     "FelixKratz/formulae/borders"
@@ -91,6 +85,7 @@
 
     bringWindow = pkgs.writeShellScriptBin "bring-window" ''
       ${brewPrefix}/bin/rift-cli execute workspace move-window "$1"
+      sleep 0.05
       ${brewPrefix}/bin/rift-cli execute workspace switch "$1"
     '';
 
@@ -164,7 +159,7 @@
       [settings]
       animate = false
       hot_reload = true
-      focus_follows_mouse = true
+      focus_follows_mouse = false
       mouse_follows_focus = true
       mouse_hides_on_focus = true
       auto_focus_blacklist = [
