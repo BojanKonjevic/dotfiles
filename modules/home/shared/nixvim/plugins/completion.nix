@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   programs.nixvim.plugins = {
     # Tab is overridden in keymaps.nix with explicit \t fallback
     blink-cmp = {
@@ -81,6 +81,23 @@
     };
   };
 
+  programs.nixvim.extraPlugins = let
+    neocodeium = pkgs.vimUtils.buildVimPlugin {
+      name = "neocodeium";
+      src = pkgs.fetchFromGitHub {
+        owner = "monkoose";
+        repo = "neocodeium";
+        rev = "ab8a3da3a66d299ad5422b76ce5ee21b68719296";
+        hash = "sha256-rvlTa5nj9Aoelk7taqW5nBSqLZXrLt52jfWc+23toEs=";
+      };
+      doCheck = false;
+    };
+  in [neocodeium];
+
+  programs.nixvim.extraConfigLua = ''
+    require("neocodeium").setup()
+  '';
+
   programs.nixvim.keymaps = [
     {
       mode = "i";
@@ -101,6 +118,30 @@
         noremap = true;
         desc = "blink accept";
       };
+    }
+    {
+      mode = "i";
+      key = "<D-f>";
+      action.__raw = "function() require('neocodeium').accept() end";
+      options.desc = "Accept neocodeium suggestion";
+    }
+    {
+      mode = "i";
+      key = "<D-]>";
+      action.__raw = "function() require('neocodeium').cycle_or_complete() end";
+      options.desc = "Next neocodeium suggestion";
+    }
+    {
+      mode = "i";
+      key = "<D-[>";
+      action.__raw = "function() require('neocodeium').cycle_or_complete(-1) end";
+      options.desc = "Previous neocodeium suggestion";
+    }
+    {
+      mode = "i";
+      key = "<D-c>";
+      action.__raw = "function() require('neocodeium').clear() end";
+      options.desc = "Clear neocodeium suggestion";
     }
   ];
 }

@@ -79,6 +79,7 @@ in {
         "super+shift+j=unbind"
         "super+ctrl+shift+j=unbind"
         "super+q=unbind"
+        "super+f=unbind"
       ];
 
       theme = "catppuccin-mocha";
