@@ -19,7 +19,7 @@
             bind "Ctrl Shift g" { SwitchToMode "Normal"; }
         }
         resize {
-            bind "Ctrl Shift n" { SwitchToMode "Normal"; }
+            bind "Ctrl Shift r" { SwitchToMode "Normal"; }
             bind "h" "Left" { Resize "Increase Left"; }
             bind "j" "Down" { Resize "Increase Down"; }
             bind "k" "Up" { Resize "Increase Up"; }
@@ -167,6 +167,22 @@
             bind "Super c" { Copy; }
             bind "Ctrl Shift g" { SwitchToMode "Locked"; }
             bind "Ctrl Shift q" { Quit; }
+            bind "Ctrl Shift 1" { GoToTab 1; }
+            bind "Ctrl Shift 2" { GoToTab 2; }
+            bind "Ctrl Shift 3" { GoToTab 3; }
+            bind "Ctrl Shift 4" { GoToTab 4; }
+            bind "Ctrl Shift 5" { GoToTab 5; }
+            bind "Ctrl Shift 6" { GoToTab 6; }
+            bind "Ctrl Shift 7" { GoToTab 7; }
+            bind "Ctrl Shift 8" { GoToTab 8; }
+            bind "Ctrl Shift 9" { GoToTab 9; }
+            bind "Ctrl Shift n" { NewPane; }
+            bind "Ctrl Shift x" { CloseFocus; }
+            bind "Ctrl Shift f" { ToggleFocusFullscreen; }
+            bind "Ctrl Shift w" {
+                LaunchOrFocusPlugin "session-manager" { floating true; move_to_focused_tab true; };
+                SwitchToMode "Normal"
+            }
             bind "Alt f" { ToggleFloatingPanes; }
             bind "Alt n" { NewPane; }
             bind "Alt i" { MoveTab "Left"; }
@@ -193,7 +209,7 @@
             bind "Ctrl Shift p" { SwitchToMode "Pane"; }
         }
         shared_except "resize" "locked" {
-            bind "Ctrl Shift n" { SwitchToMode "Resize"; }
+            bind "Ctrl Shift r" { SwitchToMode "Resize"; }
         }
         shared_except "scroll" "locked" {
             bind "Ctrl Shift s" { SwitchToMode "Scroll"; }

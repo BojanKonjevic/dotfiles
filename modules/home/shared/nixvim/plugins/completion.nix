@@ -95,7 +95,14 @@
   in [neocodeium];
 
   programs.nixvim.extraConfigLua = ''
-    require("neocodeium").setup()
+    require("neocodeium").setup({
+      filter = function(bufnr)
+        local bufname = vim.api.nvim_buf_get_name(bufnr)
+        if bufname:match("/nvim/leetcode/") then
+          return false
+        end
+      end,
+    })
   '';
 
   programs.nixvim.keymaps = [

@@ -190,8 +190,8 @@ in {
           eval "$(direnv hook zsh)"
           export _direnv_hooked=1
         fi
-        bindkey -M viins '^I' autosuggest-accept
-        bindkey -M viins '^[[Z' menu-complete
+        bindkey -M viins '^I' menu-complete
+        bindkey -M viins '^[[Z' autosuggest-accept
       }
     '';
   };
