@@ -8,7 +8,7 @@
 
       leetcode
       daily
-      journal
+      personal
     '';
   };
   home.file."Documents/Obsidian/Templates/Daily.md" = {

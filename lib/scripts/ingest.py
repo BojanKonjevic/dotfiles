@@ -3,22 +3,37 @@ GitIngest CLI Wrapper (NixOS + Wayland) - Direct to clipboard (Clean)
 Usage:
   ./ingest.py <owner/repo> [--src|--test|--docs]
   ./ingest.py -m <repo_name> [--src|--test|--docs]
+
+Private repos:
+  Set GITHUB_TOKEN in your environment (a PAT with `repo` scope for
+  classic tokens, or Contents: Read-only for fine-grained tokens).
+  The token is used for gitingest itself, the raw.githubusercontent.com
+  binary-recovery fetches, and the api.github.com directory pre-check.
 """
 
 import sys
 import re
+import os
 import subprocess
 import urllib.request
 import urllib.error
 import platform
 
 MY_GITHUB = "https://github.com/BojanKonjevic"
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+
+
+def auth_headers() -> dict:
+    if GITHUB_TOKEN:
+        return {"Authorization": f"Bearer {GITHUB_TOKEN}"}
+    return {}
 
 
 def fetch_raw(owner_repo: str, filepath: str) -> str | None:
     url = f"https://raw.githubusercontent.com/{owner_repo}/HEAD/{filepath}"
+    req = urllib.request.Request(url, headers=auth_headers())
     try:
-        with urllib.request.urlopen(url) as r:
+        with urllib.request.urlopen(req) as r:
             return r.read().decode("utf-8", errors="replace")
     except Exception:
         return None
@@ -72,7 +87,7 @@ def repo_has_dir(owner_repo: str, dir_name: str) -> bool | None:
     None if the check could not be performed (rate limit, network error, etc.).
     """
     api_url = f"https://api.github.com/repos/{owner_repo}/contents/{dir_name}"
-    req = urllib.request.Request(api_url, method="HEAD")
+    req = urllib.request.Request(api_url, method="HEAD", headers=auth_headers())
     try:
         with urllib.request.urlopen(req) as resp:
             return True  # 200 OK → directory exists
@@ -95,6 +110,13 @@ def main():
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)
+
+    if not GITHUB_TOKEN:
+        print(
+            "⚠️  No GITHUB_TOKEN set — private repos will fail "
+            "(binary-recovery and directory checks will silently skip/fail, "
+            "and gitingest itself will 404/403 on the repo)."
+        )
 
     # ---- Parse flags ----
     filter_dir = None
@@ -152,8 +174,12 @@ def main():
     print("Running gitingest...")
 
     try:
+        cmd = ["gitingest", url, "-o", "-"]
+        if GITHUB_TOKEN:
+            cmd += ["--token", GITHUB_TOKEN]
+
         result = subprocess.run(
-            ["gitingest", url, "-o", "-"],
+            cmd,
             capture_output=True,
             text=True,
             check=True,

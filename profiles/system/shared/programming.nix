@@ -17,6 +17,7 @@ in
         opencode
         pnpm
         nodejs
+        wrangler
       ]
       ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [docker-client]
       ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [docker];
