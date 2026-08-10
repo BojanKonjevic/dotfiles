@@ -161,7 +161,7 @@
       hot_reload = true
       focus_follows_mouse = false
       mouse_follows_focus = true
-      mouse_hides_on_focus = true
+      mouse_hides_on_focus = false
       auto_focus_blacklist = [
         "com.apple.dock",
         "com.apple.systemuiserver",
