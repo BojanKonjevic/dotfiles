@@ -80,6 +80,15 @@ in {
         "super+ctrl+shift+j=unbind"
         "super+q=unbind"
         "super+f=unbind"
+        "super+a=unbind"
+        "super+1=unbind"
+        "super+2=unbind"
+        "super+3=unbind"
+        "super+4=unbind"
+        "super+digit_1=unbind"
+        "super+digit_2=unbind"
+        "super+digit_3=unbind"
+        "super+digit_4=unbind"
       ];
 
       theme = "catppuccin-mocha";
@@ -270,4 +279,43 @@ in {
     };
   };
   home.file.".hushlogin".text = "";
+  xdg.configFile."opencode/opencode.jsonc" = {
+    force = true;
+    text = builtins.toJSON {
+      "$schema" = "https://opencode.ai/config.json";
+      instructions = [
+        "${userConfig.homeDirectory}/Documents/Obsidian/agents/AGENTS.md"
+      ];
+      skills = {
+        paths = [
+          "${userConfig.homeDirectory}/Documents/Obsidian/agents/skills"
+        ];
+      };
+      permission = {
+        external_directory = {
+          "${userConfig.homeDirectory}/.config/**" = "allow";
+          "${userConfig.homeDirectory}/dotfiles/**" = "allow";
+          "${userConfig.homeDirectory}/Projects/**" = "allow";
+          "${userConfig.homeDirectory}/Downloads/**" = "allow";
+          "${userConfig.homeDirectory}/Documents/Obsidian/**" = "allow";
+          "/tmp/**" = "allow";
+        };
+        read = {
+          "${userConfig.homeDirectory}/.config/**" = "allow";
+          "${userConfig.homeDirectory}/dotfiles/**" = "allow";
+          "${userConfig.homeDirectory}/Projects/**" = "allow";
+          "${userConfig.homeDirectory}/Downloads/**" = "allow";
+          "${userConfig.homeDirectory}/Documents/Obsidian/**" = "allow";
+          "/tmp/**" = "allow";
+        };
+        edit = {
+          "${userConfig.homeDirectory}/dotfiles/**" = "allow";
+          "${userConfig.homeDirectory}/Projects/**" = "allow";
+          "${userConfig.homeDirectory}/Downloads/**" = "allow";
+          "${userConfig.homeDirectory}/Documents/Obsidian/**" = "allow";
+          "/tmp/**" = "allow";
+        };
+      };
+    };
+  };
 }

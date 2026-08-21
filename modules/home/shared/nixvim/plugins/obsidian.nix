@@ -6,9 +6,46 @@
 
       One tag per line. Lines starting with `#` or blank lines are ignored.
 
-      leetcode
+      architecture
+      array
+      binary-search
+      boyer-moore-majority-vote-algorithm
+      bucket-sort
+      codebase
+      code-review
+      counting
       daily
+      debugging
+      design
+      divide-and-conquer
+      dynamic-programming
+      greedy
+      hash-function
+      hash-table
+      html
+      leetcode
+      linked-list
+      math
+      matrix
+      merge-sort
+      meta
       personal
+      planning
+      prefix-sum
+      queue
+      quicksort
+      simulation
+      skill
+      sliding-window
+      sorting
+      stack
+      string
+      study-sourcing
+      tdd
+      testing
+      two-pointers
+      unslop
+      writing
     '';
   };
   home.file."Documents/Obsidian/Templates/Daily.md" = {
@@ -29,7 +66,6 @@
 
       - **Link:**
       - **Difficulty:**
-      - **Topics:**
       - **Date:** {{date}}
 
       ## Approach
@@ -42,6 +78,21 @@
       ## Code
 
       ## Notes
+    '';
+  };
+  home.file."Documents/Obsidian/Templates/Skill.md" = {
+    force = false;
+    text = ''
+      ---
+      tags:
+        - skill
+      description: Fill in what this skill is triggered by
+      name: {{title}}
+      ---
+
+      # {{title}}
+
+      ## Instructions
     '';
   };
 
@@ -60,7 +111,7 @@
           },
         },
         daily_notes = {
-          folder = nil,
+          folder = "daily",
           date_format = "%Y-%m-%d",
           template = "Daily.md",
           default_tags = {"daily"},
@@ -69,6 +120,11 @@
           folder = "Templates",
           date_format = "%Y-%m-%d",
           time_format = "%H:%M",
+          customizations = {
+            leetcode = {
+              notes_subdir = "leetcode",
+            },
+          },
         },
         note_id_func = function(title)
           if title ~= nil and title ~= "" then
@@ -78,10 +134,16 @@
         end,
         frontmatter = {
           func = function(note)
-            return {
+            local out = {
               id = note.id,
               tags = note.tags or {},
             }
+            if note.metadata ~= nil then
+              for k, v in pairs(note.metadata) do
+                out[k] = v
+              end
+            end
+            return out
           end,
         },
         link = {
@@ -107,6 +169,19 @@
           end
         '';
         options.desc = "New leetcode note";
+      }
+      {
+        mode = "n";
+        key = "<leader>os";
+        action.__raw = ''
+          function()
+            local name = vim.fn.input("Skill name: ")
+            if name ~= "" then
+              vim.cmd("Obsidian new_from_template " .. name .. " Skill.md")
+            end
+          end
+        '';
+        options.desc = "New skill note";
       }
       {
         mode = "n";
