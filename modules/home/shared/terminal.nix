@@ -17,6 +17,7 @@ in {
     eza
     calcurse
     delta
+    gh
     lazygit
   ];
   programs.zoxide.enable = true;
@@ -298,7 +299,9 @@ in {
           "${userConfig.homeDirectory}/Projects/**" = "allow";
           "${userConfig.homeDirectory}/Downloads/**" = "allow";
           "${userConfig.homeDirectory}/Documents/Obsidian/**" = "allow";
+          "${userConfig.homeDirectory}/.pp/**" = "allow";
           "/tmp/**" = "allow";
+          "/var/**" = "allow";
         };
         read = {
           "${userConfig.homeDirectory}/.config/**" = "allow";
@@ -306,14 +309,18 @@ in {
           "${userConfig.homeDirectory}/Projects/**" = "allow";
           "${userConfig.homeDirectory}/Downloads/**" = "allow";
           "${userConfig.homeDirectory}/Documents/Obsidian/**" = "allow";
+          "${userConfig.homeDirectory}/.pp/**" = "allow";
           "/tmp/**" = "allow";
+          "/var/**" = "allow";
         };
         edit = {
           "${userConfig.homeDirectory}/dotfiles/**" = "allow";
           "${userConfig.homeDirectory}/Projects/**" = "allow";
           "${userConfig.homeDirectory}/Downloads/**" = "allow";
           "${userConfig.homeDirectory}/Documents/Obsidian/**" = "allow";
+          "${userConfig.homeDirectory}/.pp/**" = "allow";
           "/tmp/**" = "allow";
+          "/var/**" = "allow";
         };
       };
     };

@@ -29,7 +29,7 @@ in {
     };
   };
 
-  # REVIEW §2.2: "zap" removes ALL user data for removed casks/formulae.
+  # "zap" removes ALL user data for removed casks/formulae.
   # Switched to "uninstall" while the cask set is still churning; flip to
   # "zap" once the desktop-app list stabilises.
   homebrew = {
@@ -40,7 +40,7 @@ in {
       upgrade = true;
     };
     brews = ["mas"];
-    casks = [];
+    casks = ["t3-code"];
     masApps = {};
   };
 

@@ -1,13 +1,13 @@
 {pkgs, ...}: {
   home.file."Documents/Obsidian/Templates/Daily.md" = {
-    force = false;
+    force = true;
     text = ''
 
       # {{date}}
     '';
   };
   home.file."Documents/Obsidian/Templates/Leetcode.md" = {
-    force = false;
+    force = true;
     text = ''
       ---
       tags: [leetcode]
@@ -32,9 +32,10 @@
     '';
   };
   home.file."Documents/Obsidian/Templates/Skill.md" = {
-    force = false;
+    force = true;
     text = ''
       ---
+      id: {{title}}
       tags:
         - skill
       description: Fill in what this skill is triggered by
