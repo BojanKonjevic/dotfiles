@@ -3,11 +3,10 @@
   config,
   pkgs,
   lib,
-  inputs,
   userConfig,
   ...
 }: let
-  nix-search = inputs.nix-search-tv.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  nix-search = pkgs.nix-search-tv;
 in {
   home.packages = with pkgs; [
     nix-search
@@ -17,9 +16,31 @@ in {
     eza
     calcurse
     delta
-    gh
     lazygit
   ];
+  programs.gh = {
+    enable = true;
+    settings = {
+      git_protocol = "https";
+    };
+  };
+  # gh reads auth from ~/.config/gh/hosts.yml, which `gh auth login`
+  # cannot create here because the agenix token lacks the required
+  # read:org scope. Write it directly from the secret at activation
+  # time so gh works in interactive and non-interactive shells.
+  # Next token rotation should add read:org and gist scopes.
+  home.activation.ghAuth = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    token_file="/run/agenix/github-token"
+    if [[ -f "$token_file" ]]; then
+      token="$(cat "$token_file")"
+      if [[ -n "$token" ]]; then
+        mkdir -p "$HOME/.config/gh"
+        umask 077
+        printf 'github.com:\n    user: BojanKonjevic\n    oauth_token: %s\n    git_protocol: https\n' "$token" > "$HOME/.config/gh/hosts.yml"
+        chmod 600 "$HOME/.config/gh/hosts.yml"
+      fi
+    fi
+  '';
   programs.zoxide.enable = true;
   programs.broot.enable = true;
   programs.bat.enable = true;
@@ -139,6 +160,7 @@ in {
       nr = nhSwitch;
       ngc = "nh clean all --keep 10";
       gp = "git push";
+      gl = "git log";
     };
     initContent = ''
       export HOMEBREW_NO_AUTO_UPDATE=1

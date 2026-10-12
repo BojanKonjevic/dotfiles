@@ -39,30 +39,25 @@ def extract_video_id(url_or_id: str) -> str | None:
     return None
 
 
-def fetch_transcript(video_id: str, lang: str | None = None):
-    """Fetch transcript - works with the current API."""
+def fetch_transcript(video_id: str, lang: str = "en"):
+    """Fetch transcript in the requested language (English by default)."""
     try:
         api = YouTubeTranscriptApi()
 
-        if lang:
-            # Specific language
-            return api.get_transcript(video_id, languages=[lang])
+        try:
+            return api.fetch(video_id, languages=[lang])
+        except NoTranscriptFound:
+            pass
 
-        # Auto-select best available transcript
+        # No direct track, translate the first translatable one.
         transcript_list = api.list(video_id)
-
-        # 1. Prefer manual (human-created) transcripts
         for t in transcript_list:
-            if not t.is_generated:
-                return t.fetch()
+            try:
+                return t.translate(lang).fetch()
+            except Exception:
+                continue
 
-        # 2. Fallback to auto-generated
-        for t in transcript_list:
-            if t.is_generated:
-                return t.fetch()
-
-        # 3. Last resort: English auto-generated
-        return transcript_list.find_generated_transcript(["en"]).fetch()
+        print("❌ No captions available for this video.")
 
     except TranscriptsDisabled:
         print("❌ Transcripts are disabled for this video.")
@@ -99,7 +94,7 @@ def main():
         "-t", "--timestamps", action="store_true", help="Show timestamps"
     )
     parser.add_argument(
-        "--lang", default=None, help="Preferred language code (e.g. en, es, fr)"
+        "--lang", default="en", help="Preferred language code (e.g. en, es, fr)"
     )
     args = parser.parse_args()
 

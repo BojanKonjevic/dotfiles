@@ -47,10 +47,6 @@
       url = "github:TheBoredTeam/homebrew-boring-notch";
       flake = false;
     };
-    nix-search-tv = {
-      url = "github:3timeslazy/nix-search-tv";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";

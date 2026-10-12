@@ -1,9 +1,13 @@
 #import <AppKit/AppKit.h>
 #import <CoreGraphics/CoreGraphics.h>
+#import <ApplicationServices/ApplicationServices.h>
 #include <dlfcn.h>
+#include <mach-o/dyld.h>
 #include <signal.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #define IDLE_TIMEOUT 3.0
 #define REHIDE_INTERVAL 0.5 // while idle, keep re-asserting hide this often
@@ -15,6 +19,7 @@ typedef void (*CGSSetConnectionPropertyFunc)(int cid, int targetCID,
 
 static dispatch_source_t hideTimer;
 static dispatch_source_t rehideTimer;
+static dispatch_source_t watchdogTimer;
 static int hideDepth = 0;
 static BOOL idle = NO;
 static CFMachPortRef eventTap;
@@ -32,6 +37,84 @@ static void logmsg(const char *fmt, ...) {
   va_end(ap);
   fprintf(stderr, "\n");
   fflush(stderr);
+}
+
+// A predecessor killed while idle leaks hide counts into the global
+// display counter (it never gets to drain its hideDepth). Extra Show
+// calls past visible are no-ops, so overshoot to guarantee visible.
+static void drainLeakedHides(void) {
+  for (int i = 0; i < 10000; i++) {
+    CGDisplayShowCursor(kCGNullDirectDisplay);
+  }
+  logmsg("drained leaked hides");
+}
+
+// Block until this exact binary is Accessibility-trusted. A fresh nix
+// store path is a new identity every rebuild, and since macOS now hands
+// out non-NULL but permanently disabled taps instead of failing loudly,
+// proceeding untrusted means hiding the cursor forever with no prompt.
+// The one prompt call makes macOS show the approval dialog by itself.
+// Note the grant only applies to a fresh exec, so after waiting a while
+// we exit and let launchd respawn us rather than wait forever. The
+// marker keeps the dialog to once per boot instead of every respawn.
+// It stores the executable path, so a new nix store hash (a new binary
+// identity) prompts again instead of going silent.
+static int alreadyPromptedFor(const char *exe) {
+  char prev[1024] = {0};
+  FILE *f = fopen("/tmp/cursor-hide.prompted", "r");
+  if (!f) {
+    return 0;
+  }
+  size_t r = fread(prev, 1, sizeof(prev) - 1, f);
+  (void)r;
+  fclose(f);
+  return strcmp(prev, exe) == 0;
+}
+
+static void markPromptedFor(const char *exe) {
+  FILE *f = fopen("/tmp/cursor-hide.prompted", "w");
+  if (f) {
+    fputs(exe, f);
+    fclose(f);
+  }
+}
+
+static void waitForTrust(void) {
+  if (AXIsProcessTrusted()) {
+    logmsg("accessibility: trusted");
+    return;
+  }
+  char exe[1024] = {0};
+  uint32_t size = sizeof(exe);
+  if (_NSGetExecutablePath(exe, &size) != 0) {
+    snprintf(exe, sizeof(exe), "unknown");
+  }
+  if (!alreadyPromptedFor(exe)) {
+    logmsg("accessibility: not trusted, requesting approval");
+    const void *keys[] = {kAXTrustedCheckOptionPrompt};
+    const void *vals[] = {kCFBooleanTrue};
+    CFDictionaryRef opts = CFDictionaryCreate(
+        NULL, keys, vals, 1, &kCFTypeDictionaryKeyCallBacks,
+        &kCFTypeDictionaryValueCallBacks);
+    AXIsProcessTrustedWithOptions(opts);
+    CFRelease(opts);
+    markPromptedFor(exe);
+  } else {
+    logmsg("accessibility: not trusted (already prompted)");
+  }
+  int n = 0;
+  while (!AXIsProcessTrusted() && n < 24) {
+    if (n % 12 == 0) {
+      logmsg("waiting for Accessibility approval...");
+    }
+    sleep(5);
+    n++;
+  }
+  if (!AXIsProcessTrusted()) {
+    logmsg("approval not yet visible to us, exiting for a fresh respawn");
+    exit(1);
+  }
+  logmsg("accessibility: trusted");
 }
 
 static void setup_cgs(void) {
@@ -137,6 +220,8 @@ static CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type,
 @implementation AppDel
 - (void)applicationDidFinishLaunching:(NSNotification *)note {
   logmsg("starting up");
+  drainLeakedHides();
+  waitForTrust();
   setup_cgs();
 
   CGEventMask mask = CGEventMaskBit(kCGEventMouseMoved);
@@ -179,6 +264,22 @@ static CGEventRef tapCallback(CGEventTapProxy proxy, CGEventType type,
     }
   });
   dispatch_resume(rehideTimer);
+
+  // macOS can hand out a disabled tap (untrusted at creation, grant
+  // revoked under us) that never fires, not even its own disabled
+  // notice. Bailing lets launchd respawn into the trust gate above
+  // instead of hiding the cursor forever on a dead tap.
+  watchdogTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                         dispatch_get_main_queue());
+  dispatch_source_set_timer(watchdogTimer, DISPATCH_TIME_NOW,
+                            (uint64_t)(10 * NSEC_PER_SEC), 0);
+  dispatch_source_set_event_handler(watchdogTimer, ^{
+    if (!CGEventTapIsEnabled(eventTap)) {
+      logmsg("watchdog: event tap disabled, exiting for respawn");
+      exit(1);
+    }
+  });
+  dispatch_resume(watchdogTimer);
 
   logmsg("setup complete, idle timeout=%.1fs", IDLE_TIMEOUT);
 }

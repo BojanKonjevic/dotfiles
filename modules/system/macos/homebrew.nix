@@ -40,7 +40,7 @@ in {
       upgrade = true;
     };
     brews = ["mas"];
-    casks = ["t3-code"];
+    casks = ["t3-code" "coderabbit"];
     masApps = {};
   };
 

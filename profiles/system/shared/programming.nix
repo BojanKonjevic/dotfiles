@@ -14,7 +14,6 @@ in
         ruff
         mypy
         just
-        opencode
         pnpm
         nodejs
         wrangler

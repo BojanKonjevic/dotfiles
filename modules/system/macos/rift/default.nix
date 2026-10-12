@@ -24,6 +24,7 @@
       /usr/bin/clang -o "$out/bin/ksd" ${./ksd.c} \
         -framework CoreFoundation \
         -framework CoreGraphics \
+        -framework ApplicationServices \
         -Wall -O2
     '';
 
@@ -34,6 +35,7 @@
         -framework AppKit \
         -framework CoreFoundation \
         -framework CoreGraphics \
+        -framework ApplicationServices \
         -Wall -O2
     '';
 
@@ -274,20 +276,13 @@
       executable = true;
     };
 
-    launchd.agents.rift = {
-      enable = true;
-      config = {
-        ProgramArguments = ["${../../../../lib/bin/rift-helper}"];
-        KeepAlive = true;
-        RunAtLoad = true;
-        StandardOutPath = "/tmp/rift.stdout.log";
-        StandardErrorPath = "/tmp/rift.stderr.log";
-        EnvironmentVariables = {
-          PATH = "${config.home.profileDirectory}/bin:/run/current-system/sw/bin:${brewPrefix}/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-        };
-      };
-    };
-
+    # Rift itself is owned by the Homebrew service (homebrew.mxcl.rift),
+    # which has held the singleton since it was enabled. A nix-managed
+    # launcher can never start a second instance, it only crash-loops
+    # ("Another Rift instance is already running") and re-fires the
+    # event-access request on every respawn, so there is intentionally
+    # no launchd agent for it here. If the Homebrew service is ever off:
+    # brew services start rift
     launchd.agents.borders = {
       enable = true;
       config = {
